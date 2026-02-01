@@ -116,20 +116,14 @@ export const PublicShopPage: React.FC = () => {
                     <p className="text-slate-600 leading-relaxed whitespace-pre-line">
                         {shopData.layout.aboutText}
                     </p>
-                    {shopData.address && (
-                         <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-                            <Icon name="map" className="w-4 h-4" />
-                            {shopData.address}
-                         </div>
-                    )}
+
                 </section>
             )}
 
             {/* Contato e Localização */}
             <section className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <Icon name="map" className="w-5 h-5 text-shop-primary" />
-                    Onde Estamos
+                <h3 className="text-xl font-bold text-slate-900 mb-4">
+                    Contato e Localização
                 </h3>
                 
                 <div className="space-y-4">

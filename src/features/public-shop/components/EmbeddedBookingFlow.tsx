@@ -48,7 +48,8 @@ export const EmbeddedBookingFlow: React.FC = () => {
                 `\ud83d\udc88 Profissional: ${selectedBarber.name}\n` +
                 `\ud83d\udcc5 Data: ${dateFormatted} às ${selectedTime}\n` +
                 `\ud83d\udcb0 Total: R$ ${total.toFixed(2)}\n\n` +
-                `Aguardo confirmação!`
+                `Agendamento realizado pelo link!\n` +
+                `Me comprometo à estar presente no horário a cima escolhido por mim.`
             );
 
             // Redirecionar
@@ -84,15 +85,15 @@ export const EmbeddedBookingFlow: React.FC = () => {
                                     }
                                 `}
                             >
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-4 min-w-0 flex-1">
                                     <div className={`
-                                        w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
+                                        w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0
                                         ${isSelected ? 'border-shop-primary bg-shop-primary' : 'border-slate-300'}
                                     `}>
                                         {isSelected && <Icon name="check" className="w-4 h-4 text-white" />}
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-slate-900">{service.name}</h4>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="font-bold text-slate-900 truncate">{service.name}</h4>
                                         <p className="text-sm text-slate-500">{service.duration} min</p>
                                     </div>
                                 </div>
@@ -137,7 +138,7 @@ export const EmbeddedBookingFlow: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
-                                <span className={`font-medium text-sm ${isSelected ? 'text-shop-primary font-bold' : 'text-slate-600'}`}>
+                                <span className={`font-medium text-sm truncate w-full text-center px-1 ${isSelected ? 'text-shop-primary font-bold' : 'text-slate-600'}`}>
                                     {barber.name}
                                 </span>
                             </div>

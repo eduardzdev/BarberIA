@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Configuração do Playwright para AgendaBarber
+ * Configuração do Playwright para BarberIA
  * 
  * Features:
  * - Testes E2E para todas as features

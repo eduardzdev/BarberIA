@@ -8,8 +8,8 @@ test.describe('Autenticação', () => {
     // Aguardar carregamento
     await page.waitForLoadState('networkidle');
     
-    // Verificar se está na página de login (deve ter título AgendaBarber)
-    await expect(page.locator('text=AgendaBarber')).toBeVisible();
+    // Verificar se está na página de login (deve ter título BarberIA)
+    await expect(page.locator('text=BarberIA')).toBeVisible();
     
     // Preencher formulário
     await page.fill('input[type="email"]', 'teste@exemplo.com');

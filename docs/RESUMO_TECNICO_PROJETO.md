@@ -1,4 +1,4 @@
-# 💈 AgendaBarber - Resumo Técnico do Projeto
+# 💈 BarberIA - Resumo Técnico do Projeto
 
 **Data:** Outubro 2025  
 **Versão:** 2.0  
@@ -8,7 +8,7 @@
 
 ## 📌 Visão Geral
 
-**AgendaBarber** é uma plataforma SaaS Mobile-First para gerenciamento de barbearias, construída com React + TypeScript + Firebase. O sistema oferece uma experiência profissional para donos de barbearias gerenciarem agendamentos, clientes, finanças e configurações, além de uma tela pública para clientes agendarem serviços via WhatsApp.
+**BarberIA** é uma plataforma SaaS Mobile-First para gerenciamento de barbearias, construída com React + TypeScript + Firebase. O sistema oferece uma experiência profissional para donos de barbearias gerenciarem agendamentos, clientes, finanças e configurações, além de uma tela pública para clientes agendarem serviços via WhatsApp.
 
 ### 🎯 Propósito
 - Facilitar o gerenciamento completo de barbearias
@@ -90,7 +90,7 @@
 ## 📁 Estrutura de Pastas
 
 ```
-[APP]-AgendaBarber/
+[APP]-BarberIA/
 ├── src/
 │   ├── features/              # 🎯 Features por domínio (10 módulos)
 │   │   ├── auth/              # Login, Register, Logout
@@ -678,7 +678,7 @@ cmd /c npm run dev
 
 ```powershell
 # ✅ CORRETO
-cd "[APP]-AgendaBarber"
+cd "[APP]-BarberIA"
 ```
 
 ### 4. Test Timeouts Playwright
@@ -855,7 +855,7 @@ Aguardo confirmação!
 - **Console:** https://console.firebase.google.com/project/saas-barbearia-8d49a
 
 **Repositório:**
-- **Path:** `C:\Users\victo\OneDrive\Documentos\Projetos\SaaS-Barbearia\[APP]-AgendaBarber`
+- **Path:** `C:\Users\victo\OneDrive\Documentos\Projetos\SaaS-Barbearia\[APP]-BarberIA`
 
 ---
 

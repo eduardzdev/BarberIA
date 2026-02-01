@@ -172,7 +172,7 @@ export const LoginPage: React.FC = () => {
           <div className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
             <Icon name="scissors" className="w-8 h-8 text-slate-950" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-100">AgendaBarber</h1>
+          <h1 className="text-2xl font-bold text-slate-100">BarberIA</h1>
           <p className="text-slate-400 mt-1 text-sm">
             Acesso ao Painel Profissional ou Tela de Agendamentos para Clientes
           </p>

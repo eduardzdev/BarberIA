@@ -1,4 +1,4 @@
-# 📋 Backlog Imediato – AgendaBarber (atualizado em 25/10/2025)
+# 📋 Backlog Imediato – BarberIA (atualizado em 25/10/2025)
 
 ## 🔥 Prioridade Alta (liberação beta)
 - [ ] Exercitar fluxo completo em produção (login → cliente → agendamento → conclusão) num dispositivo mobile real e registrar problemas de UX.
@@ -15,7 +15,7 @@
 - [x] `npm run build` / deploy Firebase executados.
 - [ ] Registrar insights de uso após 48h e revisar backlog.
 
-> Atualize este arquivo ao concluir cada item para manter o roadmap alinhado com a etapa beta em produção.# 📋 TODO List - AgendaBarber
+> Atualize este arquivo ao concluir cada item para manter o roadmap alinhado com a etapa beta em produção.# 📋 TODO List - BarberIA
 
 **Última Atualização:** 17/10/2025 - 00:00  
 **Status Geral:** 🟢 Fases 1-2 Concluídas - Pronto para Fase 3

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AgendaBarber is a SaaS barbershop management system built with React, TypeScript, Vite, TailwindCSS, and Firebase. It's a mobile-first application with dark theme only.
+BarberIA is a SaaS barbershop management system built with React, TypeScript, Vite, TailwindCSS, and Firebase. It's a mobile-first application with dark theme only.
 
 ## Commands
 

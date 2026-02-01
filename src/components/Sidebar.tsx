@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             <div className="w-8 h-8 bg-violet-500 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30">
                                <Icon name="scissors" className="w-5 h-5 text-slate-950" />
                             </div>
-                            <span className="text-xl font-bold text-slate-100">AgendaBarber</span>
+                            <span className="text-xl font-bold text-slate-100">BarberIA</span>
                         </div>
                         <button onClick={onClose} className="p-2 text-slate-400 hover:text-white">
                             <Icon name="x" className="w-6 h-6" />

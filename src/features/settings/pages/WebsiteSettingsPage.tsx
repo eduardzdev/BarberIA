@@ -204,7 +204,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                                 setSlug(val);
                             }}
                             placeholder="minha-barbearia"
-                            className={`flex-1 bg-slate-800 border rounded-r-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 ${
+                            className={`flex-1 min-w-0 bg-slate-800 border rounded-r-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 ${
                                 isSlugAvailable === false ? 'border-red-500 focus:ring-red-500' : 
                                 isSlugAvailable === true ? 'border-green-500 focus:ring-green-500' : 
                                 'border-slate-700 focus:ring-violet-500'
@@ -234,7 +234,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                                 type="text"
                                 value={theme.primaryColor}
                                 onChange={(e) => setTheme(prev => ({ ...prev, primaryColor: e.target.value }))}
-                                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
+                                className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
                             />
                         </div>
                     </div>
@@ -251,7 +251,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                                 type="text"
                                 value={theme.secondaryColor}
                                 onChange={(e) => setTheme(prev => ({ ...prev, secondaryColor: e.target.value }))}
-                                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
+                                className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
                             />
                         </div>
                     </div>

@@ -5,6 +5,8 @@ Os workflows do GitHub Actions agora estão configurados para usar as variáveis
 ## Passo a Passo
 
 1. **Acesse seu repositório no GitHub**: https://github.com/v7create/saas-agendabarber-app
+2. Vá em **Settings** > **Secrets and variables** > **Actions**.
+3. Clique em **New repository secret**.
 
 2. **Navegue até Settings** (ícone de engrenagem no menu superior)
 

@@ -135,7 +135,7 @@ export const AppSettingsPage: React.FC = () => {
   };
 
   const handleOpenSupport = () => {
-    window.open('https://wa.me/5511999999999?text=Olá, preciso de ajuda com o AgendaBarber', '_blank');
+    window.open('https://wa.me/5511999999999?text=Olá, preciso de ajuda com o BarberIA', '_blank');
   };
 
   const handleOpenPrivacy = () => {
@@ -279,7 +279,7 @@ export const AppSettingsPage: React.FC = () => {
 
         {/* App Info */}
         <div className="text-center py-4">
-          <p className="text-slate-500 text-xs">AgendaBarber v1.0.0</p>
+          <p className="text-slate-500 text-xs">BarberIA v1.0.0</p>
           <p className="text-slate-600 text-xs mt-1">Desenvolvido por WebMind AI.</p>
         </div>
       </div>

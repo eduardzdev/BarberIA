@@ -1,21 +1,9 @@
-/**
- * COMPREHENSIVE E2E TESTS - AgendaBarber SaaS
- * 
- * Objetivo: Teste ABRANGENTE e AUTOCORRIGÍVEL
- * - Testa TODO fluxo CRUD (Create, Read, Update, Delete)
- * - Valida persisência em tempo real
- * - Autocorrige bugs encontrados
- * - Assertivas cirúrgicas em cada operação
- * 
- * Estratégia de Autocorreção:
- * 1. Testa operação
- * 2. Se falhar, identifica raiz
- * 3. Executa fix automático
- * 4. Retesta operação
- * 5. Se ainda falhar, loga erro detalhado
- */
-
 import { test, expect } from '@playwright/test';
+
+/**
+ * COMPREHENSIVE E2E TESTS - BarberIA SaaS
+ * 
+ * Testes cobrindo fluxos críticos de ponta a ponta.
 
 // ===== CONSTANTS =====
 // ✅ FIXED: Direct string assignment, no template issues

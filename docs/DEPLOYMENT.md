@@ -1,6 +1,6 @@
 # Guía de Deploy Seguro
 
-Este documento cobre o processo para preparar o AgendaBarber para ambientes de produção, garantindo que as chaves sensíveis permaneçam fora do repositório e que o build falhe imediatamente caso qualquer credencial obrigatória esteja ausente.
+Este documento cobre o processo para preparar o BarberIA para ambientes de produção, garantindo que as chaves sensíveis permaneçam fora do repositório e que o build falhe imediatamente caso qualquer credencial obrigatória esteja ausente.
 
 ## 1. Arquivos `.env`
 

@@ -18,7 +18,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
         <section>
           <h3 className="font-bold text-slate-100 mb-2">1. Introdução</h3>
           <p>
-            Bem-vindo ao AgendaBarber. Sua privacidade é fundamental para nós. Esta política descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais e os dados de sua barbearia ao utilizar nossa plataforma SaaS de agendamento e gestão.
+            Bem-vindo ao BarberIA. Sua privacidade é fundamental para nós. Esta política descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais e os dados de sua barbearia ao utilizar nossa plataforma SaaS de agendamento e gestão.
           </p>
         </section>
 
@@ -37,7 +37,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
           <h3 className="font-bold text-slate-100 mb-2">3. Uso dos Dados</h3>
           <p className="mb-2">Utilizamos seus dados exclusivamente para:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Fornecer, manter e melhorar a plataforma AgendaBarber.</li>
+            <li>Fornecer, manter e melhorar a plataforma BarberIA.</li>
             <li>Processar e gerenciar seus agendamentos e cadastro de clientes.</li>
             <li>Gerar relatórios e métricas de desempenho do seu negócio.</li>
             <li>Enviar comunicações importantes sobre sua conta, atualizações de serviço ou suporte técnico.</li>

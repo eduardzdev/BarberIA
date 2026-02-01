@@ -1,4 +1,4 @@
-# 💈 AgendaBarber
+# 💈 BarberIA
 
 <div align="center">
   
@@ -33,7 +33,7 @@
 
 ## 🎯 Sobre o Projeto
 
-**AgendaBarber** é uma plataforma SaaS completa para gerenciamento de barbearias, oferecendo:
+**BarberIA** é uma plataforma SaaS completa para gerenciamento de barbearias, oferecendo:
 
 - 📱 **Interface Mobile-First** - Experiência otimizada para dispositivos móveis
 - 👨‍💼 **Dashboard Profissional** - Controle completo da barbearia
@@ -132,7 +132,6 @@
 1. **Clone o repositório**
    ```bash
    git clone https://github.com/seu-usuario/agendabarber.git
-   cd agendabarber
    ```
 
 2. **Instale as dependências**
@@ -182,7 +181,7 @@
 ## 📁 Estrutura do Projeto
 
 ```
-agendabarber/
+barberia/
 ├── .github/              # GitHub Actions & workflows
 ├── public/               # Arquivos públicos estáticos
 ├── src/
@@ -416,7 +415,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](./LICENSE) para 
 
 <div align="center">
 
-**[⬆ Voltar ao topo](#-agendabarber)**
+**[⬆ Voltar ao topo](#-barberia)**
 
 Feito com ❤️ e muito ☕
 

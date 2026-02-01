@@ -51,7 +51,7 @@ const AuthenticatedLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    setTitle(pageTitles[location.pathname] || 'AgendaBarber');
+    setTitle(pageTitles[location.pathname] || 'BarberIA');
   }, [location]);
 
   useEffect(() => {

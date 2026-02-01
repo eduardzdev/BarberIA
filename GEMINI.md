@@ -1,10 +1,10 @@
-# GEMINI.md - Contexto do Projeto AgendaBarber
+# GEMINI.md - Contexto do Projeto BarberIA
 
-Este arquivo contém informações essenciais sobre o projeto **AgendaBarber** para contextualizar o agente Gemini.
+Este arquivo contém informações essenciais sobre o projeto **BarberIA** para contextualizar o agente Gemini.
 
 ## 📌 Visão Geral do Projeto
 
-**AgendaBarber** é uma plataforma SaaS **Mobile-First** para gerenciamento de barbearias. O sistema permite que profissionais gerenciem sua agenda, clientes e finanças, e oferece uma interface pública para clientes finais realizarem pré-agendamentos (que são confirmados via WhatsApp).
+**BarberIA** é uma plataforma SaaS **Mobile-First** para gerenciamento de barbearias. O sistema permite que profissionais gerenciem sua agenda, clientes e finanças, e oferece uma interface pública para clientes finais realizarem pré-agendamentos (que são confirmados via WhatsApp).
 
 ### Stack Tecnológico
 *   **Frontend:** React 18, TypeScript, Vite

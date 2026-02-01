@@ -1,4 +1,4 @@
-# 📊 Status do Projeto AgendaBarber
+# 📊 Status do Projeto BarberIA
 
 **Última atualização:** 25/10/2025  
 **Versão:** 3.0-beta  
