@@ -58,7 +58,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         // Define dimensões baseadas no aspect ratio
         const maxWidth = aspectRatio === 'cover' ? 1920 : 800;
         const maxHeight = aspectRatio === 'cover' ? 1080 : 800;
-        
+
         const compressedBase64 = await compressImage(file, maxWidth, maxHeight);
         setPreviewUrl(compressedBase64);
       } catch (error) {
@@ -103,8 +103,8 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-md border border-slate-800">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm mx-2 border border-slate-800">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-800">
           <h2 className="text-lg font-bold text-slate-100">{title}</h2>
@@ -120,9 +120,8 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         <div className="p-4 space-y-4">
           {/* Preview */}
           <div
-            className={`relative bg-slate-800 rounded-lg overflow-hidden border-2 border-dashed border-slate-700 ${
-              aspectRatio === 'cover' ? 'aspect-video' : 'aspect-square'
-            }`}
+            className={`relative bg-slate-800 rounded-lg overflow-hidden border-2 border-dashed border-slate-700 ${aspectRatio === 'cover' ? 'aspect-video' : 'aspect-square'
+              }`}
           >
             {loading ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
@@ -193,11 +192,10 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           <button
             onClick={handleSave}
             disabled={loading}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              loading
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${loading
+              ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
           >
             {loading ? 'Salvando...' : 'Salvar'}
           </button>

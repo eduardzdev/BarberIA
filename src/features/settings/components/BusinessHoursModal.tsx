@@ -55,7 +55,7 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
       if (businessHours?.schedule && Array.isArray(businessHours.schedule) && businessHours.schedule.length > 0) {
         const loadedSchedule = DAY_NAMES.map((dayName, index) => {
           const existingDay = businessHours.schedule!.find(d => d.dayOfWeek === index);
-          
+
           if (existingDay) {
             return {
               dayOfWeek: index,
@@ -68,7 +68,7 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
               lunchDuration: existingDay.lunchDuration,
             };
           }
-          
+
           // Se não tiver config para esse dia específico, usa default
           return {
             ...DEFAULT_SCHEDULE[index],
@@ -84,7 +84,7 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
           // businessHours pode ter propriedades antigas que não estão na tipagem atual mas existem no objeto
           const oldBusinessHours = businessHours as any;
           const isActive = oldBusinessHours?.daysOfWeek?.includes(index) ?? DEFAULT_SCHEDULE[index].isActive;
-          
+
           return {
             dayOfWeek: index,
             dayName,
@@ -172,8 +172,8 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-800">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto border border-slate-800">
         {/* Header */}
         <div className="sticky top-0 bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-100">Horários de Funcionamento</h2>
@@ -190,11 +190,10 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
           {schedule.map(day => (
             <div
               key={day.dayOfWeek}
-              className={`border rounded-lg p-4 transition-colors ${
-                day.isActive
-                  ? 'bg-slate-800/50 border-slate-700'
-                  : 'bg-slate-800/20 border-slate-700/50'
-              }`}
+              className={`border rounded-lg p-4 transition-colors ${day.isActive
+                ? 'bg-slate-800/50 border-slate-700'
+                : 'bg-slate-800/20 border-slate-700/50'
+                }`}
             >
               {/* Cabeçalho do dia */}
               <div className="flex items-center justify-between mb-3">
@@ -301,11 +300,10 @@ export const BusinessHoursModal: React.FC<BusinessHoursModalProps> = ({ isOpen, 
           <button
             onClick={handleSave}
             disabled={loading}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              loading
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${loading
+              ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
           >
             {loading ? 'Salvando...' : 'Salvar Horários'}
           </button>

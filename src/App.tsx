@@ -22,6 +22,7 @@ import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthStore } from './store/auth.store';
 import { useUIStore } from './store/ui.store';
+import { useBarbershopStore } from './store/barbershop.store';
 
 // Inicializa Firebase App Check para proteção contra abuso
 import './lib/firebase-app-check';
@@ -81,13 +82,14 @@ const AuthenticatedLayout = () => {
 
 const App: React.FC = () => {
   const { user, loading, setUser, setLoading } = useAuthStore();
+  const { shopInfo, fetchSettings, settingsLoaded } = useBarbershopStore();
   const [showLoginToast, setShowLoginToast] = useState(false);
   const [showSetupModal, setShowSetupModal] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(false);
-  
+
   // Hook de Notificações
   const { requestPermissionAndGetToken } = useFCM();
 
+  // Efeito para autenticação
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -100,27 +102,29 @@ const App: React.FC = () => {
 
         // Inicializa o sistema de notificações (solicita permissão e registra token)
         requestPermissionAndGetToken();
-
-        // Detecta se é novo usuário pela metadata
-        const creationTime = currentUser.metadata?.creationTime;
-        const lastSignInTime = currentUser.metadata?.lastSignInTime;
-
-        // Se foi criado nos últimos 5 segundos, é um novo usuário
-        if (creationTime && lastSignInTime && creationTime === lastSignInTime) {
-          setIsNewUser(true);
-          setShowSetupModal(true);
-        } else {
-          setIsNewUser(false);
-          setShowSetupModal(false);
-        }
-      } else {
-        setIsNewUser(false);
-        setShowSetupModal(false);
       }
     });
 
     return () => unsubscribe();
   }, [setUser, setLoading]);
+
+  // Efeito para carregar settings e verificar onboarding
+  useEffect(() => {
+    if (user && !settingsLoaded) {
+      fetchSettings();
+    }
+  }, [user, settingsLoaded, fetchSettings]);
+
+  // Efeito para mostrar modal de onboarding quando settings carregarem
+  useEffect(() => {
+    if (user && settingsLoaded) {
+      // Mostra modal apenas se onboardingCompleted não for true
+      const needsOnboarding = !shopInfo.onboardingCompleted;
+      setShowSetupModal(needsOnboarding);
+    } else {
+      setShowSetupModal(false);
+    }
+  }, [user, settingsLoaded, shopInfo.onboardingCompleted]);
 
   if (loading) {
     return (
@@ -143,33 +147,31 @@ const App: React.FC = () => {
       <ToastContainer />
 
       {/* Setup Modal for New Users */}
-      {isNewUser && (
-        <BarbershopSetupModal
-          isOpen={showSetupModal}
-          onClose={() => setShowSetupModal(false)}
-        />
-      )}
+      <BarbershopSetupModal
+        isOpen={showSetupModal}
+        onClose={() => setShowSetupModal(false)}
+      />
 
       <HashRouter>
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
           <Route path="/booking" element={<BookingPage />} />
-          
+
           {/* Rotas Internas Protegidas */}
           <Route element={<AuthenticatedLayout />}>
-             <Route path="/dashboard" element={<DashboardPage />} />
-             <Route path="/appointments" element={<AppointmentsPage />} />
-             <Route path="/agenda" element={<AgendaPage />} />
-             <Route path="/clients" element={<ClientsPage />} />
-             <Route path="/financial" element={<FinancialPage />} />
-             <Route path="/history" element={<HistoryPage />} />
-             <Route path="/profile" element={<ProfilePage />} />
-             <Route path="/settings-shop" element={<ShopSettingsPage />} />
-             <Route path="/settings-services" element={<ServicesSettingsPage />} />
-             <Route path="/settings-website" element={<WebsiteSettingsPage />} />
-             <Route path="/settings-app" element={<AppSettingsPage />} />
-             {/* Root Redirect */}
-             <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/appointments" element={<AppointmentsPage />} />
+            <Route path="/agenda" element={<AgendaPage />} />
+            <Route path="/clients" element={<ClientsPage />} />
+            <Route path="/financial" element={<FinancialPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings-shop" element={<ShopSettingsPage />} />
+            <Route path="/settings-services" element={<ServicesSettingsPage />} />
+            <Route path="/settings-website" element={<WebsiteSettingsPage />} />
+            <Route path="/settings-app" element={<AppSettingsPage />} />
+            {/* Root Redirect */}
+            <Route path="/" element={<Navigate to="/dashboard" />} />
           </Route>
 
           {/* Rota Pública da Barbearia (Slug) */}

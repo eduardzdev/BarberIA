@@ -19,7 +19,7 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
   const { services, createCombo, updateCombo } = useServicesStore();
   const { success, error: showError } = useUI();
   const [loading, setLoading] = useState(false);
-  
+
   // Image Upload state
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -68,7 +68,7 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
       const newServiceIds = isSelected
         ? prev.serviceIds.filter(id => id !== serviceId)
         : [...prev.serviceIds, serviceId];
-      
+
       // Recalcular preço e duração sugeridos
       const selectedServices = services.filter(s => newServiceIds.includes(s.id));
       const suggestedPrice = selectedServices.reduce((acc, s) => acc + s.price, 0);
@@ -131,8 +131,8 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-        <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-800">
+      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2">
+        <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto border border-slate-800">
           <div className="sticky top-0 bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between z-10">
             <h2 className="text-lg font-bold text-slate-100">
               {editingCombo ? 'Editar Combo' : 'Novo Combo'}
@@ -224,9 +224,9 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
                 <span className="text-sm font-medium text-slate-200">
                   Adicionar Preço Promocional?
                 </span>
-                <input 
-                  type="checkbox" 
-                  className="hidden" 
+                <input
+                  type="checkbox"
+                  className="hidden"
                   checked={formData.isPromotion}
                   onChange={(e) => setFormData({ ...formData, isPromotion: e.target.checked })}
                 />

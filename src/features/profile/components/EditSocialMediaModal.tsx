@@ -57,8 +57,8 @@ export const EditSocialMediaModal: React.FC<EditSocialMediaModalProps> = ({ isOp
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-md border border-slate-800">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm mx-2 border border-slate-800">
         {/* Header */}
         <div className="border-b border-slate-800 p-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-100">Nossas Redes</h2>
@@ -147,11 +147,10 @@ export const EditSocialMediaModal: React.FC<EditSocialMediaModalProps> = ({ isOp
           <button
             onClick={handleSave}
             disabled={loading}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              loading
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${loading
+              ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
           >
             {loading ? 'Salvando...' : 'Salvar'}
           </button>

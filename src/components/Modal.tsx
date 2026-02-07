@@ -29,7 +29,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center p-2 animate-fade-in"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
@@ -51,15 +51,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         }
       `}</style>
       <Card
-        className="w-full max-w-md !p-0 animate-slide-up bg-slate-900 shadow-2xl shadow-violet-500/20"
+        className="w-full max-w-sm mx-2 !p-0 animate-slide-up bg-slate-900 shadow-2xl shadow-violet-500/20 rounded-2xl"
         onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
       >
         <div className="flex justify-between items-center p-4 border-b border-slate-700">
           <h2 className="text-lg font-bold text-slate-100">{title}</h2>
           <div className="flex items-center gap-2">
             {onEdit && (
-              <button 
-                onClick={onEdit} 
+              <button
+                onClick={onEdit}
                 className="p-1 text-slate-400 hover:text-violet-400 transition-colors"
                 title="Editar agendamento"
               >
@@ -72,7 +72,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
           </div>
         </div>
         <div className="p-6 max-h-[85vh] overflow-y-auto">
-            {children}
+          {children}
         </div>
       </Card>
     </div>

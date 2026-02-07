@@ -50,16 +50,16 @@ export interface DaySchedule {
 export interface BarbershopSettings {
   // Profissionais
   barbers: Barber[];
-  
+
   // Horário de funcionamento (agora detalhado por dia)
   businessHours: {
     // Mantendo retrocompatibilidade opcional ou migrando estrutura
-    schedule: DaySchedule[]; 
+    schedule: DaySchedule[];
   };
-  
+
   // Métodos de pagamento
   paymentMethods: string[];
-  
+
   // Informações da barbearia
   shopInfo: {
     name: string;
@@ -80,20 +80,22 @@ export interface BarbershopSettings {
     // Website Settings
     slug?: string;
     theme?: {
-        primaryColor: string;
-        secondaryColor: string;
-        font: string;
-        mode?: 'light' | 'dark';
+      primaryColor: string;
+      secondaryColor: string;
+      font: string;
+      mode?: 'light' | 'dark';
     };
     layout?: {
-        showHero: boolean;
-        heroTitle: string;
-        heroSubtitle?: string;
-        heroImage?: string;
-        showAbout: boolean;
-        aboutText?: string;
-        aboutImage?: string;
+      showHero: boolean;
+      heroTitle: string;
+      heroSubtitle?: string;
+      heroImage?: string;
+      showAbout: boolean;
+      aboutText?: string;
+      aboutImage?: string;
     };
+    // Onboarding
+    onboardingCompleted?: boolean;
   };
 }
 
@@ -125,27 +127,28 @@ const defaultSettings: BarbershopSettings = {
 
 interface BarbershopState extends BarbershopSettings {
   loading: boolean;
+  settingsLoaded: boolean;
   error: string | null;
 
   // Actions
   fetchSettings: () => Promise<void>;
   updateSettings: (settings: Partial<BarbershopSettings>) => Promise<void>;
-  
+
   // Barbers
   addBarber: (barber: Omit<Barber, 'id'>) => Promise<string>;
   updateBarber: (id: string, data: Partial<Omit<Barber, 'id'>>) => Promise<void>;
   removeBarber: (id: string) => Promise<void>;
-  
+
   // Business Hours
   updateBusinessHours: (hours: Partial<BarbershopSettings['businessHours']>) => Promise<void>;
-  
+
   // Payment Methods
   addPaymentMethod: (method: string) => Promise<void>;
   removePaymentMethod: (method: string) => Promise<void>;
-  
+
   // Shop Info
   updateShopInfo: (info: Partial<BarbershopSettings['shopInfo']>) => Promise<void>;
-  
+
   clearError: () => void;
 }
 
@@ -164,6 +167,7 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
   // Estado inicial
   ...defaultSettings,
   loading: false,
+  settingsLoaded: false,
   error: null,
 
   /**
@@ -177,23 +181,25 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
 
       if (docSnap.exists()) {
         const data = docSnap.data() as BarbershopSettings;
-        set({ 
+        set({
           ...data,
-          loading: false 
+          loading: false,
+          settingsLoaded: true
         });
       } else {
         // Se não existe, criar com valores padrão
         await setDoc(docRef, defaultSettings);
-        set({ 
+        set({
           ...defaultSettings,
-          loading: false 
+          loading: false,
+          settingsLoaded: true
         });
       }
     } catch (err) {
       console.error('Erro ao buscar configurações:', err);
-      set({ 
-        error: 'Erro ao carregar configurações', 
-        loading: false 
+      set({
+        error: 'Erro ao carregar configurações',
+        loading: false
       });
     }
   },
@@ -208,16 +214,16 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
       // Use setDoc with merge to create or update the document
       await setDoc(docRef, settings, { merge: true });
 
-      set((state) => ({ 
+      set((state) => ({
         ...state,
         ...settings,
-        loading: false 
+        loading: false
       }));
     } catch (err) {
       console.error('Erro ao atualizar configurações:', err);
-      set({ 
-        error: 'Erro ao salvar configurações', 
-        loading: false 
+      set({
+        error: 'Erro ao salvar configurações',
+        loading: false
       });
       throw err;
     }
@@ -288,9 +294,9 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
       await get().updateSettings({ barbers: updatedBarbers });
     } catch (err) {
       console.error('Erro ao remover profissional:', err);
-      set({ 
-        error: 'Erro ao remover profissional', 
-        loading: false 
+      set({
+        error: 'Erro ao remover profissional',
+        loading: false
       });
       throw err;
     }
@@ -306,7 +312,7 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
         ...get().businessHours,
         ...hours,
       };
-      
+
       // Persistir no Firestore (o merge do setDoc cuidará de atualizar apenas o campo businessHours)
       await get().updateSettings({ businessHours: updatedBusinessHours });
     } catch (err) {
@@ -352,9 +358,9 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
       await get().updateSettings({ paymentMethods: updated });
     } catch (err) {
       console.error('Erro ao remover método de pagamento:', err);
-      set({ 
-        error: 'Erro ao remover método', 
-        loading: false 
+      set({
+        error: 'Erro ao remover método',
+        loading: false
       });
       throw err;
     }
@@ -366,9 +372,14 @@ export const useBarbershopStore = create<BarbershopState>((set, get) => ({
   updateShopInfo: async (info: Partial<BarbershopSettings['shopInfo']>) => {
     set({ loading: true, error: null });
     try {
+      // Filtra valores undefined pois Firestore não aceita
+      const filteredInfo = Object.fromEntries(
+        Object.entries(info).filter(([_, value]) => value !== undefined)
+      );
+
       const updatedInfo = {
         ...get().shopInfo,
-        ...info,
+        ...filteredInfo,
       };
 
       if (updatedInfo.name && !updatedInfo.name.trim()) {

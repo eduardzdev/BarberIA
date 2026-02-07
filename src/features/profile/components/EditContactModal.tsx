@@ -10,7 +10,7 @@ interface EditContactModalProps {
 export const EditContactModal: React.FC<EditContactModalProps> = ({ isOpen, onClose }) => {
   const { shopInfo, updateShopInfo } = useBarbershop();
   const [loading, setLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     address: '', // Rua e número
     neighborhood: '',
@@ -25,13 +25,13 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({ isOpen, onCl
       // Se não, coloca tudo em address
       let addr = shopInfo.address || '';
       let neigh = '';
-      
+
       if (addr.includes(' - ')) {
         const parts = addr.split(' - ');
         // Pega a última parte como bairro se houver separador " - "
         if (parts.length > 1) {
-           neigh = parts.pop() || '';
-           addr = parts.join(' - ');
+          neigh = parts.pop() || '';
+          addr = parts.join(' - ');
         }
       }
 
@@ -56,7 +56,7 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({ isOpen, onCl
     setLoading(true);
     try {
       // Concatenando para manter compatibilidade com campo único
-      const fullAddress = formData.neighborhood 
+      const fullAddress = formData.neighborhood
         ? `${formData.address} - ${formData.neighborhood}`
         : formData.address;
 
@@ -76,8 +76,8 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-800">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-2">
+      <div className="bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto border border-slate-800">
         {/* Header */}
         <div className="sticky top-0 bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-100">Contato e Localização</h2>
@@ -174,11 +174,10 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({ isOpen, onCl
           <button
             onClick={handleSave}
             disabled={loading}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-              loading
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${loading
+              ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+              : 'bg-violet-600 text-white hover:bg-violet-700'
+              }`}
           >
             {loading ? 'Salvando...' : 'Salvar'}
           </button>

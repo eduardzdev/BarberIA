@@ -25,6 +25,7 @@ import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '@/firebase';
 import { useAuthStore } from '@/store/auth.store';
 import { loginSchema, registerSchema } from '@/lib/validations';
+import { seedInitialData } from '@/services/onboarding.service';
 import type { z } from 'zod';
 
 type LoginData = z.infer<typeof loginSchema>;
@@ -67,7 +68,7 @@ export function useAuth() {
       clearError();
 
       await signInWithRedirect(auth, googleProvider);
-      
+
       // O redirect vai acontecer e o user será detectado no retorno
     } catch (err: any) {
       const errorMessage = getErrorMessage(err.code);
@@ -98,6 +99,18 @@ export function useAuth() {
         await updateProfile(userCredential.user, {
           displayName: validated.name,
         });
+      }
+
+      // Seed de dados iniciais para novo usuário
+      // Cria serviço padrão e settings automaticamente
+      if (userCredential.user) {
+        try {
+          await seedInitialData(userCredential.user.uid);
+          console.log('[Auth] Onboarding seed executado com sucesso');
+        } catch (seedError) {
+          // Log do erro mas não bloqueia o registro
+          console.warn('[Auth] Erro no seed (não crítico):', seedError);
+        }
       }
 
       // O user será atualizado automaticamente pelo listener no App.tsx
