@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useId } from 'react';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClients } from '@/hooks/useClients';
 import { useServices } from '@/hooks/useServices';
+import { useBarbershop } from '@/hooks/useBarbershop';
 import { useUI } from '@/hooks/useUI';
 import { AppointmentStatus } from '@/types';
 import { formatPhone } from '@/lib/validations';
@@ -21,6 +22,7 @@ interface CreateAppointmentFormProps {
     duration?: number;
     price?: number;
     status?: AppointmentStatus;
+    barberName?: string;
   };
   onSuccess?: () => void;
 }
@@ -39,6 +41,7 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
   const { createAppointment, updateAppointment, appointments } = useAppointments();
   const { clients } = useClients({ autoFetch: true });
   const { services } = useServices({ autoFetch: true });
+  const { barbers } = useBarbershop({ autoFetch: true });
   const { success, error: showError } = useUI();
 
   const [clientName, setClientName] = useState(defaultValues?.clientName || '');
@@ -56,6 +59,7 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
   const [status, setStatus] = useState<AppointmentStatus>(
     defaultValues?.status || AppointmentStatus.Pending
   );
+  const [selectedBarber, setSelectedBarber] = useState(defaultValues?.barberName || '');
 
   const availableTimes = useMemo(
     () =>
@@ -97,6 +101,9 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
     }
     if (defaultValues.status !== undefined) {
       setStatus(defaultValues.status);
+    }
+    if (defaultValues.barberName !== undefined) {
+      setSelectedBarber(defaultValues.barberName);
     }
   }, [defaultValues]);
 
@@ -159,6 +166,12 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
       return;
     }
 
+    // Validar seleção de profissional (obrigatório se houver barbeiros cadastrados)
+    if (barbers.length > 0 && !selectedBarber) {
+      showError('Selecione o profissional responsável');
+      return;
+    }
+
     if (!isHalfHourSlot(startTime)) {
       showError('Escolha horários com intervalos de 30 minutos.');
       return;
@@ -191,6 +204,7 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         price: totalPrice,
         services: selectedServices,
         notes: notes.trim(),
+        barberName: selectedBarber || undefined,
       };
 
       if (mode === 'edit' && appointmentId) {
@@ -261,6 +275,26 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
           )}
         </div>
       </div>
+
+      {/* Seleção de Profissional */}
+      {barbers.length > 0 && (
+        <div>
+          <label className="text-sm font-medium text-slate-400">Profissional *</label>
+          <select
+            value={selectedBarber}
+            onChange={(event) => setSelectedBarber(event.target.value)}
+            className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          >
+            <option value="">Selecione o profissional</option>
+            {barbers.map((barber) => (
+              <option key={barber.id} value={barber.name}>
+                {barber.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div>
         <label className="text-sm font-medium text-slate-400">Data *</label>
         <input

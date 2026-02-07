@@ -40,10 +40,10 @@
  */
 
 import { useEffect } from 'react';
-import { 
-  useAppointmentsStore, 
-  CreateAppointmentData, 
-  UpdateAppointmentData 
+import {
+  useAppointmentsStore,
+  CreateAppointmentData,
+  UpdateAppointmentData
 } from '@/store/appointments.store';
 import { AppointmentStatus } from '@/types';
 
@@ -56,7 +56,7 @@ interface UseAppointmentsOptions {
    * - false: Não busca automaticamente
    */
   autoFetch?: 'all' | 'upcoming' | 'date' | false;
-  
+
   /**
    * Data para filtro automático (apenas se autoFetch === 'date')
    */
@@ -80,6 +80,13 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
   const deleteAppointment = useAppointmentsStore((state) => state.deleteAppointment);
   const updateStatus = useAppointmentsStore((state) => state.updateStatus);
   const clearError = useAppointmentsStore((state) => state.clearError);
+
+  // Pagination state and methods
+  const hasMoreData = useAppointmentsStore((state) => state.hasMoreData);
+  const estimatedTotal = useAppointmentsStore((state) => state.estimatedTotal);
+  const lastVisibleDoc = useAppointmentsStore((state) => state.lastVisibleDoc);
+  const fetchRecentAppointments = useAppointmentsStore((state) => state.fetchRecentAppointments);
+  const fetchMoreAppointments = useAppointmentsStore((state) => state.fetchMoreAppointments);
 
   // Auto-fetch ao montar
   useEffect(() => {
@@ -119,7 +126,7 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
      * Filtra agendamentos por profissional
      */
     filterByBarber: (barberName: string) => {
-      return appointments.filter(a => 
+      return appointments.filter(a =>
         a.barberName?.toLowerCase() === barberName.toLowerCase()
       );
     },
@@ -129,7 +136,7 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
      */
     searchByClient: (query: string) => {
       const lowerQuery = query.toLowerCase();
-      return appointments.filter(a => 
+      return appointments.filter(a =>
         a.clientName.toLowerCase().includes(lowerQuery)
       );
     },
@@ -164,19 +171,19 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
     getStats: () => {
       const total = appointments.length;
       const today = helpers.getTodayAppointments().length;
-      
+
       const confirmed = appointments.filter(
         a => a.status === AppointmentStatus.Confirmed
       ).length;
-      
+
       const pending = appointments.filter(
         a => a.status === AppointmentStatus.Pending
       ).length;
-      
+
       const completed = appointments.filter(
         a => a.status === AppointmentStatus.Completed
       ).length;
-      
+
       const cancelled = appointments.filter(
         a => a.status === AppointmentStatus.Cancelled
       ).length;
@@ -200,8 +207,8 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
      * Verifica se há conflito de horário
      */
     hasTimeConflict: (date: string, startTime: string, duration: number, excludeId?: string) => {
-      const dayAppointments = appointments.filter(a => 
-        a.date === date && 
+      const dayAppointments = appointments.filter(a =>
+        a.date === date &&
         a.id !== excludeId &&
         a.status !== AppointmentStatus.Cancelled
       );
@@ -229,8 +236,8 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
      * Retorna horários disponíveis para uma data
      */
     getAvailableSlots: (date: string, slotDuration: number = 30) => {
-      const dayAppointments = appointments.filter(a => 
-        a.date === date && 
+      const dayAppointments = appointments.filter(a =>
+        a.date === date &&
         a.status !== AppointmentStatus.Cancelled
       );
 
@@ -244,7 +251,7 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
       }
 
       // Filtra slots ocupados
-      return slots.filter(slot => 
+      return slots.filter(slot =>
         !helpers.hasTimeConflict(date, slot, slotDuration)
       );
     },
@@ -255,11 +262,15 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
     appointments,
     loading,
     error,
+    hasMoreData,
+    estimatedTotal,
 
     // Ações
     fetchAppointments,
     fetchAppointmentsByDate,
     fetchUpcoming,
+    fetchRecentAppointments,
+    fetchMoreAppointments,
     createAppointment,
     updateAppointment,
     deleteAppointment,

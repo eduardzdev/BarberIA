@@ -2,22 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { useBookingStore } from '../../stores/booking.store';
 import { publicAppointmentService } from '../../services/public-appointment.service';
+import { OccupiedSlot } from '@/types';
 import { addDays, format, isSameDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const StepDateTime: React.FC = () => {
-    const { 
-        shopData, 
-        selectedDate, 
-        selectedTime, 
-        selectDateTime, 
-        selectedBarber, 
-        selectedServices 
+    const {
+        shopData,
+        selectedDate,
+        selectedTime,
+        selectDateTime,
+        selectedBarber,
+        selectedServices
     } = useBookingStore();
-    
+
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
     const [loadingSlots, setLoadingSlots] = useState(false);
-    
+
     // Gerar próximos 14 dias
     const today = new Date();
     const nextDays = Array.from({ length: 14 }, (_, i) => addDays(today, i));
@@ -25,23 +26,23 @@ export const StepDateTime: React.FC = () => {
     useEffect(() => {
         const fetchAvailability = async () => {
             if (!selectedDate || !shopData) return;
-            
+
             setLoadingSlots(true);
             try {
-                // 1. Buscar agendamentos existentes no dia
-                const appointments = await publicAppointmentService.getAppointmentsByDate(
-                    shopData.ownerId, 
+                // 1. Buscar slots ocupados (LGPD compliant - sem dados de clientes)
+                const occupiedSlots = await publicAppointmentService.getOccupiedSlots(
+                    shopData.ownerId,
                     selectedDate
                 );
 
                 // 2. Definir horário de funcionamento
                 const dateObj = parseISO(selectedDate);
                 const dayOfWeek = dateObj.getDay();
-                
+
                 // Tenta pegar do shopData ou usa fallback se não existir
                 // Necessário pois businessHours pode não estar salvo em lojas antigas
                 let schedule = shopData.businessHours?.schedule?.find(s => s.dayOfWeek === dayOfWeek);
-                
+
                 // Fallback
                 if (!schedule) {
                     // Se for Domingo (0), padrão fechado. Outros dias 09:00 - 19:00
@@ -59,7 +60,7 @@ export const StepDateTime: React.FC = () => {
                         };
                     }
                 }
-                
+
                 if (!schedule || !schedule.isOpen || !schedule.startTime || !schedule.endTime) {
                     setAvailableSlots([]);
                     return;
@@ -67,13 +68,13 @@ export const StepDateTime: React.FC = () => {
 
                 const [startH, startM] = schedule.startTime.split(':').map(Number);
                 const [endH, endM] = schedule.endTime.split(':').map(Number);
-                
+
                 const openingTimeMinutes = startH * 60 + startM;
                 const closingTimeMinutes = endH * 60 + endM;
-                
+
                 // Intervalo de slots (ex: 30 min)
-                const interval = 30; 
-                
+                const interval = 30;
+
                 // Lunch break
                 let lunchStartMin = -1;
                 let lunchEndMin = -1;
@@ -104,24 +105,24 @@ export const StepDateTime: React.FC = () => {
                     const [slotH, slotM] = slot.split(':').map(Number);
                     const slotStartMinutes = slotH * 60 + slotM;
                     const slotEndMinutes = slotStartMinutes + totalDuration;
-                    
+
                     // Verificar se termina depois do expediente
                     if (slotEndMinutes > closingTimeMinutes) return false;
 
-                    // Verificar colisão com agendamentos existentes
-                    const hasConflict = appointments.some(apt => {
-                        if (selectedBarber && apt.barberName !== selectedBarber.name) {
-                            return false; 
+                    // Verificar colisão com slots ocupados (OccupiedSlot - sem PII)
+                    const hasConflict = occupiedSlots.some((slot: OccupiedSlot) => {
+                        if (selectedBarber && slot.barberName !== selectedBarber.name) {
+                            return false;
                         }
-                        
-                        const [aptH, aptM] = apt.startTime.split(':').map(Number);
-                        const aptStart = aptH * 60 + aptM;
-                        const aptEnd = aptStart + apt.duration;
+
+                        const [slotH, slotM] = slot.time.split(':').map(Number);
+                        const slotStart = slotH * 60 + slotM;
+                        const slotEnd = slotStart + slot.duration;
 
                         return (
-                            (slotStartMinutes >= aptStart && slotStartMinutes < aptEnd) || 
-                            (slotEndMinutes > aptStart && slotEndMinutes <= aptEnd) ||   
-                            (slotStartMinutes <= aptStart && slotEndMinutes >= aptEnd)    
+                            (slotStartMinutes >= slotStart && slotStartMinutes < slotEnd) ||
+                            (slotEndMinutes > slotStart && slotEndMinutes <= slotEnd) ||
+                            (slotStartMinutes <= slotStart && slotEndMinutes >= slotEnd)
                         );
                     });
 
@@ -149,12 +150,12 @@ export const StepDateTime: React.FC = () => {
                         const dateStr = format(date, 'yyyy-MM-dd');
                         const isSelected = selectedDate === dateStr;
                         const isToday = isSameDay(date, today);
-                        
+
                         // Dia da semana (0-6)
                         const dayOfWeek = date.getDay();
                         const schedule = shopData?.businessHours?.schedule.find(s => s.dayOfWeek === dayOfWeek);
                         const isOpen = schedule?.isOpen ?? false;
-                        
+
                         return (
                             <button
                                 key={dateStr}
@@ -163,8 +164,8 @@ export const StepDateTime: React.FC = () => {
                                 className={`
                                     flex flex-col items-center min-w-[4rem] p-3 rounded-xl border transition-all
                                     ${!isOpen ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-100 grayscale' : ''}
-                                    ${isSelected 
-                                        ? 'bg-shop-primary text-white border-shop-primary shadow-lg scale-105' 
+                                    ${isSelected
+                                        ? 'bg-shop-primary text-white border-shop-primary shadow-lg scale-105'
                                         : isOpen ? 'bg-white text-slate-600 border-slate-200 hover:border-shop-primary hover:text-shop-primary' : ''
                                     }
                                 `}

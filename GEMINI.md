@@ -91,6 +91,94 @@ O projeto segue uma arquitetura baseada em **features** (`src/features`), separa
 
 ---
 
+## 🛡️ Segurança e Performance (Remediações Recentes)
+
+Para mitigar riscos identificados em auditoria técnica, as seguintes melhorias foram implementadas:
+
+### 1. Proteção de Dados (LGPD/GDPR)
+*   **Coleção `availability`:** Criada para armazenar apenas dados de disponibilidade (data, hora, barbeiro, duração) para consulta pública.
+*   **Isolamento de PII:** A coleção `appointments` (contendo nomes e telefones de clientes) agora é acessível **apenas** por usuários autenticados (barbeiros).
+*   **Sincronização:** O `AppointmentService` sincroniza automaticamente criações, edições e deleções para a coleção `availability`.
+
+### 2. Otimização de Custos e Performance
+*   **Paginação Firestore:** Implementada paginação baseada em cursor (`fetchRecentAppointments`, `fetchMoreAppointments`) para evitar carregamento massivo de dados.
+*   **Estimativa de Total:** Sistema de contagem aproximada (`estimatedTotal`) que mostra "100 de ~350 agendamentos" sem queries extras.
+*   **Exportação Eficiente:** Sistema de export para Excel com suporte a grandes datasets, respeitando filtros e paginação.
+*   **Limites de Segurança:**
+    *   **Histórico:** Carga inicial de 100 itens + botão "Carregar Mais" (50 itens).
+    *   **Agenda/Dashboard:** Limite fixo de 50 agendamentos futuros.
+    *   **Geral:** Limite de segurança de 200 itens em buscas globais.
+*   **Base Service:** A classe `BaseService` agora suporta nativamente o parâmetro `limitCount`.
+
+---
+
+## 🚀 Próximos Passos para Crescimento
+
+Melhorias recomendadas para otimização de longo prazo:
+
+### 1. Server-Side Filters via Cloud Functions
+**O que é:** Mover filtros de busca (por cliente, serviço, período) para o backend usando Cloud Functions.
+
+**Por que é importante:**
+- Atualmente, para buscar "João" no histórico, precisamos carregar 1.000 agendamentos no cliente e filtrar em JavaScript = 1.000 leituras Firestore
+- Com Cloud Functions: mesma busca = 10-50 leituras (apenas resultados relevantes)
+- Economia de 95% em reads quando dataset > 10.000 appointments
+- Permite buscas complexas (fuzzy search, regex) sem impacto de performance
+
+**Quando implementar:** Dataset > 10.000 agendamentos ou quando usuários reclamarem de lentidão em buscas
+
+**Tempo estimado:** 8-12 horas
+
+### 2. Infinite Scroll
+**O que é:** Substituir botão "Carregar Mais" por carregamento automático ao rolar a página.
+
+**Por que é importante:**
+- UX mais moderna e fluida (similar a Instagram/Twitter)
+- Reduz cliques manuais do usuário
+- Melhora percepção de velocidade da aplicação
+
+**Quando implementar:** Quando usuários frequentemente clicam "Carregar Mais" múltiplas vezes
+
+**Tempo estimado:** 4-6 horas
+
+### 3. Testes E2E para Paginação
+**O que é:** Testes automatizados com Playwright para validar comportamento de paginação.
+
+**Por que é importante:**
+- Previne regressões ao adicionar novas features
+- Garante que paginação funciona com datasets grandes
+- Valida que estimativas de total estão corretas
+
+**Quando implementar:** Antes de lançar para produção com múltiplos usuários
+
+**Tempo estimado:** 3-4 horas
+
+### 4. Auto-Archival (>2 anos)
+**O que é:** Mover automaticamente agendamentos com mais de 2 anos para uma collection de arquivo.
+
+**Por que é importante:**
+- Mantém collection principal leve (queries mais rápidas)
+- Reduz custos de leitura em operações diárias
+- Dados antigos ainda acessíveis quando necessário
+
+**Quando implementar:** Quando tiver ~5.000+ agendamentos históricos
+
+**Tempo estimado:** 6-8 horas
+
+### 5. Dashboard de Custos
+**O que é:** Painel para monitorar leituras Firestore em tempo real e estimar custos mensais.
+
+**Por que é importante:**
+- Visibilidade sobre padrões de uso
+- Alertas quando custos excedem limites
+- Identificação de queries problemáticas
+
+**Quando implementar:** Quando ultrapassar 50% da cota gratuita do Firebase
+
+**Tempo estimado:** 8-12 horas
+
+---
+
 ## 🔑 Configuração de Ambiente
 
 As variáveis de ambiente ficam em `.env.local` (não comitado).

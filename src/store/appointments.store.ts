@@ -7,6 +7,9 @@
  * - appointments: Lista de agendamentos
  * - loading: Estado de carregamento
  * - error: Mensagem de erro
+ * - hasMoreData: Indica se há mais dados para carregar
+ * - lastVisibleDoc: Último documento carregado (para paginação)
+ * - estimatedTotal: Estimativa do total de registros (baseado em dados carregados)
  * 
  * Ações:
  * - fetchAppointments: Busca todos os agendamentos
@@ -16,6 +19,8 @@
  * - updateAppointment: Atualiza agendamento existente
  * - deleteAppointment: Remove agendamento
  * - updateStatus: Atualiza apenas o status de um agendamento
+ * - fetchRecentAppointments: Busca últimos N agendamentos (para paginação)
+ * - fetchMoreAppointments: Carrega mais agendamentos (paginação incremental)
  * 
  * Referências:
  * - ANALISE_COMPLETA_UI.md - Seção 3 (Appointments), Seção 4 (Agenda)
@@ -35,7 +40,7 @@
 import { create } from 'zustand';
 import { Appointment, AppointmentStatus, TransactionType } from '@/types';
 import { BaseService } from '@/services/base.service';
-import { where, orderBy, Timestamp } from 'firebase/firestore';
+import { where, orderBy, Timestamp, query, getDocs, limit, startAfter, DocumentSnapshot } from 'firebase/firestore';
 
 // Instância do serviço de Firestore
 const appointmentsService = new BaseService<Appointment>('appointments');
@@ -49,6 +54,9 @@ interface AppointmentsState {
   appointments: Appointment[];
   loading: boolean;
   error: string | null;
+  hasMoreData: boolean;
+  lastVisibleDoc: DocumentSnapshot | null;
+  estimatedTotal: number;
 
   // Ações de dados
   fetchAppointments: () => Promise<void>;
@@ -58,6 +66,8 @@ interface AppointmentsState {
   updateAppointment: (id: string, data: UpdateAppointmentData) => Promise<void>;
   deleteAppointment: (id: string) => Promise<void>;
   updateStatus: (id: string, status: AppointmentStatus) => Promise<void>;
+  fetchRecentAppointments: (limitCount: number) => Promise<void>;
+  fetchMoreAppointments: (limitCount: number) => Promise<void>;
 
   // Ações de controle
   setLoading: (loading: boolean) => void;
@@ -70,31 +80,143 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
   appointments: [],
   loading: false,
   error: null,
+  hasMoreData: true,
+  lastVisibleDoc: null,
+  estimatedTotal: 0,
 
-  // Busca todos os agendamentos
+  // Busca todos os agendamentos (com limite de segurança)
   fetchAppointments: async () => {
     set({ loading: true, error: null });
-    
+
     try {
       const appointments = await appointmentsService.getAll([
         orderBy('date', 'desc'),
         orderBy('startTime', 'asc')
-      ]);
-      
-      set({ 
-        appointments, 
+      ], 200); // Limite de segurança
+
+      set({
+        appointments,
         loading: false,
-        error: null 
+        error: null
       });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao carregar agendamentos';
-      
+
       console.error('Erro ao buscar agendamentos:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
+      });
+    }
+  },
+
+  // Busca últimos N agendamentos (paginação inicial)
+  fetchRecentAppointments: async (limitCount: number) => {
+    set({ loading: true, error: null, hasMoreData: true, lastVisibleDoc: null });
+
+    try {
+      const userId = appointmentsService['getCollectionRef']().path.split('/')[1];
+      const colRef = appointmentsService['getCollectionRef']();
+
+      const q = query(
+        colRef,
+        orderBy('date', 'desc'),
+        orderBy('startTime', 'desc'),
+        limit(limitCount)
+      );
+
+      const snapshot = await getDocs(q);
+      const appointments = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Appointment[];
+
+      const lastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
+      const hasMore = snapshot.docs.length === limitCount;
+
+      // Estimar total: se carregou o limite completo, provavelmente há mais
+      const estimatedTotal = hasMore
+        ? appointments.length * 2 // Estimativa conservadora
+        : appointments.length; // Se não completou o limite, é o total
+
+      set({
+        appointments,
+        lastVisibleDoc: lastVisible,
+        hasMoreData: hasMore,
+        estimatedTotal,
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Erro ao carregar agendamentos recentes';
+
+      console.error('Erro ao buscar agendamentos recentes:', error);
+      set({
+        loading: false,
+        error: errorMessage,
+        hasMoreData: false
+      });
+    }
+  },
+
+  // Carrega mais agendamentos (paginação incremental)
+  fetchMoreAppointments: async (limitCount: number) => {
+    const { lastVisibleDoc: lastDoc, hasMoreData, appointments: currentAppointments } = get();
+
+    if (!hasMoreData || !lastDoc) {
+      return;
+    }
+
+    set({ loading: true, error: null });
+
+    try {
+      const colRef = appointmentsService['getCollectionRef']();
+
+      const q = query(
+        colRef,
+        orderBy('date', 'desc'),
+        orderBy('startTime', 'desc'),
+        startAfter(lastDoc),
+        limit(limitCount)
+      );
+
+      const snapshot = await getDocs(q);
+      const newAppointments = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Appointment[];
+
+      const lastVisible = snapshot.docs[snapshot.docs.length - 1] || lastDoc;
+      const hasMore = snapshot.docs.length === limitCount;
+
+      const totalLoaded = currentAppointments.length + newAppointments.length;
+
+      // Atualizar estimativa: se ainda há mais, estimar baseado no padrão de crescimento
+      const estimatedTotal = hasMore
+        ? Math.ceil(totalLoaded * 1.5) // Estimativa progressiva
+        : totalLoaded; // Se não há mais, este é o total exato
+
+      set((state) => ({
+        appointments: [...state.appointments, ...newAppointments],
+        lastVisibleDoc: lastVisible,
+        hasMoreData: hasMore,
+        estimatedTotal,
+        loading: false,
+        error: null
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Erro ao carregar mais agendamentos';
+
+      console.error('Erro ao buscar mais agendamentos:', error);
+      set({
+        loading: false,
+        error: errorMessage
       });
     }
   },
@@ -102,58 +224,58 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
   // Busca agendamentos de uma data específica
   fetchAppointmentsByDate: async (date: string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const appointments = await appointmentsService.getAll([
         where('date', '==', date),
         orderBy('startTime', 'asc')
       ]);
-      
-      set({ 
-        appointments, 
+
+      set({
+        appointments,
         loading: false,
-        error: null 
+        error: null
       });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao carregar agendamentos da data';
-      
+
       console.error('Erro ao buscar agendamentos por data:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
       });
     }
   },
 
-  // Busca próximos agendamentos (hoje e futuros)
+  // Busca próximos agendamentos (hoje e futuros com limite de segurança)
   fetchUpcoming: async () => {
     set({ loading: true, error: null });
-    
+
     try {
       const today = new Date().toISOString().split('T')[0];
-      
+
       const appointments = await appointmentsService.getAll([
         where('date', '>=', today),
         orderBy('date', 'asc'),
         orderBy('startTime', 'asc')
-      ]);
-      
-      set({ 
-        appointments, 
+      ], 50); // Limite de segurança para upcoming
+
+      set({
+        appointments,
         loading: false,
-        error: null 
+        error: null
       });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao carregar próximos agendamentos';
-      
+
       console.error('Erro ao buscar próximos agendamentos:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
       });
     }
   },
@@ -161,7 +283,7 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
   // Cria um novo agendamento
   createAppointment: async (data: CreateAppointmentData) => {
     set({ loading: true, error: null });
-    
+
     try {
       // Validações
       if (!data.clientName || !data.date || !data.startTime) {
@@ -181,15 +303,15 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
         ...data,
         status: data.status || AppointmentStatus.Pending,
       });
-      
+
       // Atualiza estado local
       const newAppointment: Appointment = {
         id,
         ...data,
         status: data.status || AppointmentStatus.Pending,
       };
-      
-      set((state) => ({ 
+
+      set((state) => ({
         appointments: [...state.appointments, newAppointment].sort((a, b) => {
           // Ordena por data e depois por horário
           if (a.date === b.date) {
@@ -203,16 +325,16 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
 
       return id;
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao criar agendamento';
-      
+
       console.error('Erro ao criar agendamento:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
       });
-      
+
       throw error;
     }
   },
@@ -220,7 +342,7 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
   // Atualiza um agendamento existente
   updateAppointment: async (id: string, data: UpdateAppointmentData) => {
     set({ loading: true, error: null });
-    
+
     try {
       // Valida se agendamento existe
       const appointment = get().appointments.find(a => a.id === id);
@@ -239,9 +361,9 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
 
       // Atualiza no Firestore
       await appointmentsService.update(id, data);
-      
+
       // Atualiza estado local
-      set((state) => ({ 
+      set((state) => ({
         appointments: state.appointments
           .map(a => a.id === id ? { ...a, ...data } : a)
           .sort((a, b) => {
@@ -254,16 +376,16 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
         error: null,
       }));
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao atualizar agendamento';
-      
+
       console.error('Erro ao atualizar agendamento:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
       });
-      
+
       throw error;
     }
   },
@@ -271,7 +393,7 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
   // Remove um agendamento
   deleteAppointment: async (id: string) => {
     set({ loading: true, error: null });
-    
+
     try {
       // Valida se agendamento existe
       const appointment = get().appointments.find(a => a.id === id);
@@ -281,24 +403,24 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
 
       // Remove do Firestore
       await appointmentsService.delete(id);
-      
+
       // Remove do estado local
-      set((state) => ({ 
+      set((state) => ({
         appointments: state.appointments.filter(a => a.id !== id),
         loading: false,
         error: null,
       }));
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : 'Erro ao excluir agendamento';
-      
+
       console.error('Erro ao excluir agendamento:', error);
-      set({ 
-        loading: false, 
-        error: errorMessage 
+      set({
+        loading: false,
+        error: errorMessage
       });
-      
+
       throw error;
     }
   },
@@ -320,7 +442,7 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
           // 1. Atualiza estatísticas do cliente
           const { useClientsStore } = await import('./clients.store');
           const clientsStore = useClientsStore.getState();
-          
+
           // Busca cliente por telefone (identificador único mais confiável)
           const existingClient = clientsStore.clients.find(
             (c) => c.phone === appointment.clientPhone
@@ -411,8 +533,8 @@ export const useAppointmentsStore = create<AppointmentsState>((set, get) => ({
 
   // Ações de controle
   setLoading: (loading) => set({ loading }),
-  
+
   setError: (error) => set({ error, loading: false }),
-  
+
   clearError: () => set({ error: null }),
 }));

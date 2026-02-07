@@ -13,7 +13,7 @@
  * - AppointmentsStore (para histórico real filtrado por Concluído)
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -30,6 +30,7 @@ import {
   subDays,
   subMonths
 } from 'date-fns';
+import { exportFilteredHistory } from '@/services/export.service';
 
 /**
  * StatCard - Card de estatística reutilizável
@@ -121,7 +122,14 @@ const HistoryDetailCard: React.FC<HistoryDetailCardProps> = ({
  * HistoryPage - Componente principal
  */
 export const HistoryPage: React.FC = () => {
-  const { appointments } = useAppointments({ autoFetch: 'all' });
+  const {
+    appointments,
+    fetchRecentAppointments,
+    fetchMoreAppointments,
+    hasMoreData,
+    estimatedTotal,
+    loading
+  } = useAppointments({ autoFetch: false });
   const { services: catalogServices } = useServices({ autoFetch: true });
   const [searchQuery, setSearchQuery] = useState('');
   const [periodFilter, setPeriodFilter] = useState('30days');
@@ -131,6 +139,58 @@ export const HistoryPage: React.FC = () => {
   const [customDateRange, setCustomDateRange] = useState<{ start?: string; end?: string }>({});
   type PriceOperator = 'any' | 'gt' | 'lt' | 'eq';
   const [priceFilter, setPriceFilter] = useState<{ operator: PriceOperator; value?: number }>({ operator: 'any' });
+
+  // Carrega dados iniciais
+  useEffect(() => {
+    fetchRecentAppointments(100); // Carrega últimos 100 agendamentos
+  }, [fetchRecentAppointments]);
+
+  // Handler para carregar mais
+  const handleLoadMore = () => {
+    fetchMoreAppointments(50); // Carrega mais 50 por vez
+  };
+
+  // Estado do modal de exportação
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
+
+  // Handler de exportação
+  const handleExport = async () => {
+    setIsExporting(true);
+    setExportProgress(0);
+
+    try {
+      // Simular progresso inicial
+      setExportProgress(20);
+
+      // Buscar TODOS os agendamentos (sem paginação)
+      const allCompletedAppointments = filteredAppointments.filter(
+        apt => apt.status === AppointmentStatus.Completed
+      );
+
+      setExportProgress(60);
+
+      // Exportar com filtros aplicados
+      exportFilteredHistory(allCompletedAppointments, {
+        searchQuery,
+        services: selectedServices,
+        barbers: selectedBarbers,
+      });
+
+      setExportProgress(100);
+
+      // Fechar modal após breve delay
+      setTimeout(() => {
+        setIsExporting(false);
+        setExportProgress(0);
+      }, 1000);
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      alert('Erro ao exportar dados. Tente novamente.');
+      setIsExporting(false);
+      setExportProgress(0);
+    }
+  };
 
   const parseAppointmentDate = useCallback((dateStr: string | undefined, time?: string | null) => {
     if (!dateStr) return null;
@@ -453,7 +513,11 @@ export const HistoryPage: React.FC = () => {
       </div>
 
       {/* Botão de Exportação */}
-      <button className="w-full bg-slate-800/50 border border-slate-700 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-slate-800 transition-colors">
+      <button
+        onClick={handleExport}
+        disabled={filteredAppointments.length === 0 || isExporting}
+        className="w-full bg-slate-800/50 border border-slate-700 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
         <Icon name="download" className="w-5 h-5" />
         <span>Exportar Relatório</span>
       </button>
@@ -580,6 +644,43 @@ export const HistoryPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Load More Button */}
+        {hasMoreData && filteredAppointments.length > 0 && (
+          <div className="text-center pt-4">
+            <button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="bg-violet-600 hover:bg-violet-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center mx-auto space-x-2"
+            >
+              {loading ? (
+                <>
+                  <Icon name="loader" className="w-5 h-5 animate-spin" />
+                  <span>Carregando...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="chevron-down" className="w-5 h-5" />
+                  <span>Carregar mais agendamentos</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Data Indicator */}
+        <div className="text-center text-sm text-slate-500 mt-4">
+          {filteredAppointments.length > 0 && (
+            <p>
+              Mostrando {filteredAppointments.length} {hasMoreData ? `de ~${estimatedTotal}` : `de ${estimatedTotal}`} agendamento(s) concluído(s)
+            </p>
+          )}
+          {hasActiveAdvancedFilters && filteredAppointments.length > 0 && (
+            <p className="text-xs text-amber-400 mt-1">
+              ⚠️ Filtros aplicados apenas aos agendamentos já carregados
+            </p>
+          )}
+        </div>
       </Card>
 
       <Modal
@@ -703,6 +804,35 @@ export const HistoryPage: React.FC = () => {
             >
               Aplicar filtros
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de Progresso de Exportação */}
+      <Modal isOpen={isExporting} onClose={() => { }} title="Exportando dados...">
+        <div className="space-y-4">
+          <p className="text-slate-300">
+            Preparando arquivo Excel com {filteredAppointments.length} agendamento(s)...
+          </p>
+
+          {/* Barra de progresso */}
+          <div className="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
+            <div
+              className="bg-violet-600 h-full transition-all duration-300 rounded-full flex items-center justify-center"
+              style={{ width: `${exportProgress}%` }}
+            >
+              <span className="text-xs font-semibold text-white">
+                {exportProgress}%
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center text-sm text-slate-400">
+            <Icon name="loader" className="w-4 h-4 mr-2 animate-spin" />
+            {exportProgress < 30 && 'Coletando dados...'}
+            {exportProgress >= 30 && exportProgress < 70 && 'Formatando planilha...'}
+            {exportProgress >= 70 && exportProgress < 100 && 'Gerando arquivo...'}
+            {exportProgress === 100 && 'Concluído! 🎉'}
           </div>
         </div>
       </Modal>

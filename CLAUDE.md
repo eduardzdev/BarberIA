@@ -104,6 +104,55 @@ VITE_FIREBASE_MEASUREMENT_ID
 VITE_FIREBASE_APP_CHECK_KEY      # reCAPTCHA v3 site key
 ```
 
+## Security & Performance Remediations
+
+### 1. Data Protection (LGPD/GDPR)
+- **`availability` collection:** Public-facing data without PII (date, time, barber, duration).
+- **PII Isolation:** `appointments` collection containing client names/phones is restricted to authenticated owners.
+- **Sync:** `AppointmentService` syncs changes to `availability` automatically.
+
+### 2. Cost & Performance
+- **Firestore Pagination:** Cursor-based (`fetchRecentAppointments`, `fetchMoreAppointments`).
+- **Total Count Estimation:** Shows "100 of ~350 appointments" without extra queries.
+- **Excel Export:** Efficient export system with `xlsx` library, respects filters and pagination.
+- **Safety Limits:**
+    - History: 100 initial + "Load More" (50 items).
+    - Dashboard: 50 upcoming limit.
+    - Global: 200 items safety limit.
+- **Base Service:** Supports `limitCount` parameter.
+
+## Future Optimizations
+
+### Server-Side Filters via Cloud Functions
+**What:** Move search filters to backend using Cloud Functions.  
+**Why:** Reduce reads from 1,000 → 50 for searches in large datasets (95% savings).  
+**When:** Dataset > 10,000 appointments.  
+**Effort:** 8-12 hours.
+
+### Infinite Scroll
+**What:** Auto-load on scroll instead of "Load More" button.  
+**Why:** Modern UX, reduces manual clicks.  
+**When:** Users frequently click "Load More" multiple times.  
+**Effort:** 4-6 hours.
+
+### E2E Tests for Pagination
+**What:** Playwright tests validating pagination behavior.  
+**Why:** Prevent regressions, ensure data integrity.  
+**When:** Before multi-user production launch.  
+**Effort:** 3-4 hours.
+
+### Auto-Archival (>2 years)
+**What:** Archive appointments older than 2 years to separate collection.  
+**Why:** Keep main collection light, faster queries.  
+**When:** ~5,000+ historical appointments.  
+**Effort:** 6-8 hours.
+
+### Cost Monitoring Dashboard
+**What:** Real-time Firestore read tracking and cost estimation.  
+**Why:** Visibility, alerts, identify problematic queries.  
+**When:** Exceed 50% of Firebase free tier.  
+**Effort:** 8-12 hours.
+
 ## Terminal Note
 
 This project uses CMD (not PowerShell). For paths with brackets like `[APP]`, use `-LiteralPath` in PowerShell.

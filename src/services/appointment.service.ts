@@ -10,6 +10,7 @@
 
 import { where, Timestamp, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { BaseService } from './base.service';
+import { availabilityService } from './availability.service';
 import { Appointment, AppointmentStatus, NotificationType } from '@/types';
 import { db, auth } from '@/firebase';
 
@@ -43,6 +44,76 @@ export class AppointmentService extends BaseService<Appointment> {
   }
 
   /**
+   * Override create to sync availability collection
+   */
+  async create(data: Omit<Appointment, 'id'>): Promise<string> {
+    const appointmentId = await super.create(data);
+
+    // Sync to public availability collection (no PII)
+    try {
+      const userId = auth.currentUser?.uid;
+      if (userId && data.status !== AppointmentStatus.Cancelled) {
+        await availabilityService.createSlot(userId, {
+          date: data.date,
+          time: data.startTime,
+          duration: data.duration,
+          barberName: data.barberName,
+          appointmentId,
+        });
+      }
+    } catch (error) {
+      console.error('Falha ao sincronizar disponibilidade (create):', error);
+      // Don't fail the appointment creation if availability sync fails
+    }
+
+    return appointmentId;
+  }
+
+  /**
+   * Override update to sync availability collection
+   */
+  async update(id: string, data: Partial<Omit<Appointment, 'id'>>): Promise<void> {
+    await super.update(id, data);
+
+    // Sync to availability if date/time/duration changed
+    try {
+      const userId = auth.currentUser?.uid;
+      if (userId && (data.date || data.startTime || data.duration || data.barberName)) {
+        // Get full appointment to have all required fields
+        const appointment = await this.getById(id);
+        if (appointment && appointment.status !== AppointmentStatus.Cancelled) {
+          await availabilityService.updateSlot(userId, id, {
+            date: appointment.date,
+            time: appointment.startTime,
+            duration: appointment.duration,
+            barberName: appointment.barberName,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Falha ao sincronizar disponibilidade (update):', error);
+    }
+  }
+
+  /**
+   * Override delete to remove from availability collection
+   */
+  async delete(id: string): Promise<void> {
+    const userId = auth.currentUser?.uid;
+
+    await super.delete(id);
+
+    // Remove from availability
+    try {
+      if (userId) {
+        await availabilityService.deleteSlotByAppointmentId(userId, id);
+      }
+    } catch (error) {
+      console.error('Falha ao sincronizar disponibilidade (delete):', error);
+    }
+  }
+
+  /**
    * Busca agendamentos de uma data específica
    * @param date - Data no formato 'YYYY-MM-DD'
    */
@@ -52,7 +123,7 @@ export class AppointmentService extends BaseService<Appointment> {
         this.whereEqual('date', date),
         this.orderByField('startTime', 'asc'),
       ];
-      
+
       return await this.getAll(constraints);
     } catch (error) {
       console.error('Erro ao buscar agendamentos por data:', error);
@@ -73,7 +144,7 @@ export class AppointmentService extends BaseService<Appointment> {
         this.orderByField('date', 'asc'),
         this.orderByField('startTime', 'asc'),
       ];
-      
+
       return await this.getAll(constraints);
     } catch (error) {
       console.error('Erro ao buscar agendamentos por período:', error);
@@ -92,7 +163,7 @@ export class AppointmentService extends BaseService<Appointment> {
         this.orderByField('date', 'desc'),
         this.orderByField('startTime', 'desc'),
       ];
-      
+
       return await this.getAll(constraints);
     } catch (error) {
       console.error('Erro ao buscar agendamentos por status:', error);
@@ -110,7 +181,7 @@ export class AppointmentService extends BaseService<Appointment> {
         this.whereEqual('clientId', clientId),
         this.orderByField('date', 'desc'),
       ];
-      
+
       return await this.getAll(constraints);
     } catch (error) {
       console.error('Erro ao buscar agendamentos por cliente:', error);
@@ -126,6 +197,16 @@ export class AppointmentService extends BaseService<Appointment> {
   async updateStatus(id: string, status: AppointmentStatus): Promise<void> {
     try {
       await this.update(id, { status });
+
+      // Sync availability - remove slot if cancelled
+      const userId = auth.currentUser?.uid;
+      if (status === AppointmentStatus.Cancelled && userId) {
+        try {
+          await availabilityService.deleteSlotByAppointmentId(userId, id);
+        } catch (e) {
+          console.error('Falha ao remover slot de disponibilidade:', e);
+        }
+      }
 
       // Notificar sobre cancelamento
       if (status === AppointmentStatus.Cancelled) {
@@ -161,7 +242,7 @@ export class AppointmentService extends BaseService<Appointment> {
   async getUpcoming(limitCount: number = 10): Promise<Appointment[]> {
     try {
       const today = new Date().toISOString().split('T')[0];
-      
+
       const constraints = [
         where('date', '>=', today),
         where('status', '!=', AppointmentStatus.Cancelled),
@@ -169,7 +250,7 @@ export class AppointmentService extends BaseService<Appointment> {
         this.orderByField('startTime', 'asc'),
         this.limitTo(limitCount),
       ];
-      
+
       return await this.getAll(constraints);
     } catch (error) {
       console.error('Erro ao buscar próximos agendamentos:', error);
@@ -186,13 +267,13 @@ export class AppointmentService extends BaseService<Appointment> {
   async hasTimeConflict(date: string, time: string, excludeId?: string): Promise<boolean> {
     try {
       const appointments = await this.getByDate(date);
-      
-      const conflict = appointments.some(apt => 
-        apt.startTime === time && 
+
+      const conflict = appointments.some(apt =>
+        apt.startTime === time &&
         apt.id !== excludeId &&
         apt.status !== AppointmentStatus.Cancelled
       );
-      
+
       return conflict;
     } catch (error) {
       console.error('Erro ao verificar conflito de horário:', error);

@@ -1,23 +1,23 @@
 export enum AppointmentStatus {
-  Confirmed = "Confirmado",
-  Pending = "Pendente",
-  Cancelled = "Cancelado",
-  Completed = "Concluído",
+    Confirmed = "Confirmado",
+    Pending = "Pendente",
+    Cancelled = "Cancelado",
+    Completed = "Concluído",
 }
 
 export interface Appointment {
-  id: string;
-  clientName: string;
-  clientPhone: string;
-  services: string[];
-  startTime: string;
-  duration: number; // in minutes
-  status: AppointmentStatus;
-  price?: number;
-  notes?: string;
-  date: string;
-  barberName?: string;
-  createdAt?: number; // Firebase timestamp
+    id: string;
+    clientName: string;
+    clientPhone: string;
+    services: string[];
+    startTime: string;
+    duration: number; // in minutes
+    status: AppointmentStatus;
+    price?: number;
+    notes?: string;
+    date: string;
+    barberName?: string;
+    createdAt?: number; // Firebase timestamp
 }
 
 export enum ClientStatus {
@@ -102,57 +102,57 @@ export interface Notification {
     type: NotificationType;
     title: string;
     description: string;
-    time: string; 
+    time: string;
     read: boolean;
 }
 
 export interface Barbershop {
-  id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  address: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  website?: string;
-  instagram?: string;
-  facebook?: string;
-  logoUrl?: string;
-  coverImageUrl?: string;
-  description?: string;
-  username?: string;
-  defaultPaymentMethod?: string;
-  slug?: string;
-  theme?: {
-      primaryColor: string;
-      secondaryColor: string;
-      font: string;
-      mode?: 'light' | 'dark';
-  };
-  layout?: {
-      showHero: boolean;
-      heroTitle: string;
-      heroSubtitle?: string;
-      heroImage?: string;
-      showAbout: boolean;
-      aboutText?: string;
-      aboutImage?: string;
-  };
+    id: string;
+    name: string;
+    phone: string;
+    email?: string;
+    address: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    website?: string;
+    instagram?: string;
+    facebook?: string;
+    logoUrl?: string;
+    coverImageUrl?: string;
+    description?: string;
+    username?: string;
+    defaultPaymentMethod?: string;
+    slug?: string;
+    theme?: {
+        primaryColor: string;
+        secondaryColor: string;
+        font: string;
+        mode?: 'light' | 'dark';
+    };
+    layout?: {
+        showHero: boolean;
+        heroTitle: string;
+        heroSubtitle?: string;
+        heroImage?: string;
+        showAbout: boolean;
+        aboutText?: string;
+        aboutImage?: string;
+    };
 }
 
 export interface WorkingHours {
-  schedule: DaySchedule[];
+    schedule: DaySchedule[];
 }
 
 export interface DaySchedule {
-  dayOfWeek: number;
-  isOpen: boolean;
-  startTime: string;
-  endTime: string;
-  hasLunchBreak: boolean;
-  lunchStart: string;
-  lunchDuration: number;
+    dayOfWeek: number;
+    isOpen: boolean;
+    startTime: string;
+    endTime: string;
+    hasLunchBreak: boolean;
+    lunchStart: string;
+    lunchDuration: number;
 }
 
 export interface PublicShopData {
@@ -166,7 +166,7 @@ export interface PublicShopData {
         primaryColor: string;
         secondaryColor: string;
         font: string;
-      mode?: 'light' | 'dark';
+        mode?: 'light' | 'dark';
     };
     layout: {
         showHero: boolean;
@@ -184,4 +184,30 @@ export interface PublicShopData {
     facebook?: string;
     website?: string;
     updatedAt: string;
+}
+
+/**
+ * OccupiedSlot - Public-safe type for availability queries
+ * Contains NO personal identifiable information (PII)
+ * Used by public booking page to check time slot availability
+ */
+export interface OccupiedSlot {
+    time: string;          // HH:MM format
+    duration: number;      // minutes
+    barberName?: string;   // optional, for multi-barber shops
+}
+
+/**
+ * AvailabilitySlot - Firestore document structure for availability collection
+ * This is the sanitized public version of appointment time slots
+ * LGPD/GDPR compliant - no client data stored
+ */
+export interface AvailabilitySlot {
+    id?: string;
+    date: string;          // YYYY-MM-DD
+    time: string;          // HH:MM
+    duration: number;      // minutes
+    barberName?: string;   // optional
+    appointmentId: string; // Reference to the actual appointment
+    createdAt?: any;       // Firebase Timestamp
 }

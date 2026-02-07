@@ -62,7 +62,8 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
 
       match /appointments/{appointmentId} {
-        allow read: if true;
+        // SECURITY FIX: Only owner can read appointments (contains PII)
+        allow read: if isOwner(userId);
         
         allow create: if true &&
           request.resource.data.keys().hasAll(['clientName', 'clientPhone', 'date', 'startTime', 'status', 'createdAt']) &&
@@ -83,6 +84,15 @@ service cloud.firestore {
           isValidAppointmentStatus(request.resource.data.status);
         
         allow delete: if isOwner(userId);
+      }
+
+      // Public availability slots - LGPD/GDPR compliant (no PII)
+      match /availability/{slotId} {
+        // Anyone can read availability to check open time slots
+        allow read: if true;
+        
+        // Only authenticated owner can write availability
+        allow create, update, delete: if isOwner(userId);
       }
 
       match /notifications/{notificationId} {

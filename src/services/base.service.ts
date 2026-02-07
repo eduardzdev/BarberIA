@@ -51,13 +51,20 @@ export class BaseService<T extends DocumentData> {
   /**
    * Busca todos os documentos da coleção
    * @param constraints - Filtros opcionais (where, orderBy, limit)
+   * @param limitCount - Limite opcional de documentos a retornar
    */
-  async getAll(constraints: QueryConstraint[] = []): Promise<T[]> {
+  async getAll(constraints: QueryConstraint[] = [], limitCount?: number): Promise<T[]> {
     try {
       const colRef = this.getCollectionRef();
-      const q = query(colRef, ...constraints);
+
+      // Adiciona limit se especificado
+      const finalConstraints = limitCount
+        ? [...constraints, limit(limitCount)]
+        : constraints;
+
+      const q = query(colRef, ...finalConstraints);
       const snapshot = await getDocs(q);
-      
+
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
@@ -88,7 +95,7 @@ export class BaseService<T extends DocumentData> {
           ...docSnap.data(),
         } as unknown as T;
       }
-      
+
       return null;
     } catch (error) {
       console.error(`Erro ao buscar ${this.collectionName} por ID:`, error);
@@ -108,7 +115,7 @@ export class BaseService<T extends DocumentData> {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
-      
+
       return docRef.id;
     } catch (error) {
       console.error(`Erro ao criar ${this.collectionName}:`, error);
