@@ -188,6 +188,18 @@ service cloud.firestore {
         allow read: if isOwner(userId);
         allow write: if isOwner(userId);
       }
+
+      // Subscription data - owner can read, only Cloud Functions write (admin SDK bypasses rules)
+      match /subscription/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      // Payment audit events - owner can read for billing history
+      match /payment_events/{eventId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
     }
 
     match /publicProfiles/{userId} {

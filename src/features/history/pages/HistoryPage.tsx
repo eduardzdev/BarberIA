@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -654,10 +655,7 @@ export const HistoryPage: React.FC = () => {
               className="bg-violet-600 hover:bg-violet-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center mx-auto space-x-2"
             >
               {loading ? (
-                <>
-                  <Icon name="loader" className="w-5 h-5 animate-spin" />
-                  <span>Carregando...</span>
-                </>
+                <CardSkeleton count={1} className="w-full" />
               ) : (
                 <>
                   <Icon name="chevron-down" className="w-5 h-5" />

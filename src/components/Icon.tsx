@@ -10,12 +10,13 @@ import {
   BiLogoTiktok, BiMap, BiGlobe, BiPhone, BiPalette, BiKey, BiShieldQuarter,
   BiHelpCircle, BiGift, BiCog, BiLogoGoogle, BiArchive, BiDoorOpen, BiWallet,
   BiCamera, BiImage, BiUpload, BiBuildings, BiMapPin, BiCurrentLocation, BiParty,
-  BiRocket, BiInfoCircle, BiStore
+  BiRocket, BiInfoCircle, BiStore, BiErrorCircle
 } from 'react-icons/bi';
 
 interface IconProps {
   name: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const iconMap: { [key: string]: React.ElementType } = {
@@ -84,13 +85,15 @@ const iconMap: { [key: string]: React.ElementType } = {
   rocket: BiRocket,
   info: BiInfoCircle,
   store: BiStore,
+  alert: BiErrorCircle,
+  alertCircle: BiErrorCircle,
 };
 
-export const Icon: React.FC<IconProps> = ({ name, className }) => {
+export const Icon: React.FC<IconProps> = ({ name, className, style }) => {
   const IconComponent = iconMap[name];
   if (!IconComponent) {
     console.warn(`Icon "${name}" not found.`);
     return null;
   }
-  return <IconComponent className={className} />;
+  return <IconComponent className={className} style={style} />;
 };

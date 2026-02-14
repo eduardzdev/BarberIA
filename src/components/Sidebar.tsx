@@ -8,8 +8,8 @@ import { useBarbershop } from '@/hooks/useBarbershop';
 import { useAuthStore } from '@/store/auth.store';
 
 interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 const mainNavItems = [
@@ -22,6 +22,7 @@ const mainNavItems = [
 
 const settingsNavItems = [
     { path: '/profile', icon: 'user', label: 'Perfil da Empresa' },
+    { path: '/billing', icon: 'dollar', label: 'Meu Plano' },
     { path: '/settings-shop', icon: 'scissors', label: 'Configurações da Barbearia' },
     { path: '/settings-services', icon: 'receipt', label: 'Serviços' },
     { path: '/settings-website', icon: 'globe', label: 'Site de Agendamento' },
@@ -61,8 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             to={path}
             onClick={onClose}
             className={({ isActive }) =>
-                `flex items-center space-x-4 px-4 py-3 rounded-lg transition-colors duration-200 ${
-                    isActive ? 'bg-violet-500/20 text-violet-300' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
+                `flex items-center space-x-4 px-4 py-3 rounded-lg transition-colors duration-200 ${isActive ? 'bg-violet-500/20 text-violet-300' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
                 }`
             }
         >
@@ -76,22 +76,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 bg-black/60 z-20 transition-opacity duration-300 ${
-                    isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`fixed inset-0 bg-black/60 z-20 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
             />
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full w-72 bg-slate-800 shadow-2xl shadow-violet-800/20 z-30 transform transition-transform duration-300 ease-in-out ${
-                    isOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                className={`fixed top-0 left-0 h-full w-72 bg-slate-800 shadow-2xl shadow-violet-800/20 z-30 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                         <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-violet-500 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30">
-                               <Icon name="scissors" className="w-5 h-5 text-slate-950" />
+                                <Icon name="scissors" className="w-5 h-5 text-slate-950" />
                             </div>
                             <span className="text-xl font-bold text-slate-100">BarberIA</span>
                         </div>
@@ -101,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Profile */}
-                     <div className="p-4 border-b border-slate-700">
+                    <div className="p-4 border-b border-slate-700">
                         <div className="w-12 h-12 bg-violet-600 rounded-full flex items-center justify-center font-bold text-white text-xl mb-2 shadow-lg shadow-violet-900/20">
                             {initials}
                         </div>
@@ -122,8 +120,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
                     {/* Footer / Logout */}
                     <div className="p-4 border-t border-slate-700">
-                         <button onClick={handleLogout} className="w-full flex items-center space-x-4 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors duration-200">
-                            <Icon name="logout" className="w-6 h-6"/>
+                        <button onClick={handleLogout} className="w-full flex items-center space-x-4 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors duration-200">
+                            <Icon name="logout" className="w-6 h-6" />
                             <span className="font-semibold">Sair</span>
                         </button>
                     </div>

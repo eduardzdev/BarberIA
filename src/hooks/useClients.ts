@@ -39,11 +39,11 @@
  * ```
  */
 
-import { useEffect } from 'react';
-import { 
-  useClientsStore, 
-  CreateClientData, 
-  UpdateClientData 
+import { useEffect, useMemo } from 'react';
+import {
+  useClientsStore,
+  CreateClientData,
+  UpdateClientData
 } from '@/store/clients.store';
 import { ClientStatus } from '@/types';
 
@@ -52,15 +52,21 @@ interface UseClientsOptions {
    * Busca automática ao montar
    */
   autoFetch?: boolean;
+
+  /**
+   * Força refetch ignorando cache
+   */
+  forceRefresh?: boolean;
 }
 
 export function useClients(options: UseClientsOptions = {}) {
-  const { autoFetch = false } = options;
+  const { autoFetch = false, forceRefresh = false } = options;
 
   // Estado do store
   const clients = useClientsStore((state) => state.clients);
   const loading = useClientsStore((state) => state.loading);
   const error = useClientsStore((state) => state.error);
+  const dataLoaded = useClientsStore((state) => state.dataLoaded);
 
   // Ações
   const fetchClients = useClientsStore((state) => state.fetchClients);
@@ -70,16 +76,17 @@ export function useClients(options: UseClientsOptions = {}) {
   const updateStatus = useClientsStore((state) => state.updateStatus);
   const toggleVip = useClientsStore((state) => state.toggleVip);
   const clearError = useClientsStore((state) => state.clearError);
+  const clearCache = useClientsStore((state) => state.clearCache);
 
-  // Auto-fetch ao montar
+  // Auto-fetch ao montar (usa cache a menos que forceRefresh)
   useEffect(() => {
     if (autoFetch) {
-      fetchClients();
+      fetchClients(forceRefresh);
     }
-  }, [autoFetch, fetchClients]);
+  }, [autoFetch, forceRefresh, fetchClients]);
 
-  // Helpers
-  const helpers = {
+  // Helpers memoizados para evitar re-renders desnecessários
+  const helpers = useMemo(() => ({
     /**
      * Busca cliente por ID
      */
@@ -92,7 +99,7 @@ export function useClients(options: UseClientsOptions = {}) {
      */
     searchClients: (query: string) => {
       const lowerQuery = query.toLowerCase();
-      return clients.filter(c => 
+      return clients.filter(c =>
         c.name.toLowerCase().includes(lowerQuery) ||
         c.email.toLowerCase().includes(lowerQuery) ||
         c.phone.includes(query)
@@ -155,10 +162,10 @@ export function useClients(options: UseClientsOptions = {}) {
       const total = clients.length;
       const active = clients.filter(c => c.status === ClientStatus.Active).length;
       const inactive = clients.filter(c => c.status === ClientStatus.Inactive).length;
-      
+
       const totalVisits = clients.reduce((sum, c) => sum + c.visits, 0);
       const totalRevenue = clients.reduce((sum, c) => sum + c.spent, 0);
-      
+
       const averageVisits = total > 0 ? totalVisits / total : 0;
       const averageSpent = total > 0 ? totalRevenue / total : 0;
 
@@ -177,8 +184,8 @@ export function useClients(options: UseClientsOptions = {}) {
      * Valida se email já está em uso
      */
     isEmailDuplicate: (email: string, excludeId?: string) => {
-      return clients.some(c => 
-        c.email.toLowerCase() === email.toLowerCase() && 
+      return clients.some(c =>
+        c.email.toLowerCase() === email.toLowerCase() &&
         c.id !== excludeId
       );
     },
@@ -187,18 +194,19 @@ export function useClients(options: UseClientsOptions = {}) {
      * Valida se telefone já está em uso
      */
     isPhoneDuplicate: (phone: string, excludeId?: string) => {
-      return clients.some(c => 
-        c.phone === phone && 
+      return clients.some(c =>
+        c.phone === phone &&
         c.id !== excludeId
       );
     },
-  };
+  }), [clients]);
 
   return {
     // Estado
     clients,
     loading,
     error,
+    dataLoaded,
 
     // Ações
     fetchClients,
@@ -208,6 +216,7 @@ export function useClients(options: UseClientsOptions = {}) {
     updateStatus,
     toggleVip,
     clearError,
+    clearCache,
 
     // Helpers
     ...helpers,

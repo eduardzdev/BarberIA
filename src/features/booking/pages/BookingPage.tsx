@@ -32,6 +32,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '@/hooks/useServices';
 import { Card } from '@/components/Card';
@@ -41,18 +42,18 @@ import { MOCK_SERVICES } from '@/constants';
 
 // Mock data de profissionais (futuro: vir do BarbershopStore)
 const MOCK_BARBERS: Barber[] = [
-  { 
-    id: '1', 
+  {
+    id: '1',
     name: 'André',
     avatarUrl: 'https://i.pravatar.cc/150?img=12'
   },
-  { 
-    id: '2', 
+  {
+    id: '2',
     name: 'Bruno',
     avatarUrl: 'https://i.pravatar.cc/150?img=13'
   },
-  { 
-    id: '3', 
+  {
+    id: '3',
     name: 'Carlos',
     avatarUrl: 'https://i.pravatar.cc/150?img=14'
   },
@@ -60,8 +61,8 @@ const MOCK_BARBERS: Barber[] = [
 
 // Mock de horários disponíveis (futuro: integração com agenda real)
 const AVAILABLE_TIMES = [
-  '09:00', '10:00', '11:00', 
-  '13:00', '14:00', '15:00', 
+  '09:00', '10:00', '11:00',
+  '13:00', '14:00', '15:00',
   '16:00', '17:00'
 ];
 
@@ -109,7 +110,7 @@ export const BookingPage: React.FC = () => {
    */
   const total = useMemo(() => {
     const subtotal = selectedServices.reduce(
-      (acc, service) => acc + service.price, 
+      (acc, service) => acc + service.price,
       0
     );
     // Desconto de 5% para pagamento online
@@ -136,12 +137,12 @@ export const BookingPage: React.FC = () => {
     const servicesText = selectedServices
       .map(s => s.name)
       .join(', ');
-    
+
     const dateFormatted = new Date(selectedDate + 'T00:00:00')
       .toLocaleDateString('pt-BR');
-    
+
     const message = encodeURIComponent(
-`Olá! Gostaria de confirmar meu agendamento:
+      `Olá! Gostaria de confirmar meu agendamento:
 
 📋 Serviços: ${servicesText}
 👤 Profissional: ${selectedBarber?.name}
@@ -197,9 +198,8 @@ export const BookingPage: React.FC = () => {
       {/* Loading State */}
       {loading && (
         <Card>
-          <div className="flex items-center justify-center py-8 text-slate-400">
-            <Icon name="clock" className="animate-spin mr-2" />
-            <span>Carregando serviços...</span>
+          <div className="p-4">
+            <CardSkeleton count={3} />
           </div>
         </Card>
       )}
@@ -223,7 +223,7 @@ export const BookingPage: React.FC = () => {
             </span>
             Escolha os Serviços
           </h2>
-          
+
           {servicesToDisplay.length === 0 ? (
             <div className="text-center py-6 text-slate-400">
               Nenhum serviço disponível no momento.
@@ -232,7 +232,7 @@ export const BookingPage: React.FC = () => {
             <div className="space-y-3">
               {servicesToDisplay.map(service => {
                 const isSelected = selectedServices.some(s => s.id === service.id);
-                
+
                 return (
                   <div
                     key={service.id}
@@ -240,8 +240,8 @@ export const BookingPage: React.FC = () => {
                     className={`
                       flex justify-between items-center p-3 rounded-lg 
                       cursor-pointer transition-all border
-                      ${isSelected 
-                        ? 'bg-violet-600/30 border-violet-500' 
+                      ${isSelected
+                        ? 'bg-violet-600/30 border-violet-500'
                         : 'bg-slate-700/50 border-slate-700 hover:bg-slate-700'
                       }
                     `}
@@ -273,11 +273,11 @@ export const BookingPage: React.FC = () => {
           </span>
           Escolha o Profissional
         </h2>
-        
+
         <div className="flex space-x-3 overflow-x-auto pb-2">
           {MOCK_BARBERS.map(barber => {
             const isSelected = selectedBarber?.id === barber.id;
-            
+
             return (
               <div
                 key={barber.id}
@@ -285,8 +285,8 @@ export const BookingPage: React.FC = () => {
                 className={`
                   flex flex-col items-center p-3 rounded-lg 
                   cursor-pointer border-2 transition-all min-w-[100px]
-                  ${isSelected 
-                    ? 'border-violet-500 bg-violet-500/10' 
+                  ${isSelected
+                    ? 'border-violet-500 bg-violet-500/10'
                     : 'border-transparent hover:border-slate-600'
                   }
                 `}
@@ -313,7 +313,7 @@ export const BookingPage: React.FC = () => {
           </span>
           Escolha a Data e Horário
         </h2>
-        
+
         {/* Data */}
         <div className="mb-4">
           <label className="text-sm font-medium text-slate-400 mb-1 block">
@@ -336,7 +336,7 @@ export const BookingPage: React.FC = () => {
           <div className="grid grid-cols-4 gap-2">
             {AVAILABLE_TIMES.map(time => {
               const isSelected = selectedTime === time;
-              
+
               return (
                 <button
                   key={time}
@@ -366,7 +366,7 @@ export const BookingPage: React.FC = () => {
           </span>
           Pagamento
         </h2>
-        
+
         <div className="space-y-3">
           {/* Pagamento Online */}
           <div

@@ -7,7 +7,8 @@
  * - Acesso ao estado de serviços (lista, loading, error)
  * - Métodos CRUD: fetch, create, update, delete
  * - Auto-loading inicial (opcional)
- * - Helpers de validação
+ * - forceRefresh para bypass de cache
+ * - Helpers de validação memoizados
  * 
  * Referências:
  * - ANALISE_COMPLETA_UI.md - Seção 13 (Componentes Reutilizáveis)
@@ -49,7 +50,7 @@
  * ```
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useServicesStore, CreateServiceData, UpdateServiceData } from '@/store/services.store';
 
 interface UseServicesOptions {
@@ -58,15 +59,22 @@ interface UseServicesOptions {
    * @default false
    */
   autoFetch?: boolean;
+
+  /**
+   * Força refetch ignorando cache
+   * @default false
+   */
+  forceRefresh?: boolean;
 }
 
 export function useServices(options: UseServicesOptions = {}) {
-  const { autoFetch = false } = options;
+  const { autoFetch = false, forceRefresh = false } = options;
 
   // Estado do store
   const services = useServicesStore((state) => state.services);
   const loading = useServicesStore((state) => state.loading);
   const error = useServicesStore((state) => state.error);
+  const dataLoaded = useServicesStore((state) => state.dataLoaded);
 
   // Ações
   const fetchServices = useServicesStore((state) => state.fetchServices);
@@ -74,16 +82,17 @@ export function useServices(options: UseServicesOptions = {}) {
   const updateService = useServicesStore((state) => state.updateService);
   const deleteService = useServicesStore((state) => state.deleteService);
   const clearError = useServicesStore((state) => state.clearError);
+  const clearCache = useServicesStore((state) => state.clearCache);
 
-  // Auto-fetch ao montar (se habilitado)
+  // Auto-fetch ao montar (usa cache a menos que forceRefresh)
   useEffect(() => {
     if (autoFetch) {
-      fetchServices();
+      fetchServices(forceRefresh);
     }
-  }, [autoFetch, fetchServices]);
+  }, [autoFetch, forceRefresh, fetchServices]);
 
-  // Helpers
-  const helpers = {
+  // Helpers memoizados para evitar re-renders desnecessários
+  const helpers = useMemo(() => ({
     /**
      * Busca um serviço por ID
      */
@@ -96,7 +105,7 @@ export function useServices(options: UseServicesOptions = {}) {
      */
     searchByName: (query: string) => {
       const lowerQuery = query.toLowerCase();
-      return services.filter(s => 
+      return services.filter(s =>
         s.name.toLowerCase().includes(lowerQuery)
       );
     },
@@ -105,7 +114,7 @@ export function useServices(options: UseServicesOptions = {}) {
      * Filtra serviços por faixa de preço
      */
     filterByPriceRange: (minPrice: number, maxPrice: number) => {
-      return services.filter(s => 
+      return services.filter(s =>
         s.price >= minPrice && s.price <= maxPrice
       );
     },
@@ -114,7 +123,7 @@ export function useServices(options: UseServicesOptions = {}) {
      * Filtra serviços por faixa de duração (minutos)
      */
     filterByDuration: (minDuration: number, maxDuration: number) => {
-      return services.filter(s => 
+      return services.filter(s =>
         s.duration >= minDuration && s.duration <= maxDuration
       );
     },
@@ -149,18 +158,19 @@ export function useServices(options: UseServicesOptions = {}) {
      * Valida se o nome do serviço já existe
      */
     isNameDuplicate: (name: string, excludeId?: string) => {
-      return services.some(s => 
-        s.name.toLowerCase() === name.toLowerCase() && 
+      return services.some(s =>
+        s.name.toLowerCase() === name.toLowerCase() &&
         s.id !== excludeId
       );
     },
-  };
+  }), [services]);
 
   return {
     // Estado
     services,
     loading,
     error,
+    dataLoaded,
 
     // Ações
     fetchServices,
@@ -168,6 +178,7 @@ export function useServices(options: UseServicesOptions = {}) {
     updateService,
     deleteService,
     clearError,
+    clearCache,
 
     // Helpers
     ...helpers,

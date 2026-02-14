@@ -100,6 +100,20 @@ export const BarbershopSetupModal: React.FC<BarbershopSetupModalProps> = ({ isOp
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
+  // Pular onboarding (marcar como completo sem preencher)
+  const handleSkipOnboarding = async () => {
+    setLoading(true);
+    try {
+      // Marca onboarding como completo para não aparecer novamente
+      await updateShopInfo({ onboardingCompleted: true });
+      onClose();
+    } catch (error) {
+      console.error('Erro ao pular onboarding:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Salvar dados
   const handleSave = async () => {
     setLoading(true);
@@ -416,10 +430,11 @@ export const BarbershopSetupModal: React.FC<BarbershopSetupModalProps> = ({ isOp
             {/* Botão Voltar / Pular */}
             {currentStep === 1 ? (
               <button
-                onClick={onClose}
-                className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 font-medium hover:bg-slate-800 hover:text-slate-300 transition-all text-sm"
+                onClick={handleSkipOnboarding}
+                disabled={loading}
+                className="flex-1 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-slate-400 font-medium hover:bg-slate-800 hover:text-slate-300 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Configurar depois
+                {loading ? 'Salvando...' : 'Configurar depois'}
               </button>
             ) : (
               <button

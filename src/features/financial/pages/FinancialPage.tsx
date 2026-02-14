@@ -28,6 +28,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -193,7 +194,7 @@ interface NewTransactionFormProps {
 const NewTransactionForm: React.FC<NewTransactionFormProps> = ({ onClose }) => {
   const { createTransaction } = useFinancial();
   const { success, error: showError } = useUI();
-  
+
   const [type, setType] = useState<TransactionType>(TransactionType.Income);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -321,7 +322,7 @@ export const FinancialPage: React.FC = () => {
     getMonthlyStats,
     getStatsByPaymentMethod
   } = useFinancial({ autoFetch: 'current-month' });
-  
+
   const { openModal, closeModal, isModalOpen } = useUI();
 
   // Estatísticas
@@ -329,17 +330,17 @@ export const FinancialPage: React.FC = () => {
   const todayRevenue = todayTransactions
     .filter(t => t.type === TransactionType.Income)
     .reduce((sum, t) => sum + t.amount, 0);
-  
+
   const monthlyStats = getMonthlyStats();
   const paymentMethodStats = getStatsByPaymentMethod();
-  
+
   // Cálculo de receita semanal (últimos 7 dias)
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
   const todayStr = now.toISOString().split('T')[0];
-  
+
   const weeklyTransactions = transactions.filter(
     t => t.date >= sevenDaysAgoStr && t.date <= todayStr
   );
@@ -349,7 +350,7 @@ export const FinancialPage: React.FC = () => {
 
   // Distribuição por método de pagamento
   const totalIncome = paymentMethodStats.reduce((sum, stat) => sum + stat.income, 0);
-  
+
   // Agregar cartões e separar crédito/débito
   const cardCreditStat = paymentMethodStats.find(s => s.method === 'Cartão de Crédito');
   const cardDebitStat = paymentMethodStats.find(s => s.method === 'Cartão de Débito');
@@ -479,11 +480,10 @@ export const FinancialPage: React.FC = () => {
             Transações Recentes
           </h3>
           <p className="text-sm text-slate-400 mb-2">Últimas movimentações financeiras</p>
-          
+
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-slate-400 text-sm mt-2">Carregando transações...</p>
+            <div className="pt-4">
+              <CardSkeleton count={3} />
             </div>
           ) : recentTransactions.length > 0 ? (
             <>

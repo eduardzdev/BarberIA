@@ -4,17 +4,26 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { LoginPage } from './features/auth';
 import { BookingPage } from './features/booking';
-import { DashboardPage } from './features/dashboard';
-import { ClientsPage } from './features/clients';
-import { FinancialPage } from './features/financial';
-import { AppointmentsPage } from './features/appointments';
-import { AgendaPage } from './features/agenda';
-import { ProfilePage } from './features/profile';
-import { ShopSettingsPage, ServicesSettingsPage, AppSettingsPage, WebsiteSettingsPage } from './features/settings';
-import { HistoryPage } from './features/history';
 import { Layout } from './components/Layout';
-import { PublicShopPage } from '@/features/public-shop';
 import { Header } from './components/Header';
+import ErrorBoundary from './components/ErrorBoundary';
+import PageSkeleton from './components/common/PageSkeleton';
+
+// Lazy load features
+const DashboardPage = React.lazy(() => import('./features/dashboard').then(m => ({ default: m.DashboardPage })));
+const ClientsPage = React.lazy(() => import('./features/clients').then(m => ({ default: m.ClientsPage })));
+const FinancialPage = React.lazy(() => import('./features/financial').then(m => ({ default: m.FinancialPage })));
+const AppointmentsPage = React.lazy(() => import('./features/appointments').then(m => ({ default: m.AppointmentsPage })));
+const AgendaPage = React.lazy(() => import('./features/agenda').then(m => ({ default: m.AgendaPage })));
+const ProfilePage = React.lazy(() => import('./features/profile').then(m => ({ default: m.ProfilePage })));
+const HistoryPage = React.lazy(() => import('./features/history').then(m => ({ default: m.HistoryPage })));
+const PublicShopPage = React.lazy(() => import('@/features/public-shop').then(m => ({ default: m.PublicShopPage })));
+const BillingPage = React.lazy(() => import('./features/billing').then(m => ({ default: m.BillingPage })));
+// Settings
+const ShopSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ShopSettingsPage })));
+const ServicesSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ServicesSettingsPage })));
+const AppSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.AppSettingsPage })));
+const WebsiteSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.WebsiteSettingsPage })));
 import { BottomNav } from './components/BottomNav';
 import { Sidebar } from './components/Sidebar';
 import { BarbershopSetupModal } from './features/profile/components/BarbershopSetupModal';
@@ -23,6 +32,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthStore } from './store/auth.store';
 import { useUIStore } from './store/ui.store';
 import { useBarbershopStore } from './store/barbershop.store';
+import { useSubscriptionStore } from './store/subscription.store';
+import { SubscriptionGuard } from './guards/SubscriptionGuard';
 
 // Inicializa Firebase App Check para proteção contra abuso
 import './lib/firebase-app-check';
@@ -39,6 +50,7 @@ const pageTitles: { [key: string]: string } = {
   '/financial': 'Financeiro',
   '/history': 'Histórico',
   '/profile': 'Perfil da Empresa',
+  '/billing': 'Assinatura',
   '/settings-shop': 'Configurações da Barbearia',
   '/settings-services': 'Serviços',
   '/settings-website': 'Site de Agendamento',
@@ -74,7 +86,13 @@ const AuthenticatedLayout = () => {
       bottomNav={<BottomNav />}
       sidebar={<Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
     >
-      <Outlet />
+      <ErrorBoundary>
+        <React.Suspense fallback={<PageSkeleton />}>
+          <SubscriptionGuard>
+            <Outlet />
+          </SubscriptionGuard>
+        </React.Suspense>
+      </ErrorBoundary>
     </Layout>
   );
 };
@@ -108,6 +126,16 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, [setUser, setLoading]);
 
+  // Efeito para iniciar listener de subscription
+  useEffect(() => {
+    if (user) {
+      const unsubscribe = useSubscriptionStore.getState().startListening(user.uid);
+      return () => unsubscribe();
+    } else {
+      useSubscriptionStore.getState().setSubscription(null);
+    }
+  }, [user]);
+
   // Efeito para carregar settings e verificar onboarding
   useEffect(() => {
     if (user && !settingsLoaded) {
@@ -116,15 +144,19 @@ const App: React.FC = () => {
   }, [user, settingsLoaded, fetchSettings]);
 
   // Efeito para mostrar modal de onboarding quando settings carregarem
+  // Só mostra se a assinatura estiver ativa (não para pending_payment, etc)
+  const subscriptionStatus = useSubscriptionStore(s => s.subscription?.status);
+
   useEffect(() => {
     if (user && settingsLoaded) {
-      // Mostra modal apenas se onboardingCompleted não for true
-      const needsOnboarding = !shopInfo.onboardingCompleted;
+      // Só mostra onboarding se a subscription estiver ativa
+      const isActive = subscriptionStatus === 'active' || subscriptionStatus === 'demo_approved';
+      const needsOnboarding = isActive && !shopInfo.onboardingCompleted;
       setShowSetupModal(needsOnboarding);
     } else {
       setShowSetupModal(false);
     }
-  }, [user, settingsLoaded, shopInfo.onboardingCompleted]);
+  }, [user, settingsLoaded, shopInfo.onboardingCompleted, subscriptionStatus]);
 
   if (loading) {
     return (
@@ -152,32 +184,42 @@ const App: React.FC = () => {
         onClose={() => setShowSetupModal(false)}
       />
 
-      <HashRouter>
-        <Routes>
-          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-          <Route path="/booking" element={<BookingPage />} />
+      <ErrorBoundary>
+        <HashRouter>
+          <Routes>
+            <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+            <Route path="/booking" element={<BookingPage />} />
 
-          {/* Rotas Internas Protegidas */}
-          <Route element={<AuthenticatedLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/appointments" element={<AppointmentsPage />} />
-            <Route path="/agenda" element={<AgendaPage />} />
-            <Route path="/clients" element={<ClientsPage />} />
-            <Route path="/financial" element={<FinancialPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/settings-shop" element={<ShopSettingsPage />} />
-            <Route path="/settings-services" element={<ServicesSettingsPage />} />
-            <Route path="/settings-website" element={<WebsiteSettingsPage />} />
-            <Route path="/settings-app" element={<AppSettingsPage />} />
-            {/* Root Redirect */}
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-          </Route>
+            {/* Rotas Internas Protegidas */}
+            <Route element={<AuthenticatedLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/agenda" element={<AgendaPage />} />
+              <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/financial" element={<FinancialPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/billing" element={<BillingPage />} />
+              <Route path="/settings-shop" element={<ShopSettingsPage />} />
+              <Route path="/settings-services" element={<ServicesSettingsPage />} />
+              <Route path="/settings-website" element={<WebsiteSettingsPage />} />
+              <Route path="/settings-app" element={<AppSettingsPage />} />
+              {/* Root Redirect */}
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Route>
 
-          {/* Rota Pública da Barbearia (Slug) */}
-          <Route path="/:slug" element={<PublicShopPage />} />
-        </Routes>
-      </HashRouter>
+            {/* Rota Pública da Barbearia (Slug) */}
+            <Route
+              path="/:slug"
+              element={
+                <React.Suspense fallback={<PageSkeleton />}>
+                  <PublicShopPage />
+                </React.Suspense>
+              }
+            />
+          </Routes>
+        </HashRouter>
+      </ErrorBoundary>
     </div>
   );
 };

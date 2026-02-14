@@ -160,6 +160,8 @@ export interface PublicShopData {
     name: string;
     phone: string;
     address: string;
+    city?: string;
+    state?: string;
     logoUrl?: string;
     slug: string;
     theme: {
@@ -210,4 +212,46 @@ export interface AvailabilitySlot {
     barberName?: string;   // optional
     appointmentId: string; // Reference to the actual appointment
     createdAt?: any;       // Firebase Timestamp
+}
+
+// ============================================
+// SUBSCRIPTION & BILLING TYPES
+// ============================================
+
+export type SubscriptionStatus =
+    | 'pending_payment'   // Conta criada, aguardando 1º pagamento (PIX/Boleto)
+    | 'demo_approved'     // Admin aprovou demonstração (acesso sem pagamento)
+    | 'active'            // Assinatura ativa, pagamentos em dia
+    | 'overdue'           // Pagamento atrasado (dentro do grace period de 5 dias)
+    | 'blocked'           // Bloqueado por inadimplência (após grace period)
+    | 'cancelled';        // Cancelado pelo usuário ou admin
+
+export type PlanType = 'basic' | 'premium';
+export type BillingType = 'CREDIT_CARD' | 'PIX' | 'BOLETO';
+
+export interface SubscriptionData {
+    status: SubscriptionStatus;
+    plan: PlanType;
+    barberCount: number;
+    monthlyValue: number;
+    asaasCustomerId?: string;
+    asaasSubscriptionId?: string;
+    startDate?: any;
+    endDate?: any;
+    lastPaymentDate?: any;
+    nextPaymentDate?: any;
+    overdueStartDate?: any;
+    createdAt?: any;
+    updatedAt?: any;
+    approvedAt?: any;
+    approvedBy?: string;
+}
+
+export interface PaymentEvent {
+    id: string;
+    type: string;
+    timestamp: any;
+    asaasEventId: string;
+    amount?: number;
+    billingType?: string;
 }

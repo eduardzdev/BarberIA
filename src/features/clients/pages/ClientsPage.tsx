@@ -31,6 +31,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -250,9 +251,8 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onDelete, onSta
                 <button
                   type="button"
                   onClick={handleToggleVip}
-                  className={`w-full flex items-center px-4 py-2 text-sm hover:bg-slate-700 ${
-                    client.isVip ? 'text-amber-400' : 'text-slate-200'
-                  }`}
+                  className={`w-full flex items-center px-4 py-2 text-sm hover:bg-slate-700 ${client.isVip ? 'text-amber-400' : 'text-slate-200'
+                    }`}
                 >
                   <Icon name={client.isVip ? 'star-fill' : 'star'} className="w-4 h-4 mr-2" />
                   {client.isVip ? 'Remover VIP' : 'Tornar VIP'}
@@ -316,7 +316,7 @@ interface ClientFormProps {
 const ClientForm: React.FC<ClientFormProps> = ({ initialData, onClose }) => {
   const { createClient, updateClient } = useClients();
   const { success, error: showError } = useUI();
-  
+
   const [name, setName] = useState(initialData?.name || '');
   const [phone, setPhone] = useState(initialData?.phone || '');
   const [email, setEmail] = useState(initialData?.email || '');
@@ -491,9 +491,9 @@ export const ClientsPage: React.FC = () => {
     updateStatus,
     toggleVip,
   } = useClients({ autoFetch: true });
-  
+
   const { openModal, closeModal, isModalOpen, success, error: showError } = useUI();
-  
+
   // Estado local
   const [searchQuery, setSearchQuery] = useState('');
   type ClientFilter = 'all' | 'active' | 'vip' | 'inactive';
@@ -684,9 +684,8 @@ export const ClientsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleFilterToggle}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 text-sm text-slate-200 transition-colors ${
-                  isFiltered ? 'bg-violet-600/10 border-violet-500 text-violet-200' : 'bg-slate-800'
-                }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 text-sm text-slate-200 transition-colors ${isFiltered ? 'bg-violet-600/10 border-violet-500 text-violet-200' : 'bg-slate-800'
+                  }`}
                 aria-haspopup="true"
                 aria-expanded={filterMenuOpen}
                 aria-label="Filtrar clientes"
@@ -710,9 +709,8 @@ export const ClientsPage: React.FC = () => {
                         key={option.key}
                         type="button"
                         onClick={() => handleFilterSelect(option.key)}
-                        className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
-                          isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'
-                        } ${isFirst ? 'rounded-t-lg' : ''} ${isLast ? 'rounded-b-lg' : ''}`}
+                        className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'
+                          } ${isFirst ? 'rounded-t-lg' : ''} ${isLast ? 'rounded-b-lg' : ''}`}
                       >
                         <span className="flex-1 text-left pr-3">{option.label}</span>
                         {isActive && <Icon name="check" className="w-4 h-4 text-violet-300" />}
@@ -731,9 +729,8 @@ export const ClientsPage: React.FC = () => {
           </p>
 
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-slate-400 text-sm mt-2">Carregando clientes...</p>
+            <div className="pt-4">
+              <CardSkeleton count={5} />
             </div>
           ) : filteredClients.length > 0 ? (
             <div className="space-y-4">

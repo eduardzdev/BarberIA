@@ -5,6 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getPerformance } from "firebase/performance";
 import { getMessaging } from "firebase/messaging";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // ============================================
 // VALIDAÇÃO DE VARIÁVEIS DE AMBIENTE
@@ -90,6 +91,25 @@ if (import.meta.env.PROD) {
 }
 
 export { analytics, performance };
+
+// ============================================
+// CLOUD FUNCTIONS
+// ============================================
+
+// Cloud Functions com região São Paulo (southamerica-east1)
+export const functions = getFunctions(app, 'southamerica-east1');
+
+// Em desenvolvimento, conectar ao emulador APENAS se explicitamente configurado
+if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
+  try {
+    connectFunctionsEmulator(functions, 'localhost', 5001);
+    console.log('🔧 Functions Emulator conectado (localhost:5001)');
+  } catch {
+    // Emulador pode não estar rodando
+  }
+} else if (import.meta.env.DEV) {
+  console.log('☁️ Functions conectado à produção (southamerica-east1)');
+}
 
 // ============================================
 // DEBUG INFO (APENAS EM DESENVOLVIMENTO)

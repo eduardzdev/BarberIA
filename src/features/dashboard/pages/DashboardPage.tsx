@@ -28,6 +28,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
@@ -37,8 +38,8 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useClients } from '@/hooks/useClients';
 import { useFinancial } from '@/hooks/useFinancial';
 import { useUI } from '@/hooks/useUI';
-import { 
-  Appointment, 
+import {
+  Appointment,
   AppointmentStatus,
   ClientStatus,
   TransactionType
@@ -475,9 +476,9 @@ const NewPaymentForm: React.FC<NewPaymentFormProps> = ({ onClose }) => {
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Hooks
-  const { 
+  const {
     loading: appointmentsLoading,
     appointments,
     updateStatus,
@@ -487,9 +488,9 @@ export const DashboardPage: React.FC = () => {
   const { clients } = useClients({ autoFetch: true });
 
   const { transactions } = useFinancial({ autoFetch: 'current-month' });
-  
+
   const { openModal, closeModal, isModalOpen, success, error: showError } = useUI();
-  
+
   // Estado local
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
@@ -612,7 +613,7 @@ export const DashboardPage: React.FC = () => {
 
   const handleConfirmRemove = async () => {
     if (!selectedAppointment) return;
-    
+
     try {
       await updateStatus(selectedAppointment.id, AppointmentStatus.Cancelled);
       await fetchUpcoming();
@@ -626,7 +627,7 @@ export const DashboardPage: React.FC = () => {
 
   const handleConfirmComplete = async () => {
     if (!selectedAppointment) return;
-    
+
     try {
       await updateStatus(selectedAppointment.id, AppointmentStatus.Completed);
       await fetchUpcoming();
@@ -749,11 +750,10 @@ export const DashboardPage: React.FC = () => {
         <Card>
           <h3 className="font-bold text-slate-100 mb-1">Próximos Agendamentos</h3>
           <p className="text-sm text-slate-400 mb-4">Seus próximos compromissos</p>
-          
+
           {appointmentsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-slate-400 text-sm mt-2">Carregando...</p>
+            <div className="pt-4">
+              <CardSkeleton count={3} />
             </div>
           ) : futureAppointments.length > 0 ? (
             <>

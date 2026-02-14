@@ -24,6 +24,7 @@ import {
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '@/firebase';
 import { useAuthStore } from '@/store/auth.store';
+import { clearAllStoresCache } from '@/lib/cache-manager';
 import { loginSchema, registerSchema } from '@/lib/validations';
 import { seedInitialData } from '@/services/onboarding.service';
 import type { z } from 'zod';
@@ -130,6 +131,7 @@ export function useAuth() {
       clearError();
 
       await signOut(auth);
+      clearAllStoresCache();
       logoutStore();
 
       // Recarrega a página para limpar todo o estado
@@ -178,6 +180,7 @@ export function useAuth() {
       }
 
       await deleteUser(auth.currentUser);
+      clearAllStoresCache();
       logoutStore();
       window.location.reload();
     } catch (err: any) {
@@ -209,6 +212,7 @@ export function useAuth() {
       });
 
       await signOut(auth);
+      clearAllStoresCache();
       logoutStore();
       window.location.reload();
     } catch (err: any) {

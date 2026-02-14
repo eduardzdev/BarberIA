@@ -30,6 +30,7 @@
  */
 
 import React, { useState, useMemo, useEffect, useId } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -619,9 +620,8 @@ export const AppointmentsPage: React.FC = () => {
             Agendamentos do Dia ({formatDateDisplay(selectedDate)})
           </h3>
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-slate-400 text-sm mt-2">Carregando agendamentos...</p>
+            <div className="pt-4">
+              <CardSkeleton count={4} />
             </div>
           ) : filteredAppointments.length > 0 ? (
             <div className="space-y-4">
@@ -701,11 +701,10 @@ export const AppointmentsPage: React.FC = () => {
                 setSelectedStatus(option.value as AppointmentStatus | 'all');
                 closeModal('statusFilter');
               }}
-              className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                selectedStatus === option.value
+              className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${selectedStatus === option.value
                   ? 'bg-violet-600 text-white'
                   : 'bg-slate-700/50 text-slate-200 hover:bg-slate-700'
-              }`}
+                }`}
             >
               {option.label}
             </button>

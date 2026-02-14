@@ -8,11 +8,14 @@ import { Icon } from '@/components/Icon';
 import { useBookingStore } from '../stores/booking.store';
 import { EmbeddedBookingFlow } from '../components/EmbeddedBookingFlow';
 
+import { LocationModal } from '../components/LocationModal';
+
 export const PublicShopPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [shopData, setShopData] = useState<PublicShopData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   
   const { initBooking } = useBookingStore();
 
@@ -64,6 +67,16 @@ export const PublicShopPage: React.FC = () => {
 
   return (
     <PublicLayout theme={shopData.theme}>
+        <LocationModal 
+            isOpen={isMapOpen}
+            onClose={() => setIsMapOpen(false)}
+            address={shopData.address}
+            city={shopData.city}
+            state={shopData.state}
+            shopName={shopData.name}
+            theme={shopData.theme}
+        />
+
         {/* Navbar Simplificada */}
         <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
             <div className="max-w-4xl mx-auto flex justify-between items-center">
@@ -129,11 +142,9 @@ export const PublicShopPage: React.FC = () => {
                 <div className="space-y-4">
                     {/* Endereço */}
                     {shopData.address && (
-                        <a 
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shopData.address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors group"
+                        <button 
+                            onClick={() => setIsMapOpen(true)}
+                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors group w-full text-left"
                         >
                             <div className="bg-shop-primary/10 p-2 rounded-full text-shop-primary group-hover:bg-shop-primary group-hover:text-white transition-colors">
                                 <Icon name="map" className="w-5 h-5" />
@@ -143,7 +154,7 @@ export const PublicShopPage: React.FC = () => {
                                 <p className="text-slate-600 text-sm">{shopData.address}</p>
                             </div>
                             <Icon name="right" className="w-4 h-4 text-slate-400 ml-auto self-center" />
-                        </a>
+                        </button>
                     )}
 
                     {/* Contato e Redes */}

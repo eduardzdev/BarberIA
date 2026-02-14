@@ -10,6 +10,8 @@
  * - Cálculo de saldo, receitas e despesas
  * - Estatísticas financeiras
  * - Auto-loading inicial (opcional)
+ * - forceRefresh para bypass de cache
+ * - Helpers memoizados (useMemo)
  * 
  * Referências:
  * - ANALISE_COMPLETA_UI.md - Seção 6 (Financeiro)
@@ -39,11 +41,11 @@
  * ```
  */
 
-import { useEffect } from 'react';
-import { 
-  useFinancialStore, 
-  CreateTransactionData, 
-  UpdateTransactionData 
+import { useEffect, useMemo } from 'react';
+import {
+  useFinancialStore,
+  CreateTransactionData,
+  UpdateTransactionData
 } from '@/store/financial.store';
 import { TransactionType } from '@/types';
 
@@ -64,19 +66,25 @@ interface UseFinancialOptions {
    * Data final (para autoFetch: 'date-range')
    */
   endDate?: string;
+  /**
+   * Força refetch ignorando cache
+   */
+  forceRefresh?: boolean;
 }
 
 export function useFinancial(options: UseFinancialOptions = {}) {
-  const { 
-    autoFetch = false, 
-    startDate, 
-    endDate 
+  const {
+    autoFetch = false,
+    startDate,
+    endDate,
+    forceRefresh = false,
   } = options;
 
   // Estado do store
   const transactions = useFinancialStore((state) => state.transactions);
   const loading = useFinancialStore((state) => state.loading);
   const error = useFinancialStore((state) => state.error);
+  const dataLoaded = useFinancialStore((state) => state.dataLoaded);
 
   // Ações
   const fetchTransactions = useFinancialStore((state) => state.fetchTransactions);
@@ -86,21 +94,22 @@ export function useFinancial(options: UseFinancialOptions = {}) {
   const updateTransaction = useFinancialStore((state) => state.updateTransaction);
   const deleteTransaction = useFinancialStore((state) => state.deleteTransaction);
   const clearError = useFinancialStore((state) => state.clearError);
+  const clearCache = useFinancialStore((state) => state.clearCache);
 
-  // Auto-fetch ao montar
+  // Auto-fetch ao montar (usa cache a menos que forceRefresh)
   useEffect(() => {
     if (autoFetch === 'all') {
-      fetchTransactions();
+      fetchTransactions(forceRefresh);
     } else if (autoFetch === 'current-month') {
       const now = new Date();
-      fetchByMonth(now.getFullYear(), now.getMonth() + 1);
+      fetchByMonth(now.getFullYear(), now.getMonth() + 1, forceRefresh);
     } else if (autoFetch === 'date-range' && startDate && endDate) {
-      fetchByDateRange(startDate, endDate);
+      fetchByDateRange(startDate, endDate, forceRefresh);
     }
-  }, [autoFetch, startDate, endDate, fetchTransactions, fetchByDateRange, fetchByMonth]);
+  }, [autoFetch, startDate, endDate, forceRefresh, fetchTransactions, fetchByDateRange, fetchByMonth]);
 
-  // Helpers
-  const helpers = {
+  // Helpers memoizados para evitar re-renders desnecessários
+  const helpers = useMemo(() => ({
     /**
      * Busca transação por ID
      */
@@ -132,9 +141,9 @@ export function useFinancial(options: UseFinancialOptions = {}) {
     /**
      * Filtra transações por período
      */
-    filterByDateRange: (startDate: string, endDate: string) => {
-      return transactions.filter(t => 
-        t.date >= startDate && t.date <= endDate
+    filterByDateRange: (start: string, end: string) => {
+      return transactions.filter(t =>
+        t.date >= start && t.date <= end
       );
     },
 
@@ -157,8 +166,8 @@ export function useFinancial(options: UseFinancialOptions = {}) {
      */
     getBalance: () => {
       return transactions.reduce((balance, t) => {
-        return t.type === TransactionType.Income 
-          ? balance + t.amount 
+        return t.type === TransactionType.Income
+          ? balance + t.amount
           : balance - t.amount;
       }, 0);
     },
@@ -185,10 +194,14 @@ export function useFinancial(options: UseFinancialOptions = {}) {
      * Retorna estatísticas gerais
      */
     getStats: () => {
-      const income = helpers.getTotalIncome();
-      const expenses = helpers.getTotalExpenses();
+      const income = transactions
+        .filter(t => t.type === TransactionType.Income)
+        .reduce((sum, t) => sum + t.amount, 0);
+      const expenses = transactions
+        .filter(t => t.type === TransactionType.Expense)
+        .reduce((sum, t) => sum + t.amount, 0);
       const balance = income - expenses;
-      
+
       return {
         total: transactions.length,
         income,
@@ -207,7 +220,7 @@ export function useFinancial(options: UseFinancialOptions = {}) {
 
       transactions.forEach(t => {
         const current = categories.get(t.category) || { income: 0, expenses: 0, count: 0 };
-        
+
         if (t.type === TransactionType.Income) {
           current.income += t.amount;
         } else {
@@ -233,7 +246,7 @@ export function useFinancial(options: UseFinancialOptions = {}) {
 
       transactions.forEach(t => {
         const current = methods.get(t.paymentMethod) || { income: 0, expenses: 0, count: 0 };
-        
+
         if (t.type === TransactionType.Income) {
           current.income += t.amount;
         } else {
@@ -259,12 +272,14 @@ export function useFinancial(options: UseFinancialOptions = {}) {
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-      const monthTransactions = helpers.filterByDateRange(firstDay, lastDay);
-      
+      const monthTransactions = transactions.filter(t =>
+        t.date >= firstDay && t.date <= lastDay
+      );
+
       const income = monthTransactions
         .filter(t => t.type === TransactionType.Income)
         .reduce((sum, t) => sum + t.amount, 0);
-      
+
       const expenses = monthTransactions
         .filter(t => t.type === TransactionType.Expense)
         .reduce((sum, t) => sum + t.amount, 0);
@@ -284,13 +299,14 @@ export function useFinancial(options: UseFinancialOptions = {}) {
       const today = new Date().toISOString().split('T')[0];
       return transactions.filter(t => t.date === today);
     },
-  };
+  }), [transactions]);
 
   return {
     // Estado
     transactions,
     loading,
     error,
+    dataLoaded,
 
     // Ações
     fetchTransactions,
@@ -300,6 +316,7 @@ export function useFinancial(options: UseFinancialOptions = {}) {
     updateTransaction,
     deleteTransaction,
     clearError,
+    clearCache,
 
     // Helpers
     ...helpers,

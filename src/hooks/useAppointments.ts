@@ -61,15 +61,32 @@ interface UseAppointmentsOptions {
    * Data para filtro automático (apenas se autoFetch === 'date')
    */
   dateFilter?: string;
+
+  /**
+   * Força refetch ignorando cache
+   */
+  forceRefresh?: boolean;
+
+  /**
+   * Ativa listener em tempo real para agendamentos de hoje
+   */
+  enableTodayListener?: boolean;
 }
 
 export function useAppointments(options: UseAppointmentsOptions = {}) {
-  const { autoFetch = false, dateFilter } = options;
+  const {
+    autoFetch = false,
+    dateFilter,
+    forceRefresh = false,
+    enableTodayListener = false
+  } = options;
 
   // Estado do store
   const appointments = useAppointmentsStore((state) => state.appointments);
+  const todayAppointments = useAppointmentsStore((state) => state.todayAppointments);
   const loading = useAppointmentsStore((state) => state.loading);
   const error = useAppointmentsStore((state) => state.error);
+  const dataLoaded = useAppointmentsStore((state) => state.dataLoaded);
 
   // Ações
   const fetchAppointments = useAppointmentsStore((state) => state.fetchAppointments);
@@ -87,17 +104,32 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
   const lastVisibleDoc = useAppointmentsStore((state) => state.lastVisibleDoc);
   const fetchRecentAppointments = useAppointmentsStore((state) => state.fetchRecentAppointments);
   const fetchMoreAppointments = useAppointmentsStore((state) => state.fetchMoreAppointments);
+  const subscribeTodayAppointments = useAppointmentsStore((state) => state.subscribeTodayAppointments);
+  const unsubscribeTodayAppointments = useAppointmentsStore((state) => state.unsubscribeTodayAppointments);
+  const clearCache = useAppointmentsStore((state) => state.clearCache);
 
-  // Auto-fetch ao montar
+  // Auto-fetch ao montar (usa cache a menos que forceRefresh seja true)
   useEffect(() => {
     if (autoFetch === 'all') {
-      fetchAppointments();
+      fetchAppointments(forceRefresh);
     } else if (autoFetch === 'upcoming') {
-      fetchUpcoming();
+      fetchUpcoming(forceRefresh);
     } else if (autoFetch === 'date' && dateFilter) {
-      fetchAppointmentsByDate(dateFilter);
+      fetchAppointmentsByDate(dateFilter, forceRefresh);
     }
-  }, [autoFetch, dateFilter, fetchAppointments, fetchUpcoming, fetchAppointmentsByDate]);
+  }, [autoFetch, dateFilter, forceRefresh, fetchAppointments, fetchUpcoming, fetchAppointmentsByDate]);
+
+  // Real-time listener para agendamentos de hoje
+  useEffect(() => {
+    if (enableTodayListener) {
+      subscribeTodayAppointments();
+    }
+    return () => {
+      if (enableTodayListener) {
+        unsubscribeTodayAppointments();
+      }
+    };
+  }, [enableTodayListener, subscribeTodayAppointments, unsubscribeTodayAppointments]);
 
   // Helpers
   const helpers = {
@@ -260,10 +292,12 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
   return {
     // Estado
     appointments,
+    todayAppointments,
     loading,
     error,
     hasMoreData,
     estimatedTotal,
+    dataLoaded,
 
     // Ações
     fetchAppointments,
@@ -276,6 +310,11 @@ export function useAppointments(options: UseAppointmentsOptions = {}) {
     deleteAppointment,
     updateStatus,
     clearError,
+    clearCache,
+
+    // Real-time
+    subscribeTodayAppointments,
+    unsubscribeTodayAppointments,
 
     // Helpers
     ...helpers,

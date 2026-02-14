@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageSkeleton from '@/components/common/PageSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { useBarbershop } from '@/hooks/useBarbershop';
@@ -12,12 +13,12 @@ export const WebsiteSettingsPage: React.FC = () => {
     const { shopInfo, updateShopInfo, loading, barbers, businessHours } = useBarbershop({ autoFetch: true });
     const { user } = useAuthStore();
     const { success, error: showError } = useUI();
-    
+
     // Estados do formulário
     const [slug, setSlug] = useState('');
     const [isSlugAvailable, setIsSlugAvailable] = useState<boolean | null>(null);
     const [slugLoading, setSlugLoading] = useState(false);
-    
+
     const [theme, setTheme] = useState<{
         primaryColor: string;
         secondaryColor: string;
@@ -62,7 +63,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                     aboutImage: shopInfo.layout?.aboutImage || ''
                 }));
             }
-            
+
             // Defaults se vazio
             if (!shopInfo.layout?.heroTitle) {
                 setLayout(prev => ({ ...prev, heroTitle: `Bem-vindo à ${shopInfo.name}` }));
@@ -124,7 +125,7 @@ export const WebsiteSettingsPage: React.FC = () => {
             // 2. Publicar/Atualizar na collection public_shops (pública)
             // Aqui vamos agregar os dados necessários para a página pública
             // Precisamos buscar serviços e profissionais ativos
-            
+
             // Buscar serviços
             const servicesSnapshot = await getDocs(
                 query(collection(db, 'barbershops', user!.uid, 'services'), where('active', '==', true))
@@ -136,7 +137,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                 query(collection(db, 'barbershops', user!.uid, 'combos'), where('active', '==', true))
             );
             const combos = combosSnapshot.docs.map(d => ({ id: d.id, ...d.data(), type: 'combo' }));
-            
+
             const catalog = [...services, ...combos];
 
             // Montar objeto público otimizado
@@ -149,7 +150,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                 slug,
                 theme,
                 layout,
-                catalog, 
+                catalog,
                 team: barbers,     // Da store
                 businessHours,     // Da store
                 instagram: shopInfo?.instagram,
@@ -160,7 +161,7 @@ export const WebsiteSettingsPage: React.FC = () => {
 
             // Se o slug mudou, precisaríamos deletar o antigo, mas por segurança vamos apenas criar/sobrescrever o novo
             // TODO: Lidar com exclusão de slug antigo se necessário para liberar nome
-            
+
             await setDoc(doc(db, 'public_shops', slug), publicData);
 
             success('Site publicado com sucesso!');
@@ -180,7 +181,7 @@ export const WebsiteSettingsPage: React.FC = () => {
         setLayout(prev => ({ ...prev, aboutImage: url || '' }));
     };
 
-    if (loading) return <div>Carregando...</div>;
+    if (loading) return <PageSkeleton />;
 
     return (
         <div className="space-y-6 pb-20">
@@ -204,11 +205,10 @@ export const WebsiteSettingsPage: React.FC = () => {
                                 setSlug(val);
                             }}
                             placeholder="minha-barbearia"
-                            className={`flex-1 min-w-0 bg-slate-800 border rounded-r-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 ${
-                                isSlugAvailable === false ? 'border-red-500 focus:ring-red-500' : 
-                                isSlugAvailable === true ? 'border-green-500 focus:ring-green-500' : 
-                                'border-slate-700 focus:ring-violet-500'
-                            }`}
+                            className={`flex-1 min-w-0 bg-slate-800 border rounded-r-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 ${isSlugAvailable === false ? 'border-red-500 focus:ring-red-500' :
+                                    isSlugAvailable === true ? 'border-green-500 focus:ring-green-500' :
+                                        'border-slate-700 focus:ring-violet-500'
+                                }`}
                         />
                     </div>
                     {slugLoading && <p className="text-xs text-slate-400">Verificando disponibilidade...</p>}
@@ -255,7 +255,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                             />
                         </div>
                     </div>
-                    
+
                     {/* Mode Selector */}
                     <div className="col-span-1 md:col-span-2 border-t border-slate-800 pt-4 mt-2">
                         <label className="text-sm font-medium text-slate-300 mb-2 block">Tema de Fundo</label>
@@ -291,11 +291,11 @@ export const WebsiteSettingsPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Preview das Cores */}
                 <div className="mt-6 p-4 rounded-lg bg-slate-900 border border-slate-800">
                     <p className="text-sm text-slate-400 mb-2">Pré-visualização do Botão:</p>
-                    <button 
+                    <button
                         style={{ backgroundColor: theme.primaryColor, color: '#fff' }}
                         className="px-6 py-2 rounded-lg font-bold shadow-lg"
                     >
@@ -322,7 +322,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                 {layout.showHero && (
                     <div className="space-y-4">
                         {/* Imagem */}
-                        <div 
+                        <div
                             className="h-48 rounded-lg bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center cursor-pointer hover:border-violet-500 transition-colors relative overflow-hidden group"
                             onClick={() => setShowHeroImageModal(true)}
                         >

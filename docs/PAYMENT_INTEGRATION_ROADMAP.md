@@ -534,8 +534,8 @@ export const BillingPage: React.FC = () => {
 
 | Plano | Preço | Inclui |
 |-------|-------|--------|
-| **Básico** | R$29,90/mês | 1 barbeiro, agendamentos ilimitados, link público |
-| **Premium** | R$49,90/mês | 3 barbeiros, relatórios avançados, exportação Excel, suporte prioritário |
+| **Básico** | R$47,00/mês | 1 barbeiro, agendamentos ilimitados, link público |
+| **Premium** | R$87,00/mês | 3 barbeiros, relatórios avançados, exportação Excel, suporte prioritário |
 
 ---
 

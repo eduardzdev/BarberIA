@@ -52,5 +52,15 @@ playwright/.cache/
 build
 .cache
 
+# PWA Dev Build
+dev-dist/
+
+# Screenshots
+prints/
+
+# Firebase Functions build artifacts
+functions/lib/
+functions/node_modules/
+
 .gemini/
 gha-creds-*.json

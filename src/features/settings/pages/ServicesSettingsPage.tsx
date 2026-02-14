@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
@@ -10,30 +11,30 @@ import { ComboFormModal } from '../components/ComboFormModal';
 
 export const ServicesSettingsPage: React.FC = () => {
   // Store
-  const { 
-    services, 
-    combos, 
-    loading, 
-    fetchServices, 
-    fetchCombos, 
-    deleteService, 
-    deleteCombo, 
+  const {
+    services,
+    combos,
+    loading,
+    fetchServices,
+    fetchCombos,
+    deleteService,
+    deleteCombo,
     toggleServiceStatus,
     toggleComboStatus
   } = useServicesStore();
-  
+
   const { openModal, closeModal, isModalOpen, success, error: showError } = useUI();
 
   // State
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editingCombo, setEditingCombo] = useState<Combo | null>(null);
-  
+
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showComboModal, setShowComboModal] = useState(false);
-  
+
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteType, setDeleteType] = useState<'service' | 'combo'>('service');
-  
+
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
   // Fetch data on mount
@@ -133,7 +134,7 @@ export const ServicesSettingsPage: React.FC = () => {
   const sortedServices = sortItems(services);
   const sortedCombos = sortItems(combos);
 
-  const deletingItem = deletingId 
+  const deletingItem = deletingId
     ? (deleteType === 'service' ? services.find(s => s.id === deletingId) : combos.find(c => c.id === deletingId))
     : null;
 
@@ -154,9 +155,8 @@ export const ServicesSettingsPage: React.FC = () => {
           </div>
 
           {loading && services.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-slate-400 text-sm mt-2">Carregando serviços...</p>
+            <div className="pt-4">
+              <CardSkeleton count={3} />
             </div>
           ) : sortedServices.length > 0 ? (
             <div className="space-y-3">
@@ -212,7 +212,7 @@ export const ServicesSettingsPage: React.FC = () => {
                       >
                         <Icon name="dots" className="w-5 h-5" />
                       </button>
-                      
+
                       {menuOpenId === service.id && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setMenuOpenId(null)} />
@@ -268,7 +268,9 @@ export const ServicesSettingsPage: React.FC = () => {
           </div>
 
           {loading && combos.length === 0 ? (
-            <div className="text-center py-4 text-slate-400 text-sm">Carregando combos...</div>
+            <div className="pt-4">
+              <CardSkeleton count={2} />
+            </div>
           ) : sortedCombos.length > 0 ? (
             <div className="space-y-3">
               {sortedCombos.map(combo => {
@@ -323,7 +325,7 @@ export const ServicesSettingsPage: React.FC = () => {
                       >
                         <Icon name="dots" className="w-5 h-5" />
                       </button>
-                      
+
                       {menuOpenId === combo.id && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setMenuOpenId(null)} />
