@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '@/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FiLock, FiCreditCard, FiLoader, FiCopy, FiCheck } from 'react-icons/fi';
 import { calculatePrice, formatCurrency } from '../constants';
 import type { PlanType, BillingType } from '@/types';
@@ -55,6 +55,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ plan, barberCount, o
     // PIX state
     const [pixData, setPixData] = useState<PixPaymentData | null>(null);
     const [pixCopied, setPixCopied] = useState(false);
+
+    // Terms acceptance
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -326,10 +329,30 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ plan, barberCount, o
                 </div>
             )}
 
+            {/* Terms checkbox */}
+            <label className="flex items-start gap-2.5 cursor-pointer group">
+                <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    disabled={loading}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-600 bg-slate-700 text-violet-500 focus:ring-violet-500 focus:ring-offset-0 cursor-pointer"
+                />
+                <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
+                    Li e concordo com os{' '}
+                    <Link to="/termos" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline">
+                        Termos de Uso
+                    </Link>{' '}e a{' '}
+                    <Link to="/privacidade" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline">
+                        Política de Privacidade
+                    </Link>
+                </span>
+            </label>
+
             {/* Submit */}
             <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !acceptedTerms}
                 className="w-full bg-violet-600 text-white font-bold py-3 rounded-lg hover:bg-violet-700 transition-colors shadow-lg shadow-violet-600/20 disabled:bg-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
                 {loading ? (

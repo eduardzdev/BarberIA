@@ -1,9 +1,11 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
+// ... (omitting lines between imports and usage for brevity in thought, but tool needs exact match or separate edits. I will do separate edits to be safe or target carefully)
 import { LoginPage } from './features/auth';
 import { BookingPage } from './features/booking';
+import { TermsPage, PrivacyPage } from './features/legal';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -19,6 +21,7 @@ const ProfilePage = React.lazy(() => import('./features/profile').then(m => ({ d
 const HistoryPage = React.lazy(() => import('./features/history').then(m => ({ default: m.HistoryPage })));
 const PublicShopPage = React.lazy(() => import('@/features/public-shop').then(m => ({ default: m.PublicShopPage })));
 const BillingPage = React.lazy(() => import('./features/billing').then(m => ({ default: m.BillingPage })));
+const LandingPage = React.lazy(() => import('./features/landing').then(m => ({ default: m.LandingPage })));
 // Settings
 const ShopSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ShopSettingsPage })));
 const ServicesSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ServicesSettingsPage })));
@@ -185,10 +188,13 @@ const App: React.FC = () => {
       />
 
       <ErrorBoundary>
-        <HashRouter>
+        <BrowserRouter>
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/termos" element={<TermsPage />} />
+            <Route path="/privacidade" element={<PrivacyPage />} />
+            <Route path="/precos" element={<React.Suspense fallback={<PageSkeleton />}><LandingPage /></React.Suspense>} />
 
             {/* Rotas Internas Protegidas */}
             <Route element={<AuthenticatedLayout />}>
@@ -218,7 +224,7 @@ const App: React.FC = () => {
               }
             />
           </Routes>
-        </HashRouter>
+        </BrowserRouter>
       </ErrorBoundary>
     </div>
   );
