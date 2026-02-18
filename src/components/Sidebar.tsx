@@ -21,11 +21,11 @@ const mainNavItems = [
 ];
 
 const settingsNavItems = [
-    { path: '/profile', icon: 'user', label: 'Perfil da Empresa' },
-    { path: '/billing', icon: 'dollar', label: 'Meu Plano' },
-    { path: '/settings-shop', icon: 'scissors', label: 'Configurações da Barbearia' },
+    { path: '/profile', icon: 'user', label: 'Perfil da Barberia' },
+    { path: '/settings-shop', icon: 'scissors', label: 'Config. da Barbearia' },
     { path: '/settings-services', icon: 'receipt', label: 'Serviços' },
     { path: '/settings-website', icon: 'globe', label: 'Site de Agendamento' },
+    { path: '/billing', icon: 'dollar', label: 'Meu Plano' },
     { path: '/settings-app', icon: 'settings', label: 'Configurações' },
 ];
 
@@ -99,12 +99,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Profile */}
-                    <div className="p-4 border-b border-slate-700">
-                        <div className="w-12 h-12 bg-violet-600 rounded-full flex items-center justify-center font-bold text-white text-xl mb-2 shadow-lg shadow-violet-900/20">
-                            {initials}
+                    <div className="p-4 border-b border-slate-700 flex items-center space-x-3">
+                        {shopInfo?.logoUrl ? (
+                            <img
+                                src={shopInfo.logoUrl}
+                                alt={shopName}
+                                className="w-10 h-10 rounded-full object-cover shadow-lg shadow-violet-900/20 flex-shrink-0"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-violet-600 rounded-full flex items-center justify-center font-bold text-white text-base shadow-lg shadow-violet-900/20 flex-shrink-0">
+                                {initials}
+                            </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                            <p className="font-bold text-slate-100 truncate">{shopName}</p>
+                            <p className="text-xs text-slate-400 truncate leading-tight">{userEmail}</p>
                         </div>
-                        <p className="font-bold text-slate-100 truncate">{shopName}</p>
-                        <p className="text-sm text-slate-400 truncate">{userEmail}</p>
                     </div>
 
                     {/* Navigation */}

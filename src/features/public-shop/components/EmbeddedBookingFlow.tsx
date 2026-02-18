@@ -6,12 +6,12 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const EmbeddedBookingFlow: React.FC = () => {
-    const { 
-        shopData, 
-        selectedServices, 
-        toggleService, 
-        selectedBarber, 
-        selectBarber, 
+    const {
+        shopData,
+        selectedServices,
+        toggleService,
+        selectedBarber,
+        selectBarber,
         selectedDate,
         selectedTime,
         clientInfo,
@@ -21,12 +21,24 @@ export const EmbeddedBookingFlow: React.FC = () => {
         error
     } = useBookingStore();
 
-    const [whatsappMode, setWhatsappMode] = useState(true); // Se true, envia pro whats. Se false, salva no banco.
-    // O prompt pediu "confirmação via whatsapp", mas o sistema atual é firestore.
-    // Vou implementar Híbrido: Salva no banco E redireciona/gera link.
+    const [expandedCategories, setExpandedCategories] = useState<string[]>(['combos', 'cabelo']);
+
+    const toggleCategory = (category: string) => {
+        if (category === 'sobrancelhas') return; // Sobrancelhas não expande
+        setExpandedCategories(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
 
     if (!shopData) return null;
 
+    // Agrupamento de itens
+    const categoriesOrder: string[] = ['combos', 'cabelo', 'barba', 'especiais', 'sobrancelhas'];
+    const allItems = [...(shopData.catalog || []), ...(shopData.combos || [])];
+
+    // Total e validação
     const total = selectedServices.reduce((acc, s) => acc + (s.promotionalPrice || s.price), 0);
     const isValid = selectedServices.length > 0 && selectedBarber && selectedDate && selectedTime && clientInfo.name && clientInfo.phone;
 
@@ -40,14 +52,14 @@ export const EmbeddedBookingFlow: React.FC = () => {
             // 2. Gerar link do WhatsApp
             const servicesText = selectedServices.map(s => s.name).join(', ');
             const dateFormatted = format(new Date(selectedDate), "dd/MM/yyyy");
-            
+
             const message = encodeURIComponent(
                 `Olá, ${shopData.name}! Gostaria de confirmar meu agendamento:\n\n` +
-                `\ud83d\udc64 Cliente: ${clientInfo.name}\n` +
-                `\ud83c\udf39 Serviços: ${servicesText}\n` +
-                `\ud83d\udc88 Profissional: ${selectedBarber.name}\n` +
-                `\ud83d\udcc5 Data: ${dateFormatted} às ${selectedTime}\n` +
-                `\ud83d\udcb0 Total: R$ ${total.toFixed(2)}\n\n` +
+                `👤 Cliente: ${clientInfo.name}\n` +
+                `🌹 Serviços: ${servicesText}\n` +
+                `💈 Profissional: ${selectedBarber.name}\n` +
+                `📅 Data: ${dateFormatted} às ${selectedTime}\n` +
+                `💰 Total: R$ ${total.toFixed(2)}\n\n` +
                 `Agendamento realizado pelo link!\n` +
                 `Me comprometo à estar presente no horário a cima escolhido por mim.`
             );
@@ -62,46 +74,165 @@ export const EmbeddedBookingFlow: React.FC = () => {
         }
     };
 
+    // Ícones e labels de categoria
+    const categoryIcons: Record<string, string> = {
+        combos: 'star',
+        cabelo: 'scissors',
+        barba: 'face',
+        especiais: 'rocket',
+        sobrancelhas: 'palette'
+    };
+
+    const categoryLabels: Record<string, string> = {
+        combos: 'Combos Especiais',
+        cabelo: 'Cabelo',
+        barba: 'Barba',
+        especiais: 'Serviços Especiais',
+        sobrancelhas: 'Sobrancelhas'
+    };
+
     return (
         <div className="space-y-8 pb-32">
             {/* 1. Serviços */}
             <section className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-shop-primary text-white text-sm">1</span>
                     Escolha os Serviços
                 </h3>
-                <div className="space-y-3">
-                    {shopData.catalog.map(service => {
-                        const isSelected = selectedServices.some(s => s.id === service.id);
+
+                <div className="space-y-6">
+                    {categoriesOrder.map(category => {
+                        const items = allItems.filter(item => {
+                            const itemCat = item.category || (('serviceIds' in item) ? 'combos' : 'cabelo');
+                            return itemCat === category;
+                        });
+
+                        if (items.length === 0) return null;
+
+                        const isExpanded = expandedCategories.includes(category);
+                        const isSobrancelha = category === 'sobrancelhas';
+
                         return (
-                            <div 
-                                key={service.id}
-                                onClick={() => toggleService(service)}
-                                className={`
-                                    flex justify-between items-center p-4 rounded-xl cursor-pointer border transition-all
-                                    ${isSelected 
-                                        ? 'bg-shop-primary-dim border-shop-primary ring-1 ring-shop-primary' 
-                                        : 'bg-white border-slate-100 hover:border-slate-300'
-                                    }
-                                `}
-                            >
-                                <div className="flex items-center gap-4 min-w-0 flex-1">
-                                    <div className={`
-                                        w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0
-                                        ${isSelected ? 'border-shop-primary bg-shop-primary' : 'border-slate-300'}
-                                    `}>
-                                        {isSelected && <Icon name="check" className="w-4 h-4 text-white" />}
+                            <div key={category} className="space-y-2">
+                                {!isSobrancelha ? (
+                                    <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all bg-transparent">
+                                        {/* Category Header */}
+                                        <div
+                                            onClick={() => toggleCategory(category)}
+                                            className="flex justify-between items-center p-4 cursor-pointer bg-transparent text-slate-900 hover:bg-slate-50/50 transition-all font-bold group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-shop-primary/10 flex items-center justify-center group-hover:bg-shop-primary/20 transition-colors">
+                                                    <Icon name={categoryIcons[category]} className="w-6 h-6 text-shop-primary" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-lg">{categoryLabels[category]}</span>
+                                                    <span className="text-[10px] text-slate-400 font-normal uppercase tracking-widest mt-0.5">
+                                                        {isExpanded ? 'Toque para fechar' : 'Toque para abrir'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[10px] font-bold px-3 py-1.5 bg-shop-primary text-white rounded-full uppercase tracking-tighter shadow-sm shadow-shop-primary/20">
+                                                    {items.length} {items.length === 1 ? 'opção' : 'opções'}
+                                                </span>
+                                                <div className={`p-1 rounded-full bg-white/50 transition-transform duration-300 ${isExpanded ? 'rotate-0' : 'rotate-180'}`}>
+                                                    <Icon
+                                                        name={isExpanded ? 'up' : 'down'}
+                                                        className="w-4 h-4 text-slate-400"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Items List */}
+                                        {isExpanded && (
+                                            <div className="p-2 space-y-2 bg-transparent animate-fade-in border-t border-slate-100">
+                                                {items.map(item => {
+                                                    const isSelected = selectedServices.some(s => s.id === item.id);
+                                                    return (
+                                                        <div
+                                                            key={item.id}
+                                                            onClick={() => toggleService(item)}
+                                                            className={`
+                                                                flex justify-between items-center p-3 rounded-lg cursor-pointer border transition-all
+                                                                ${isSelected
+                                                                    ? 'bg-shop-primary-dim border-shop-primary'
+                                                                    : 'bg-white border-transparent hover:border-slate-200'
+                                                                }
+                                                            `}
+                                                        >
+                                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                                <div className={`
+                                                                    w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors
+                                                                    ${isSelected ? 'border-shop-primary bg-shop-primary' : 'border-slate-300'}
+                                                                `}>
+                                                                    {isSelected && <Icon name="check" className="w-3 h-3 text-white" />}
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="font-semibold text-slate-900 text-sm truncate">{item.name}</div>
+                                                                    <div className="text-xs text-slate-500">{item.duration} min</div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right ml-4">
+                                                                <span className="font-bold text-emerald-600 text-sm">
+                                                                    R$ {(item.promotionalPrice || item.price).toFixed(2)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="font-bold text-slate-900 truncate">{service.name}</h4>
-                                        <p className="text-sm text-slate-500">{service.duration} min</p>
+                                ) : (
+                                    /* Sobrancelhas - Direto */
+                                    <div className="space-y-3 pt-2">
+                                        <div className="flex items-center gap-3 px-1 mb-2">
+                                            <div className="w-8 h-8 rounded-lg bg-shop-primary-dim flex items-center justify-center">
+                                                <Icon name={categoryIcons[category]} className="w-5 h-5 text-shop-primary" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-widest">{categoryLabels[category]}</h4>
+                                                <span className="text-[10px] text-slate-400 font-normal uppercase tracking-wider">Seleção direta</span>
+                                            </div>
+                                        </div>
+                                        {items.map(item => {
+                                            const isSelected = selectedServices.some(s => s.id === item.id);
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    onClick={() => toggleService(item)}
+                                                    className={`
+                                                        flex justify-between items-center p-4 rounded-xl cursor-pointer border transition-all
+                                                        ${isSelected
+                                                            ? 'bg-shop-primary-dim border-shop-primary shadow-sm'
+                                                            : 'bg-transparent border-slate-200 hover:bg-slate-50/50'
+                                                        }
+                                                    `}
+                                                >
+                                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                        <div className={`
+                                                            w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                                                            ${isSelected ? 'border-shop-primary bg-shop-primary' : 'border-slate-300'}
+                                                        `}>
+                                                            {isSelected && <Icon name="check" className="w-4 h-4 text-white" />}
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="font-bold text-slate-900">{item.name}</div>
+                                                            <div className="text-xs text-slate-500">{item.duration} min</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right ml-4">
+                                                        <span className="font-bold text-emerald-600">
+                                                            R$ {(item.promotionalPrice || item.price).toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="font-bold text-shop-primary">
-                                        R$ {(service.promotionalPrice || service.price).toFixed(2)}
-                                    </span>
-                                </div>
+                                )}
                             </div>
                         );
                     })}
@@ -114,7 +245,7 @@ export const EmbeddedBookingFlow: React.FC = () => {
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-shop-primary text-white text-sm">2</span>
                     Escolha o Profissional
                 </h3>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide pt-2">
                     {shopData.team.map(barber => {
                         const isSelected = selectedBarber?.id === barber.id;
                         return (
@@ -122,23 +253,23 @@ export const EmbeddedBookingFlow: React.FC = () => {
                                 key={barber.id}
                                 onClick={() => selectBarber(barber)}
                                 className={`
-                                    flex flex-col items-center min-w-[100px] cursor-pointer transition-all
-                                    ${isSelected ? 'opacity-100 scale-105' : 'opacity-70 hover:opacity-100'}
+                                    flex flex-col items-center min-w-[110px] cursor-pointer transition-all
+                                    ${isSelected ? 'opacity-100 scale-105' : 'opacity-60 hover:opacity-100'}
                                 `}
                             >
                                 <div className={`
-                                    w-20 h-20 rounded-full border-4 mb-2 overflow-hidden transition-all
-                                    ${isSelected ? 'border-shop-primary shadow-lg' : 'border-transparent'}
+                                    w-24 h-24 rounded-full border-4 mb-3 overflow-hidden transition-all shadow-xl
+                                    ${isSelected ? 'border-shop-primary shadow-shop-primary/20' : 'border-transparent'}
                                 `}>
                                     {barber.avatarUrl ? (
                                         <img src={barber.avatarUrl} alt={barber.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
-                                            <Icon name="user" className="w-8 h-8" />
+                                            <Icon name="user" className="w-10 h-10" />
                                         </div>
                                     )}
                                 </div>
-                                <span className={`font-medium text-sm truncate w-full text-center px-1 ${isSelected ? 'text-shop-primary font-bold' : 'text-slate-600'}`}>
+                                <span className={`font-bold text-sm truncate w-full text-center px-1 ${isSelected ? 'text-shop-primary' : 'text-slate-600'}`}>
                                     {barber.name}
                                 </span>
                             </div>
@@ -163,24 +294,24 @@ export const EmbeddedBookingFlow: React.FC = () => {
                     <span className="flex items-center justify-center w-8 h-8 rounded-full bg-shop-primary text-white text-sm">4</span>
                     Seus Dados
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Seu Nome</label>
-                        <input 
-                            type="text" 
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Seu Nome</label>
+                        <input
+                            type="text"
                             value={clientInfo.name}
                             onChange={(e) => setClientInfo(e.target.value, clientInfo.phone)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-shop-primary transition-all"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-shop-primary transition-all placeholder:text-slate-400"
                             placeholder="Como gostaria de ser chamado?"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Seu Telefone (WhatsApp)</label>
-                        <input 
-                            type="tel" 
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Seu Telefone (WhatsApp)</label>
+                        <input
+                            type="tel"
                             value={clientInfo.phone}
                             onChange={(e) => setClientInfo(clientInfo.name, e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-shop-primary transition-all"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-shop-primary transition-all placeholder:text-slate-400"
                             placeholder="(00) 00000-0000"
                         />
                     </div>
@@ -188,36 +319,35 @@ export const EmbeddedBookingFlow: React.FC = () => {
             </section>
 
             {/* Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-40">
-                <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex justify-between w-full md:w-auto md:flex-col">
-                        <span className="text-slate-500 text-sm">Total a pagar</span>
-                        <span className="text-2xl font-bold text-shop-primary">R$ {total.toFixed(2)}</span>
-                    </div>
-                    
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!isValid || loading}
-                        className={`
-                            w-full md:w-auto px-8 py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all
-                            ${isValid && !loading
-                                ? 'bg-green-500 hover:bg-green-600 shadow-green-500/30 translate-y-0' 
-                                : 'bg-slate-300 cursor-not-allowed'
-                            }
-                        `}
-                    >
-                        {loading ? (
-                            <>
+            <div className="fixed bottom-6 left-0 right-0 px-4 z-50">
+                <div className="max-w-4xl mx-auto">
+                    <div className="bg-white/95 rounded-2xl md:rounded-full p-2 pl-6 md:pl-10 border-2 border-shop-primary shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex items-center justify-between gap-4 backdrop-blur-xl">
+                        <div className="flex flex-col">
+                            <span className="text-slate-900 text-[10px] font-bold uppercase tracking-[0.2em]">Total Estimado</span>
+                            <span className="text-2xl md:text-3xl font-black text-emerald-600 tracking-tighter">R$ {total.toFixed(2)}</span>
+                        </div>
+
+                        <button
+                            onClick={handleConfirm}
+                            disabled={!isValid || loading}
+                            className={`
+                                h-14 md:h-16 px-8 md:px-12 rounded-xl md:rounded-full font-bold text-white flex items-center justify-center gap-3 transition-all duration-300
+                                ${isValid && !loading
+                                    ? 'bg-green-500 hover:bg-green-600 active:bg-green-700 hover:scale-[1.02] shadow-lg shadow-green-500/40 active:scale-95'
+                                    : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                }
+                            `}
+                        >
+                            {loading ? (
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                Processando...
-                            </>
-                        ) : (
-                            <>
-                                <Icon name="whatsapp" className="w-6 h-6" />
-                                Confirmar no WhatsApp
-                            </>
-                        )}
-                    </button>
+                            ) : (
+                                <>
+                                    <Icon name="whatsapp" className={`w-5 h-5 ${isValid ? 'text-white' : 'text-slate-300'}`} />
+                                    <span className="text-sm md:text-base whitespace-nowrap">Confirmar no WhatsApp</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

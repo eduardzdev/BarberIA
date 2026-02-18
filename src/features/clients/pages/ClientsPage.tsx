@@ -41,25 +41,9 @@ import { Client, ClientStatus } from '@/types';
 import { CreateClientData, UpdateClientData } from '@/store/clients.store';
 import { formatPhone } from '@/lib/validations';
 import { ClientStatusSelector } from '@/features/clients/components/ClientStatusSelector';
+import { StatsCard } from '@/components/StatsCard';
 
 
-interface StatCardProps {
-  icon: string;
-  title: string;
-  value: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ icon, title, value }) => (
-  <Card className="!p-4">
-    <div className="flex items-center justify-between mb-2">
-      <div className="p-2 bg-transparent rounded-lg">
-        <Icon name={icon} className="w-5 h-5 text-violet-400" />
-      </div>
-    </div>
-    <p className="text-slate-400 text-sm">{title}</p>
-    <p className="text-2xl font-bold text-slate-100 mt-1">{value}</p>
-  </Card>
-);
 
 interface ClientCardProps {
   client: Client;
@@ -663,10 +647,10 @@ export const ClientsPage: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard icon="users" title="Total de Clientes" value={stats.total.toString()} />
-          <StatCard icon="check" title="Clientes Ativos" value={stats.active.toString()} />
-          <StatCard icon="star" title="Clientes VIP" value={vipClients.toString()} />
-          <StatCard
+          <StatsCard icon="users" title="Total de Clientes" value={stats.total.toString()} />
+          <StatsCard icon="check" title="Clientes Ativos" value={stats.active.toString()} />
+          <StatsCard icon="star" title="Clientes VIP" value={vipClients.toString()} />
+          <StatsCard
             icon="dollar"
             title="Receita Total"
             value={`R$ ${stats.totalRevenue.toFixed(0)}`}

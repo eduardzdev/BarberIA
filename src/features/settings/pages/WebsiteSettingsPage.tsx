@@ -8,6 +8,7 @@ import { ImageUploadModal } from '@/features/profile/components/ImageUploadModal
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useAuthStore } from '@/store/auth.store';
+import { Service, Combo } from '@/types';
 
 export const WebsiteSettingsPage: React.FC = () => {
     const { shopInfo, updateShopInfo, loading, barbers, businessHours } = useBarbershop({ autoFetch: true });
@@ -21,12 +22,10 @@ export const WebsiteSettingsPage: React.FC = () => {
 
     const [theme, setTheme] = useState<{
         primaryColor: string;
-        secondaryColor: string;
         font: string;
         mode: 'light' | 'dark';
     }>({
         primaryColor: '#7c3aed', // violet-600
-        secondaryColor: '#1e293b', // slate-800
         font: 'inter',
         mode: 'light'
     });
@@ -150,7 +149,8 @@ export const WebsiteSettingsPage: React.FC = () => {
                 slug,
                 theme,
                 layout,
-                catalog,
+                catalog: services as any as Service[],
+                combos: combos as any as Combo[],
                 team: barbers,     // Da store
                 businessHours,     // Da store
                 instagram: shopInfo?.instagram,
@@ -206,14 +206,48 @@ export const WebsiteSettingsPage: React.FC = () => {
                             }}
                             placeholder="minha-barbearia"
                             className={`flex-1 min-w-0 bg-slate-800 border rounded-r-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 ${isSlugAvailable === false ? 'border-red-500 focus:ring-red-500' :
-                                    isSlugAvailable === true ? 'border-green-500 focus:ring-green-500' :
-                                        'border-slate-700 focus:ring-violet-500'
+                                isSlugAvailable === true ? 'border-green-500 focus:ring-green-500' :
+                                    'border-slate-700 focus:ring-violet-500'
                                 }`}
                         />
                     </div>
                     {slugLoading && <p className="text-xs text-slate-400">Verificando disponibilidade...</p>}
                     {isSlugAvailable === true && <p className="text-xs text-green-400">Endereço disponível!</p>}
                     {isSlugAvailable === false && <p className="text-xs text-red-400">Este endereço já está em uso.</p>}
+                </div>
+
+                {/* Ações de Compartilhamento */}
+                <div className="flex gap-3 mt-6 pt-6 border-t border-slate-800">
+                    <button
+                        onClick={() => {
+                            const fullUrl = `https://obarberia.online/${slug}`;
+                            navigator.clipboard.writeText(fullUrl);
+                            success('Link copiado para a área de transferência!');
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 transition-all font-medium active:scale-95"
+                    >
+                        <Icon name="copy" className="w-5 h-5" />
+                        Copiar Link
+                    </button>
+                    <button
+                        onClick={() => {
+                            const fullUrl = `https://obarberia.online/${slug}`;
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: shopInfo?.name || 'Agendamento Online',
+                                    text: `Reserve seu horário na ${shopInfo?.name}!`,
+                                    url: fullUrl,
+                                }).catch(console.error);
+                            } else {
+                                // Fallback para WhatsApp se o computador não tiver navigator.share
+                                window.open(`https://wa.me/?text=${encodeURIComponent(`Reserve seu horário na ${shopInfo?.name}! ${fullUrl}`)}`, '_blank');
+                            }
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-violet-600/10 hover:bg-violet-600/20 text-violet-400 rounded-xl border border-violet-500/20 transition-all font-medium active:scale-95"
+                    >
+                        <Icon name="share" className="w-5 h-5" />
+                        Compartilhar
+                    </button>
                 </div>
             </Card>
 
@@ -234,23 +268,6 @@ export const WebsiteSettingsPage: React.FC = () => {
                                 type="text"
                                 value={theme.primaryColor}
                                 onChange={(e) => setTheme(prev => ({ ...prev, primaryColor: e.target.value }))}
-                                className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-slate-300 mb-2 block">Cor Secundária</label>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="color"
-                                value={theme.secondaryColor}
-                                onChange={(e) => setTheme(prev => ({ ...prev, secondaryColor: e.target.value }))}
-                                className="h-10 w-10 rounded cursor-pointer border-0 p-0"
-                            />
-                            <input
-                                type="text"
-                                value={theme.secondaryColor}
-                                onChange={(e) => setTheme(prev => ({ ...prev, secondaryColor: e.target.value }))}
                                 className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
                             />
                         </div>
@@ -404,7 +421,7 @@ export const WebsiteSettingsPage: React.FC = () => {
                 <button
                     onClick={handleSaveAndPublish}
                     disabled={publishing || slugLoading || !isSlugAvailable}
-                    className="w-full md:w-auto px-8 py-3 bg-violet-600 text-white font-bold rounded-lg shadow-lg hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full px-8 py-4 bg-violet-600 text-white font-bold rounded-xl shadow-lg hover:bg-violet-700 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
                 >
                     {publishing ? (
                         <>

@@ -129,19 +129,10 @@ export const ProfessionalFormModal: React.FC<ProfessionalFormModalProps> = ({
       // Firestore lança erro se passar undefined
       const barberData: any = {
         name: formData.name.trim(),
+        avatarUrl: formData.avatarUrl || '', // Enviar string vazia para remover
+        servicesNotProvided: formData.servicesNotProvided || [], // Enviar array vazio para limpar
+        unavailableHours: formData.unavailableHours || [], // Enviar array vazio para limpar
       };
-
-      if (formData.avatarUrl) {
-        barberData.avatarUrl = formData.avatarUrl;
-      }
-
-      if (formData.servicesNotProvided.length > 0) {
-        barberData.servicesNotProvided = formData.servicesNotProvided;
-      }
-
-      if (formData.unavailableHours.length > 0) {
-        barberData.unavailableHours = formData.unavailableHours;
-      }
 
       if (editingBarber) {
         await updateBarber(editingBarber.id, barberData);

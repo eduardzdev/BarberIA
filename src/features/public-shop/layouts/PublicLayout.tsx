@@ -16,7 +16,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, theme }) =
     const root = document.documentElement;
     root.style.setProperty('--shop-primary', theme.primaryColor);
     root.style.setProperty('--shop-secondary', theme.secondaryColor);
-    
+
     return () => {
       root.style.removeProperty('--shop-primary');
       root.style.removeProperty('--shop-secondary');
@@ -28,19 +28,8 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, theme }) =
   return (
     // Usa bg-black para preto puro no modo escuro
     <div className={`min-h-screen font-sans transition-colors duration-300 ${isDark ? 'bg-black text-slate-100 dark' : 'bg-slate-50 text-slate-900'}`}>
-        {/* Helper styles para usar as variáveis */}
-        <style>{`
-            .bg-shop-primary { background-color: var(--shop-primary); }
-            .text-shop-primary { color: var(--shop-primary); }
-            .border-shop-primary { border-color: var(--shop-primary); }
-            .hover\\:bg-shop-primary:hover { background-color: var(--shop-primary); }
-            
-            .bg-shop-secondary { background-color: var(--shop-secondary); }
-            .text-shop-secondary { color: var(--shop-secondary); }
-            
-            /* Fix for bg-opacity with css vars */
-            .bg-shop-primary-dim { background-color: color-mix(in srgb, var(--shop-primary), transparent 85%); }
-            
+      {/* Helper styles para usar as variáveis */}
+      <style>{`
             /* Dark mode overrides */
             /* Escaping slashes with double backslash for JS string -> CSS class selector */
             
@@ -67,6 +56,16 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, theme }) =
             .dark .bg-slate-900 { background-color: #000000 !important; }
             
             .dark nav { background-color: #000000 !important; border-color: #333333 !important; }
+
+            /* Shop dynamic theme classes - Defined last for priority */
+            .bg-shop-primary { background-color: var(--shop-primary) !important; }
+            .text-shop-primary { color: var(--shop-primary) !important; }
+            .border-shop-primary { border-color: var(--shop-primary) !important; }
+            .hover\\:bg-shop-primary:hover { background-color: var(--shop-primary) !important; }
+            .dark .border-shop-primary { border-color: var(--shop-primary) !important; }
+            .bg-shop-secondary { background-color: var(--shop-secondary) !important; }
+            .text-shop-secondary { color: var(--shop-secondary) !important; }
+            .bg-shop-primary-dim { background-color: color-mix(in srgb, var(--shop-primary), transparent 85%) !important; }
         `}</style>
       {children}
     </div>

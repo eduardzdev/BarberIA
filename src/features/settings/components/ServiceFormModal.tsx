@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Icon } from '@/components/Icon';
 import { useServicesStore } from '@/store/services.store';
 import { useUI } from '@/hooks/useUI';
-import { Service } from '@/types';
+import { Service, ServiceCategory } from '@/types';
 import { ImageUploadModal } from '@/features/profile/components/ImageUploadModal';
 
 interface ServiceFormModalProps {
@@ -27,6 +27,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
     duration: 60,
     price: 0,
     promotionalPrice: undefined as number | undefined,
+    category: '' as ServiceCategory,
     imageUrl: '',
     isPromotion: false,
     active: true,
@@ -42,6 +43,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
           duration: editingService.duration,
           price: editingService.price,
           promotionalPrice: editingService.promotionalPrice,
+          category: editingService.category,
           imageUrl: editingService.imageUrl || '',
           isPromotion: !!editingService.promotionalPrice,
           active: editingService.active ?? true,
@@ -52,6 +54,7 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
           duration: 60,
           price: 0,
           promotionalPrice: undefined,
+          category: '' as ServiceCategory,
           imageUrl: '',
           isPromotion: false,
           active: true,
@@ -73,6 +76,10 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       showError('Digite o nome do serviço');
       return;
     }
+    if (!formData.category) {
+      showError('Selecione uma categoria');
+      return;
+    }
     if (formData.price <= 0) {
       showError('Digite um preço válido');
       return;
@@ -87,18 +94,13 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       // Garantir que não enviamos undefined para o Firestore
       const data: any = {
         name: formData.name.trim(),
+        category: formData.category,
         duration: formData.duration,
         price: Number(formData.price),
         active: formData.active,
+        imageUrl: formData.imageUrl || '', // Enviar string vazia explicitamente para remover
+        promotionalPrice: (formData.isPromotion && formData.promotionalPrice) ? Number(formData.promotionalPrice) : null // Enviar null se não for promoção
       };
-
-      if (formData.isPromotion && formData.promotionalPrice) {
-        data.promotionalPrice = Number(formData.promotionalPrice);
-      }
-
-      if (formData.imageUrl) {
-        data.imageUrl = formData.imageUrl;
-      }
 
       if (editingService) {
         await updateService(editingService.id, data);
@@ -159,6 +161,23 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                 placeholder="Ex: Corte de Cabelo"
                 className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
+            </div>
+
+            {/* Categoria */}
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Categoria *</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as ServiceCategory })}
+                className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              >
+                <option value="" disabled>Selecione uma categoria</option>
+                <option value="cabelo">Cabelo (Cortado)</option>
+                <option value="barba">Barba</option>
+                <option value="especiais">Especiais (Química/Platinado)</option>
+                <option value="sobrancelhas">Sobrancelhas</option>
+                <option value="combos">Combos</option>
+              </select>
             </div>
 
             {/* Duração e Preço */}

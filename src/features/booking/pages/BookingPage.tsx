@@ -45,17 +45,17 @@ const MOCK_BARBERS: Barber[] = [
   {
     id: '1',
     name: 'André',
-    avatarUrl: 'https://i.pravatar.cc/150?img=12'
+    avatarUrl: ''
   },
   {
     id: '2',
     name: 'Bruno',
-    avatarUrl: 'https://i.pravatar.cc/150?img=13'
+    avatarUrl: ''
   },
   {
     id: '3',
     name: 'Carlos',
-    avatarUrl: 'https://i.pravatar.cc/150?img=14'
+    avatarUrl: ''
   },
 ];
 
@@ -291,11 +291,17 @@ export const BookingPage: React.FC = () => {
                   }
                 `}
               >
-                <img
-                  src={barber.avatarUrl}
-                  alt={barber.name}
-                  className="w-16 h-16 rounded-full mb-2 object-cover"
-                />
+                {barber.avatarUrl ? (
+                  <img
+                    src={barber.avatarUrl}
+                    alt={barber.name}
+                    className="w-16 h-16 rounded-full mb-2 object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full mb-2 bg-slate-800 flex items-center justify-center border-2 border-slate-700">
+                    <Icon name="user" className="w-8 h-8 text-slate-600" />
+                  </div>
+                )}
                 <p className="font-semibold text-slate-200 text-center">
                   {barber.name}
                 </p>

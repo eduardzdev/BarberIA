@@ -22,12 +22,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
   const { shopInfo, updateShopInfo } = useBarbershop();
   const [loading, setLoading] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
+  const [showCoverModal, setShowCoverModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: shopInfo?.name || '',
     username: shopInfo?.username || '',
-    description: shopInfo?.description || '',
     logoUrl: shopInfo?.logoUrl || '',
+    coverImageUrl: shopInfo?.coverImageUrl || '',
   });
 
   // Atualizar formData quando o modal abrir
@@ -36,8 +37,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
       setFormData({
         name: shopInfo.name || '',
         username: shopInfo.username || '',
-        description: shopInfo.description || '',
         logoUrl: shopInfo.logoUrl || '',
+        coverImageUrl: shopInfo.coverImageUrl || '',
       });
     }
   }, [isOpen, shopInfo]);
@@ -55,8 +56,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
       await updateShopInfo({
         name: formData.name,
         username: formData.username,
-        description: formData.description,
         logoUrl: formData.logoUrl,
+        coverImageUrl: formData.coverImageUrl,
       });
       onClose();
     } catch (error) {
@@ -69,6 +70,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
 
   const handleLogoSave = async (imageUrl: string | null) => {
     setFormData(prev => ({ ...prev, logoUrl: imageUrl || '' }));
+  };
+
+  const handleCoverSave = async (imageUrl: string | null) => {
+    setFormData(prev => ({ ...prev, coverImageUrl: imageUrl || '' }));
   };
 
   return (
@@ -88,22 +93,50 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
 
           {/* Content */}
           <div className="p-4 space-y-4">
-            {/* Logo */}
-            <div className="flex flex-col items-center">
-              <div className="relative">
-                <img
-                  src={formData.logoUrl || 'https://i.pravatar.cc/150?u=barbershop'}
-                  alt="Logo"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-slate-800"
-                />
+            {/* Cover and Logo Context */}
+            <div className="flex flex-col items-center space-y-4">
+              {/* Cover Image Preview */}
+              <div
+                className="w-full h-28 rounded-2xl bg-slate-800 overflow-hidden cursor-pointer transition-all relative group shadow-inner"
+                onClick={() => setShowCoverModal(true)}
+              >
+                {formData.coverImageUrl ? (
+                  <img src={formData.coverImageUrl} alt="Capa" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                ) : (
+                  <div className="w-full h-full bg-slate-800/50 flex items-center justify-center">
+                    <Icon name="image" className="w-8 h-8 text-slate-700" />
+                  </div>
+                )}
+
+                {/* Central Camera Icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-violet-600 text-white p-3.5 rounded-full shadow-2xl border-4 border-slate-900 group-hover:scale-110 transition-transform">
+                    <Icon name="camera" className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Logo / Profile Photo */}
+              <div className="relative -mt-10">
+                {formData.logoUrl ? (
+                  <img
+                    src={formData.logoUrl}
+                    alt="Logo"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-slate-900 shadow-xl"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full border-4 border-slate-900 shadow-xl bg-slate-800 flex items-center justify-center">
+                    <Icon name="user" className="w-10 h-10 text-slate-600" />
+                  </div>
+                )}
                 <button
                   onClick={() => setShowLogoModal(true)}
-                  className="absolute bottom-0 right-0 bg-violet-600 text-white p-2 rounded-full hover:bg-violet-700 transition-colors"
+                  className="absolute bottom-0 right-0 bg-violet-600 text-white p-2.5 rounded-full hover:bg-violet-700 transition-colors shadow-lg border-2 border-slate-900"
                 >
                   <Icon name="camera" className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mt-2">Clique no ícone para alterar a foto</p>
+              <p className="text-xs text-slate-500 font-medium">Clique nos elementos para editar as imagens</p>
             </div>
 
             {/* Nome */}
@@ -138,22 +171,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
               <p className="text-xs text-slate-500 mt-1">Apenas letras minúsculas e números, sem espaços</p>
             </div>
 
-            {/* Descrição */}
-            <div>
-              <label className="text-sm font-medium text-slate-300 block mb-2">
-                Sobre Nós
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Conte um pouco sobre sua barbearia..."
-                rows={4}
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Máximo 500 caracteres ({formData.description.length}/500)
-              </p>
-            </div>
+
           </div>
 
           {/* Footer */}
@@ -186,6 +204,16 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
         title="Alterar Logo"
         currentImage={formData.logoUrl}
         aspectRatio="square"
+      />
+
+      {/* Cover Upload Modal */}
+      <ImageUploadModal
+        isOpen={showCoverModal}
+        onClose={() => setShowCoverModal(false)}
+        onSave={handleCoverSave}
+        title="Alterar Capa"
+        currentImage={formData.coverImageUrl}
+        aspectRatio="cover"
       />
     </>
   );

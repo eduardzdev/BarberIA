@@ -34,41 +34,12 @@ import { Icon } from '@/components/Icon';
 import { Modal } from '@/components/Modal';
 import { useFinancial } from '@/hooks/useFinancial';
 import { useUI } from '@/hooks/useUI';
+import { StatsCard } from '@/components/StatsCard';
 import { Transaction, TransactionType } from '@/types';
 import { CreateTransactionData } from '@/store/financial.store';
 
 // ===== Sub-Components =====
 
-/**
- * StatCard - Card de estatística com trend
- */
-interface StatCardProps {
-  icon: string;
-  title: string;
-  value: string;
-  trend?: string;
-  trendUp?: boolean;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ icon, title, value, trend, trendUp }) => (
-  <Card className="!p-4">
-    <div className="flex items-start justify-between mb-2">
-      <div className="p-2 bg-violet-500/20 rounded-lg">
-        <Icon name={icon} className="w-5 h-5 text-violet-400" />
-      </div>
-    </div>
-    <p className="text-slate-400 text-sm">{title}</p>
-    <p className="text-2xl font-bold text-slate-100 mt-1">{value}</p>
-    {trend && (
-      <p className={`text-xs mt-2 flex items-center ${trendUp ? 'text-green-400' : trendUp === false ? 'text-red-400' : 'text-slate-400'}`}>
-        {trendUp !== undefined && (
-          <Icon name={trendUp ? 'trending-up' : 'trending-down'} className="w-3 h-3 mr-1" />
-        )}
-        {trend}
-      </p>
-    )}
-  </Card>
-);
 
 /**
  * PaymentMethodDistribution - Barra de distribuição por método de pagamento
@@ -412,29 +383,33 @@ export const FinancialPage: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <StatCard
+          <StatsCard
             icon="dollar"
             title="Receita Mensal"
             value={`R$ ${monthlyStats.income.toFixed(0)}`}
             trend={`${monthlyStats.count} transações`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="calendar"
             title="Receita Semanal"
             value={`R$ ${weeklyRevenue.toFixed(0)}`}
             trend={`${weeklyTransactions.length} transações`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="receipt"
             title="Receita Diária"
             value={`R$ ${todayRevenue.toFixed(0)}`}
             trend={`Hoje, ${now.toLocaleDateString('pt-BR')}`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="trendUp"
             title="Lucro Líquido"
             value={`R$ ${monthlyStats.balance.toFixed(0)}`}
             trend="Receita - Despesas"
+            trendDirection="neutral"
           />
         </div>
 

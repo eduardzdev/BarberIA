@@ -1,15 +1,15 @@
 import { create } from 'zustand';
-import { Service, Barber, PublicShopData } from '@/types';
+import { Service, Combo, Barber, PublicShopData } from '@/types';
 import { publicAppointmentService } from '../services/public-appointment.service';
 
 interface BookingState {
   // Dados da Barbearia (Contexto)
   shopData: PublicShopData | null;
-  
+
   // Estado da Seleção
   isOpen: boolean;
   step: number;
-  selectedServices: Service[];
+  selectedServices: (Service | Combo)[];
   selectedBarber: Barber | null;
   selectedDate: string; // YYYY-MM-DD
   selectedTime: string; // HH:MM
@@ -23,9 +23,9 @@ interface BookingState {
   error: string | null;
 
   // Actions
-  initBooking: (shopData: PublicShopData, initialService?: Service) => void;
+  initBooking: (shopData: PublicShopData, initialService?: Service | Combo) => void;
   closeBooking: () => void;
-  toggleService: (service: Service) => void;
+  toggleService: (service: Service | Combo) => void;
   selectBarber: (barber: Barber | null) => void;
   selectDateTime: (date: string, time: string) => void;
   setClientInfo: (name: string, phone: string) => void;
@@ -68,7 +68,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   toggleService: (service) => {
     const current = get().selectedServices;
     const exists = current.find(s => s.id === service.id);
-    
+
     if (exists) {
       set({ selectedServices: current.filter(s => s.id !== service.id) });
     } else {
@@ -111,7 +111,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   confirmBooking: async () => {
     const state = get();
     if (!state.shopData) throw new Error('Dados da barbearia não carregados');
-    
+
     set({ loading: true, error: null });
 
     try {
@@ -136,7 +136,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
       };
 
       const id = await publicAppointmentService.createAppointment(
-        state.shopData.ownerId, 
+        state.shopData.ownerId,
         appointmentData as any // Type assertion for extra fields
       );
 

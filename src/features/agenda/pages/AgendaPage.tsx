@@ -36,6 +36,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useUI } from '@/hooks/useUI';
 import { Appointment, AppointmentStatus } from '@/types';
 import { CreateAppointmentForm } from '@/features/appointments/components/CreateAppointmentForm';
+import { StatsCard } from '@/components/StatsCard';
 
 // ===== Sub-Components =====
 
@@ -117,11 +118,10 @@ const AppointmentActionMenu: React.FC<AppointmentActionMenuProps> = ({
           <button
             disabled={disableComplete}
             onClick={(event) => handleAction(event, onComplete)}
-            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-slate-600 ${
-              disableComplete
-                ? 'text-slate-500 cursor-not-allowed'
-                : 'text-green-400'
-            }`}
+            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-slate-600 ${disableComplete
+              ? 'text-slate-500 cursor-not-allowed'
+              : 'text-green-400'
+              }`}
           >
             <Icon name="check" className="w-4 h-4 mr-2" />
             Concluir
@@ -129,9 +129,8 @@ const AppointmentActionMenu: React.FC<AppointmentActionMenuProps> = ({
           <button
             disabled={disableCancel}
             onClick={(event) => handleAction(event, onCancel)}
-            className={`w-full flex items-center px-4 py-2 text-sm rounded-b-lg hover:bg-slate-600 ${
-              disableCancel ? 'text-slate-500 cursor-not-allowed' : 'text-red-400'
-            }`}
+            className={`w-full flex items-center px-4 py-2 text-sm rounded-b-lg hover:bg-slate-600 ${disableCancel ? 'text-slate-500 cursor-not-allowed' : 'text-red-400'
+              }`}
           >
             <Icon name="x" className="w-4 h-4 mr-2" />
             Cancelar
@@ -890,38 +889,27 @@ export const AgendaPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3 text-left">
-          <Card className="!p-3 flex items-center">
-            <Icon name="check" className="w-5 h-5 mr-3 text-violet-400" />
-            <div>
-              <p className="text-slate-400 text-xs">Agendamentos Confirmados</p>
-              <p className="font-bold text-xl text-slate-100">{confirmedCount}</p>
-            </div>
-          </Card>
-          <Card className="!p-3 flex items-center">
-            <Icon name="clock" className="w-5 h-5 mr-3 text-yellow-400" />
-            <div>
-              <p className="text-slate-400 text-xs">Aguardando Confirmação</p>
-              <p className="font-bold text-xl text-slate-100">{pendingCount}</p>
-            </div>
-          </Card>
-          <Card className="!p-3 flex items-center">
-            <Icon name="checkCircle" className="w-5 h-5 mr-3 text-green-400" />
-            <div>
-              <p className="text-slate-400 text-xs">Concluídos</p>
-              <p className="font-bold text-xl text-slate-100">{completedCount}</p>
-            </div>
-          </Card>
-          <Card className="!p-3 flex items-center">
-            <Icon name="calendar" className="w-5 h-5 mr-3 text-slate-400" />
-            <div>
-              <p className="text-slate-400 text-xs">Próximo Cliente</p>
-              <p className="font-bold text-xl text-slate-100">
-                {nextAppointment?.startTime || '--:--'}
-              </p>
-            </div>
-          </Card>
+        <div className="grid grid-cols-2 gap-3">
+          <StatsCard
+            icon="check"
+            title="Agendamentos Confirmados"
+            value={confirmedCount}
+          />
+          <StatsCard
+            icon="clock"
+            title="Aguardando Confirmação"
+            value={pendingCount}
+          />
+          <StatsCard
+            icon="checkCircle"
+            title="Concluídos"
+            value={completedCount}
+          />
+          <StatsCard
+            icon="calendar"
+            title="Próximo Cliente"
+            value={nextAppointment?.startTime || '--:--'}
+          />
         </div>
 
         {/* View Mode Selector */}
@@ -930,31 +918,28 @@ export const AgendaPage: React.FC = () => {
             <div className="flex-grow flex space-x-1 p-1 bg-slate-800/50 rounded-lg">
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`flex-1 text-center text-sm py-1.5 rounded-md ${
-                  viewMode === 'calendar'
-                    ? 'bg-slate-700 font-semibold text-slate-100'
-                    : 'text-slate-400'
-                }`}
+                className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'calendar'
+                  ? 'bg-slate-700 font-semibold text-slate-100'
+                  : 'text-slate-400'
+                  }`}
               >
                 Calendário
               </button>
               <button
                 onClick={() => setViewMode('kanban')}
-                className={`flex-1 text-center text-sm py-1.5 rounded-md ${
-                  viewMode === 'kanban'
-                    ? 'bg-slate-700 font-semibold text-slate-100'
-                    : 'text-slate-400'
-                }`}
+                className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'kanban'
+                  ? 'bg-slate-700 font-semibold text-slate-100'
+                  : 'text-slate-400'
+                  }`}
               >
                 Kanban
               </button>
               <button
                 onClick={() => setViewMode('timeline')}
-                className={`flex-1 text-center text-sm py-1.5 rounded-md ${
-                  viewMode === 'timeline'
-                    ? 'bg-slate-700 font-semibold text-slate-100'
-                    : 'text-slate-400'
-                }`}
+                className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'timeline'
+                  ? 'bg-slate-700 font-semibold text-slate-100'
+                  : 'text-slate-400'
+                  }`}
               >
                 Timeline
               </button>

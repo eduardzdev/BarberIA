@@ -8,9 +8,9 @@ import {
   BiCreditCard, BiReceipt, BiTrendingUp, BiMoney, BiFace, BiBrush, BiLayer,
   BiLogoWhatsapp, BiPencil, BiTrash, BiCheckCircle, BiLogoInstagram, BiLogoFacebook,
   BiLogoTiktok, BiMap, BiGlobe, BiPhone, BiPalette, BiKey, BiShieldQuarter,
-  BiHelpCircle, BiGift, BiCog, BiLogoGoogle, BiArchive, BiDoorOpen, BiWallet,
+  BiHelpCircle, BiSolidStar, BiGift, BiCog, BiLogoGoogle, BiArchive, BiDoorOpen, BiWallet,
   BiCamera, BiImage, BiUpload, BiBuildings, BiMapPin, BiCurrentLocation, BiParty,
-  BiRocket, BiInfoCircle, BiStore, BiErrorCircle
+  BiRocket, BiInfoCircle, BiStore, BiErrorCircle, BiCopy, BiShareAlt, BiHide
 } from 'react-icons/bi';
 
 interface IconProps {
@@ -31,6 +31,8 @@ const iconMap: { [key: string]: React.ElementType } = {
   plus: BiPlus,
   check: BiCheck,
   star: BiStar,
+  'star-fill': BiSolidStar,
+  down: BiChevronDown,
   dots: BiDotsVerticalRounded,
   x: BiX,
   close: BiX,
@@ -55,6 +57,7 @@ const iconMap: { [key: string]: React.ElementType } = {
   face: BiFace,
   brush: BiBrush,
   layer: BiLayer,
+  layers: BiLayer,
   whatsapp: BiLogoWhatsapp,
   door: BiDoorOpen,
   pencil: BiPencil,
@@ -87,6 +90,9 @@ const iconMap: { [key: string]: React.ElementType } = {
   store: BiStore,
   alert: BiErrorCircle,
   alertCircle: BiErrorCircle,
+  copy: BiCopy,
+  share: BiShareAlt,
+  eyeOff: BiHide,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, className, style }) => {

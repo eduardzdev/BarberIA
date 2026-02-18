@@ -124,37 +124,37 @@ export const MOCK_HISTORY = [
 
 export const MOCK_SERVICES: Service[] = [
     // Serviços Básicos
-    { id: 's1', name: 'Corte Simples', price: 40, duration: 30, icon: 'scissors', color: 'bg-blue-500/10 text-blue-400' },
-    { id: 's2', name: 'Barba', price: 30, duration: 30, icon: 'face', color: 'bg-green-500/10 text-green-400' },
-    { id: 's3', name: 'Sobrancelha', price: 20, duration: 15, icon: 'brush', color: 'bg-yellow-500/10 text-yellow-400' },
-    
+    { id: 's1', name: 'Corte Simples', price: 40, duration: 30, icon: 'scissors', color: 'bg-blue-500/10 text-blue-400', category: 'cabelo' },
+    { id: 's2', name: 'Barba', price: 30, duration: 30, icon: 'face', color: 'bg-green-500/10 text-green-400', category: 'barba' },
+    { id: 's3', name: 'Sobrancelha', price: 20, duration: 15, icon: 'brush', color: 'bg-yellow-500/10 text-yellow-400', category: 'sobrancelhas' },
+
     // Serviços Combinados
-    { id: 's7', name: 'Corte + Barba', price: 65, duration: 60, icon: 'layer', color: 'bg-indigo-500/10 text-indigo-400' },
-    
+    { id: 's7', name: 'Corte + Barba', price: 65, duration: 60, icon: 'layer', color: 'bg-indigo-500/10 text-indigo-400', category: 'combos' },
+
     // Serviços Especializados
-    { id: 's6', name: 'Corte Degradê', price: 50, duration: 40 },
-    { id: 's8', name: 'Degradê + Barba', price: 75, duration: 70 },
-    { id: 's10', name: 'Corte com Tratamento', price: 70, duration: 50 },
-    { id: 's11', name: 'Design de Sobrancelha', price: 25, duration: 20 },
-    
+    { id: 's6', name: 'Corte Degradê', price: 50, duration: 40, category: 'cabelo' },
+    { id: 's8', name: 'Degradê + Barba', price: 75, duration: 70, category: 'combos' },
+    { id: 's10', name: 'Corte com Tratamento', price: 70, duration: 50, category: 'cabelo' },
+    { id: 's11', name: 'Design de Sobrancelha', price: 25, duration: 20, category: 'sobrancelhas' },
+
     // Serviços Premium
-    { id: 's4', name: 'Platinado', price: 150, duration: 120 },
-    { id: 's5', name: 'Coloração', price: 120, duration: 90 },
-    { id: 's9', name: 'Pacote Premium (Corte + Barba + Sobrancelha)', price: 100, duration: 90 },
-    { id: 's12', name: 'Luzes e Mechas', price: 140, duration: 120 },
-    { id: 's13', name: 'Relaxamento Capilar', price: 180, duration: 150 },
+    { id: 's4', name: 'Platinado', price: 150, duration: 120, category: 'especiais' },
+    { id: 's5', name: 'Coloração', price: 120, duration: 90, category: 'especiais' },
+    { id: 's9', name: 'Pacote Premium (Corte + Barba + Sobrancelha)', price: 100, duration: 90, category: 'combos' },
+    { id: 's12', name: 'Luzes e Mechas', price: 140, duration: 120, category: 'especiais' },
+    { id: 's13', name: 'Relaxamento Capilar', price: 180, duration: 150, category: 'especiais' },
 ];
 
 
 export const MOCK_BARBERS: Barber[] = [
-    { id: 'b1', name: 'André', avatarUrl: 'https://i.pravatar.cc/150?u=andre' },
-    { id: 'b2', name: 'Bruno', avatarUrl: 'https://i.pravatar.cc/150?u=bruno' },
-    { id: 'b3', name: 'Carlos', avatarUrl: 'https://i.pravatar.cc/150?u=carlos' },
+    { id: 'b1', name: 'André', avatarUrl: '' },
+    { id: 'b2', name: 'Bruno', avatarUrl: '' },
+    { id: 'b3', name: 'Carlos', avatarUrl: '' },
 ];
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', type: NotificationType.NewAppointment, title: 'Novo Agendamento!', description: 'Carlos Lima agendou um Corte para 16:00.', time: '2 min atrás', read: false },
-  { id: 'n2', type: NotificationType.GoalAchieved, title: 'Meta Diária Batida!', description: 'Você atingiu R$ 450 de receita hoje. Parabéns!', time: '1h atrás', read: false },
-  { id: 'n3', type: NotificationType.NewAppointment, title: 'Novo Agendamento!', description: 'Roberto Costa agendou Corte + Barba para amanhã.', time: '3h atrás', read: true },
-  { id: 'n4', type: NotificationType.GoalAchieved, title: 'Meta Semanal Quase Lá!', description: 'Faltam apenas R$ 200 para sua meta semanal.', time: 'ontem', read: true },
+    { id: 'n1', type: NotificationType.NewAppointment, title: 'Novo Agendamento!', description: 'Carlos Lima agendou um Corte para 16:00.', time: '2 min atrás', read: false },
+    { id: 'n2', type: NotificationType.GoalAchieved, title: 'Meta Diária Batida!', description: 'Você atingiu R$ 450 de receita hoje. Parabéns!', time: '1h atrás', read: false },
+    { id: 'n3', type: NotificationType.NewAppointment, title: 'Novo Agendamento!', description: 'Roberto Costa agendou Corte + Barba para amanhã.', time: '3h atrás', read: true },
+    { id: 'n4', type: NotificationType.GoalAchieved, title: 'Meta Semanal Quase Lá!', description: 'Faltam apenas R$ 200 para sua meta semanal.', time: 'ontem', read: true },
 ];

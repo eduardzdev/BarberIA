@@ -38,6 +38,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useClients } from '@/hooks/useClients';
 import { useFinancial } from '@/hooks/useFinancial';
 import { useUI } from '@/hooks/useUI';
+import { StatsCard } from '@/components/StatsCard';
 import {
   Appointment,
   AppointmentStatus,
@@ -49,34 +50,6 @@ import { formatPhone } from '@/lib/validations';
 
 // ===== Sub-Components =====
 
-/**
- * StatCard - Card de estatística com ícone, valor e trend
- */
-interface StatCardProps {
-  icon: string;
-  title: string;
-  value: string;
-  trend?: string;
-  trendUp?: boolean;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ icon, title, value, trend, trendUp }) => (
-  <Card className="!p-4">
-    <div className="flex items-start justify-between mb-2">
-      <div className="p-2 bg-violet-500/20 rounded-lg">
-        <Icon name={icon} className="w-5 h-5 text-violet-400" />
-      </div>
-    </div>
-    <p className="text-slate-400 text-sm">{title}</p>
-    <p className="text-2xl font-bold text-slate-100 mt-1">{value}</p>
-    {trend && (
-      <p className={`text-xs mt-2 flex items-center ${trendUp ? 'text-green-400' : 'text-slate-400'}`}>
-        {trendUp && <Icon name="trending-up" className="w-3 h-3 mr-1" />}
-        {trend}
-      </p>
-    )}
-  </Card>
-);
 
 /**
  * QuickActionButton - Botão de ação rápida
@@ -687,29 +660,33 @@ export const DashboardPage: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <StatCard
+          <StatsCard
             icon="calendar"
             title="Agendamentos Hoje"
             value={todayAppointments.length.toString()}
             trend={`${appointmentStats.confirmed} confirmados`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="dollar"
             title="Receita Hoje"
             value={`R$ ${todayRevenue.toFixed(0)}`}
             trend={`${todayTransactionsCount} transações`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="users"
             title="Total de Clientes"
             value={clientStats.total.toString()}
             trend={`${clientStats.active} ativos`}
+            trendDirection="neutral"
           />
-          <StatCard
+          <StatsCard
             icon="clock"
             title="Próximo Cliente"
             value={nextAppointment?.startTime || '--:--'}
             trend={nextAppointment?.clientName || 'Nenhum agendamento'}
+            trendDirection="neutral"
           />
         </div>
 

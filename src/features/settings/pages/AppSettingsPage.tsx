@@ -53,7 +53,7 @@ const SettingsItem: React.FC<SettingsItemProps> = ({ icon, label, sublabel, onCl
   const iconColor = variant === 'danger' ? 'text-red-400' : 'text-slate-400';
 
   const content = (
-    <div className="flex items-center justify-between w-full py-3">
+    <div className="flex items-center justify-between w-full py-4 px-4 transition-all">
       <div className="flex items-center space-x-4">
         <Icon name={icon} className={`w-6 h-6 ${iconColor}`} />
         <div>
@@ -67,7 +67,7 @@ const SettingsItem: React.FC<SettingsItemProps> = ({ icon, label, sublabel, onCl
 
   if (onClick) {
     return (
-      <button onClick={onClick} className="w-full text-left hover:bg-slate-700/30 transition-colors">
+      <button onClick={onClick} className="w-full text-left hover:bg-slate-700/40 transition-all rounded-xl">
         {content}
       </button>
     );
@@ -86,14 +86,12 @@ interface ToggleSwitchProps {
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange }) => (
   <button
     onClick={() => onChange(!enabled)}
-    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${
-      enabled ? 'bg-violet-600' : 'bg-slate-600'
-    }`}
+    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${enabled ? 'bg-violet-600' : 'bg-slate-600'
+      }`}
   >
     <span
-      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${
-        enabled ? 'translate-x-6' : 'translate-x-1'
-      }`}
+      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
+        }`}
     />
   </button>
 );
@@ -186,23 +184,21 @@ export const AppSettingsPage: React.FC = () => {
       <div className="space-y-6 pb-6">
         {/* Appearance Section */}
         <Card>
-          <h2 className="font-bold text-slate-100 text-lg mb-2">Aparência</h2>
-          <SettingsItem icon="palette" label="Tema do Aplicativo">
+          <h2 className="font-bold text-slate-100 text-lg mb-2 px-4 pt-2">Aparência</h2>
+          <SettingsItem icon="palette" label="Tema do App">
             <div className="flex p-1 bg-slate-700 rounded-lg">
               <button
                 onClick={() => setTheme('light')}
                 disabled
-                className={`px-4 py-1 text-sm font-semibold rounded ${
-                  theme === 'light' ? 'bg-slate-500 text-white' : 'text-slate-400 opacity-50 cursor-not-allowed'
-                }`}
+                className={`px-4 py-1 text-sm font-semibold rounded ${theme === 'light' ? 'bg-slate-500 text-white' : 'text-slate-400 opacity-50 cursor-not-allowed'
+                  }`}
               >
                 Claro
               </button>
               <button
                 onClick={() => setTheme('dark')}
-                className={`px-4 py-1 text-sm font-semibold rounded ${
-                  theme === 'dark' ? 'bg-violet-600 text-white' : 'text-slate-400'
-                }`}
+                className={`px-4 py-1 text-sm font-semibold rounded ${theme === 'dark' ? 'bg-violet-600 text-white' : 'text-slate-400'
+                  }`}
               >
                 Escuro
               </button>
@@ -215,7 +211,7 @@ export const AppSettingsPage: React.FC = () => {
 
         {/* Account Section */}
         <Card>
-          <h2 className="font-bold text-slate-100 text-lg mb-2">Conta</h2>
+          <h2 className="font-bold text-slate-100 text-lg mb-2 px-4 pt-2">Conta</h2>
           <div className="divide-y divide-slate-700/50">
             <SettingsItem icon="user" label="Email" sublabel={user?.email || 'Não autenticado'} />
             <SettingsItem icon="key" label="Redefinir Senha" onClick={handleResetPassword} />
@@ -224,7 +220,7 @@ export const AppSettingsPage: React.FC = () => {
 
         {/* Notifications Section */}
         <Card>
-          <h2 className="font-bold text-slate-100 text-lg mb-2">Notificações</h2>
+          <h2 className="font-bold text-slate-100 text-lg mb-2 px-4 pt-2">Notificações</h2>
           <div className="divide-y divide-slate-700/50">
             <SettingsItem icon="calendar" label="Novos Agendamentos" sublabel="Notificações push">
               <ToggleSwitch
@@ -243,7 +239,7 @@ export const AppSettingsPage: React.FC = () => {
 
         {/* More Section */}
         <Card>
-          <h2 className="font-bold text-slate-100 text-lg mb-2">Mais</h2>
+          <h2 className="font-bold text-slate-100 text-lg mb-2 px-4 pt-2">Mais</h2>
           <div className="divide-y divide-slate-700/50">
             <SettingsItem icon="shield" label="Dados e Privacidade" onClick={handleOpenPrivacy} />
             <SettingsItem icon="help" label="Suporte" sublabel="Fale conosco via WhatsApp" onClick={handleOpenSupport} />
@@ -252,27 +248,27 @@ export const AppSettingsPage: React.FC = () => {
         </Card>
 
         {/* Danger Zone */}
-        <div className="border border-red-900/50 rounded-lg bg-red-950/10 overflow-hidden">
-          <div className="p-4 border-b border-red-900/30 bg-red-900/20">
+        <div className="border border-red-900/50 rounded-2xl bg-red-950/10 overflow-hidden shadow-lg shadow-red-900/5">
+          <div className="p-5 border-b border-red-900/30 bg-red-900/20">
             <h2 className="font-bold text-red-400 text-lg flex items-center gap-2">
-              <Icon name="warning" className="w-5 h-5" />
+              <Icon name="alert" className="w-5 h-5" />
               Zona de Perigo
             </h2>
           </div>
-          <div className="p-4 divide-y divide-red-900/30">
-            <SettingsItem 
-              icon="eyeOff" 
-              label="Desativar Conta" 
-              sublabel="Seus dados serão mantidos por 30 dias" 
+          <div className="divide-y divide-red-900/30">
+            <SettingsItem
+              icon="eyeOff"
+              label="Desativar Conta"
+              sublabel="Seus dados serão mantidos por 30 dias"
               variant="danger"
-              onClick={() => openModal('confirmDeactivate')} 
+              onClick={() => openModal('confirmDeactivate')}
             />
-            <SettingsItem 
-              icon="trash" 
-              label="Excluir Conta Permanentemente" 
-              sublabel="Ação irreversível. Todos os dados serão apagados." 
+            <SettingsItem
+              icon="trash"
+              label="Excluir Conta Permanentemente"
+              sublabel="Ação irreversível. Todos os dados serão apagados."
               variant="danger"
-              onClick={() => openModal('confirmDelete')} 
+              onClick={() => openModal('confirmDelete')}
             />
           </div>
         </div>

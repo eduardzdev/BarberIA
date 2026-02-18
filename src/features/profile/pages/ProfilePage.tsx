@@ -59,7 +59,7 @@ interface SettingsItemProps {
 
 const SettingsItem: React.FC<SettingsItemProps> = ({ icon, label, sublabel, onClick, children }) => {
   const content = (
-    <div className="flex items-center justify-between w-full py-3">
+    <div className="flex items-center justify-between w-full py-4 px-4 transition-all">
       <div className="flex items-center space-x-4">
         <Icon name={icon} className="w-6 h-6 text-slate-400" />
         <div>
@@ -73,12 +73,12 @@ const SettingsItem: React.FC<SettingsItemProps> = ({ icon, label, sublabel, onCl
 
   if (onClick) {
     return (
-      <button onClick={onClick} className="w-full text-left hover:bg-slate-700/30 transition-colors">
+      <button onClick={onClick} className="w-full text-left hover:bg-slate-700/40 transition-all rounded-xl">
         {content}
       </button>
     );
   }
-  return <div className="w-full">{content}</div>;
+  return <div className="w-full px-4">{content}</div>;
 };
 
 // ===== Main Component =====

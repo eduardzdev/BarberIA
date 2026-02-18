@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@/components/Icon';
 import { useServicesStore } from '@/store/services.store';
-import { Combo } from '@/types';
+import { Combo, ServiceCategory } from '@/types';
 import { useUI } from '@/hooks/useUI';
 import { ImageUploadModal } from '@/features/profile/components/ImageUploadModal';
 
@@ -30,6 +30,7 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
     price: 0,
     promotionalPrice: undefined as number | undefined,
     duration: 0,
+    category: 'combos' as ServiceCategory,
     imageUrl: '',
     isPromotion: false,
   });
@@ -43,6 +44,7 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
           price: editingCombo.price,
           promotionalPrice: editingCombo.promotionalPrice,
           duration: editingCombo.duration,
+          category: editingCombo.category || 'combos',
           imageUrl: editingCombo.imageUrl || '',
           isPromotion: !!editingCombo.promotionalPrice,
         });
@@ -53,6 +55,7 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
           price: 0,
           promotionalPrice: undefined,
           duration: 0,
+          category: 'combos' as ServiceCategory,
           imageUrl: '',
           isPromotion: false,
         });
@@ -85,8 +88,8 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || formData.serviceIds.length === 0) {
-      showError('Preencha o nome e selecione pelo menos um serviço');
+    if (!formData.name || formData.serviceIds.length === 0 || !formData.category) {
+      showError('Preencha o nome, categoria e selecione pelo menos um serviço');
       return;
     }
 
@@ -96,18 +99,13 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
       const comboData: any = {
         name: formData.name,
         serviceIds: formData.serviceIds,
+        category: formData.category,
         price: Number(formData.price),
         duration: Number(formData.duration),
         active: true,
+        imageUrl: formData.imageUrl || '', // Enviar string vazia explicitamente para remover
+        promotionalPrice: (formData.isPromotion && formData.promotionalPrice) ? Number(formData.promotionalPrice) : null // Enviar null se não for promoção
       };
-
-      if (formData.isPromotion && formData.promotionalPrice) {
-        comboData.promotionalPrice = Number(formData.promotionalPrice);
-      }
-
-      if (formData.imageUrl) {
-        comboData.imageUrl = formData.imageUrl;
-      }
 
       if (editingCombo) {
         await updateCombo(editingCombo.id, comboData);
@@ -172,6 +170,22 @@ export const ComboFormModal: React.FC<ComboFormModalProps> = ({
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
                 placeholder="Ex: Barba + Cabelo"
               />
+            </div>
+
+            {/* Categoria */}
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Categoria *</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as ServiceCategory })}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              >
+                <option value="combos">Combos</option>
+                <option value="cabelo">Cabelo (Cortado)</option>
+                <option value="barba">Barba</option>
+                <option value="especiais">Especiais (Química/Platinado)</option>
+                <option value="sobrancelhas">Sobrancelhas</option>
+              </select>
             </div>
 
             {/* Seleção de Serviços */}

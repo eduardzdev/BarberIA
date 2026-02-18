@@ -57,9 +57,13 @@ export interface Transaction {
     referenceType?: string;
 }
 
+export type ServiceCategory = 'combos' | 'cabelo' | 'barba' | 'especiais' | 'sobrancelhas';
+
 export interface Service {
     id: string;
     name: string;
+    category: ServiceCategory;
+    type?: 'service' | 'combo';
     price: number;
     promotionalPrice?: number;
     duration: number; // in minutes
@@ -72,6 +76,8 @@ export interface Service {
 export interface Combo {
     id: string;
     name: string;
+    category: ServiceCategory;
+    type?: 'service' | 'combo';
     serviceIds: string[];
     price: number;
     promotionalPrice?: number;
@@ -126,7 +132,7 @@ export interface Barbershop {
     slug?: string;
     theme?: {
         primaryColor: string;
-        secondaryColor: string;
+        secondaryColor?: string;
         font: string;
         mode?: 'light' | 'dark';
     };
@@ -166,7 +172,7 @@ export interface PublicShopData {
     slug: string;
     theme: {
         primaryColor: string;
-        secondaryColor: string;
+        secondaryColor?: string;
         font: string;
         mode?: 'light' | 'dark';
     };
@@ -180,6 +186,7 @@ export interface PublicShopData {
         aboutImage?: string;
     };
     catalog: Service[];
+    combos: Combo[];
     team: Barber[];
     businessHours: WorkingHours;
     instagram?: string;

@@ -21,6 +21,7 @@ import { Modal } from '@/components/Modal';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useServices } from '@/hooks/useServices';
 import { AppointmentStatus } from '@/types';
+import { StatsCard } from '@/components/StatsCard';
 import {
   endOfDay,
   endOfMonth,
@@ -33,22 +34,6 @@ import {
 } from 'date-fns';
 import { exportFilteredHistory } from '@/services/export.service';
 
-/**
- * StatCard - Card de estatística reutilizável
- */
-interface StatCardProps {
-  icon: string;
-  title: string;
-  value: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ icon, title, value }) => (
-  <Card>
-    <Icon name={icon} className="w-6 h-6 text-violet-400 mb-2" />
-    <p className="text-2xl font-bold text-slate-100">{value}</p>
-    <p className="text-xs text-slate-400 mt-1">{title}</p>
-  </Card>
-);
 
 /**
  * HistoryDetailCard - Card detalhado de atendimento no histórico
@@ -588,24 +573,23 @@ export const HistoryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4">
-        <StatCard
+        <StatsCard
           icon="scissors"
           title="Serviços Realizados"
           value={stats.servicesCount.toString()}
         />
-        <StatCard
+        <StatsCard
           icon="dollar"
           title="Receita Total"
           value={`R$ ${stats.totalRevenue.toFixed(0)}`}
         />
-        <StatCard
+        <StatsCard
           icon="clock"
           title="Ticket Médio"
           value={`R$ ${stats.averageTicket.toFixed(0)}`}
         />
-        <StatCard
+        <StatsCard
           icon="user"
           title="Clientes Atendidos"
           value={new Set(filteredAppointments.map(a => a.clientName)).size.toString()}

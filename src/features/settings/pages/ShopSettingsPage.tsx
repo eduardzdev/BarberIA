@@ -90,14 +90,12 @@ interface ToggleSwitchProps {
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange }) => (
   <button
     onClick={() => onChange(!enabled)}
-    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${
-      enabled ? 'bg-violet-600' : 'bg-slate-600'
-    }`}
+    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${enabled ? 'bg-violet-600' : 'bg-slate-600'
+      }`}
   >
     <span
-      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${
-        enabled ? 'translate-x-6' : 'translate-x-1'
-      }`}
+      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
+        }`}
     />
   </button>
 );
@@ -168,7 +166,7 @@ export const ShopSettingsPage: React.FC = () => {
 
   const handlePaymentMethodToggle = async (method: 'pix' | 'cash' | 'card', enabled: boolean) => {
     const methodName = method === 'pix' ? 'Pix' : method === 'cash' ? 'Dinheiro' : 'Cartão';
-    
+
     try {
       if (enabled) {
         await addPaymentMethod(methodName);
@@ -212,11 +210,17 @@ export const ShopSettingsPage: React.FC = () => {
                   className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg"
                 >
                   <div className="flex items-center space-x-3">
-                    <img
-                      src={barber.avatarUrl || `https://i.pravatar.cc/150?u=${barber.id}`}
-                      alt={barber.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    {barber.avatarUrl ? (
+                      <img
+                        src={barber.avatarUrl}
+                        alt={barber.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
+                        <Icon name="user" className="w-6 h-6 text-slate-500" />
+                      </div>
+                    )}
                     <p className="font-semibold text-slate-200">{barber.name}</p>
                   </div>
                   <div className="flex space-x-2">
@@ -260,18 +264,18 @@ export const ShopSettingsPage: React.FC = () => {
               // Encontrar a configuração específica para este dia
               // Se não existir schedule (dados antigos), fallback para lógica anterior ou fechado
               const daySchedule = businessHours?.schedule?.find(d => d.dayOfWeek === index);
-              
+
               // Retrocompatibilidade: Se não houver schedule, tenta usar daysOfWeek antigo ou assume fechado
               const isOpen = daySchedule ? daySchedule.isOpen : false;
-              
+
               const hours = isOpen && daySchedule
                 ? `${daySchedule.startTime} - ${daySchedule.endTime}`
                 : 'Fechado';
-                
+
               const lunchInfo = isOpen && daySchedule?.hasLunchBreak
                 ? ` (Almoço: ${daySchedule.lunchStart} - ${addMinutes(daySchedule.lunchStart, daySchedule.lunchDuration)})`
                 : '';
-              
+
               return (
                 <li key={index} className="flex flex-col border-b border-slate-800/50 last:border-0 pb-2 last:pb-0">
                   <div className="flex justify-between">
