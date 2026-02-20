@@ -46,6 +46,8 @@ import {
   TransactionType
 } from '@/types';
 import { CreateAppointmentForm } from '@/features/appointments/components/CreateAppointmentForm';
+import { ClientForm } from '@/features/clients/components/ClientForm';
+import { TransactionForm } from '@/features/financial/components/TransactionForm';
 import { formatPhone } from '@/lib/validations';
 
 // ===== Sub-Components =====
@@ -215,236 +217,6 @@ const ConfirmationModalContent: React.FC<ConfirmationModalContentProps> = ({
   </div>
 );
 
-/**
- * NewClientForm - Formulário inline para criar cliente
- */
-interface NewClientFormProps {
-  onClose: () => void;
-}
-
-const NewClientForm: React.FC<NewClientFormProps> = ({ onClose }) => {
-  const { createClient } = useClients();
-  const { success, error: showError, closeModal } = useUI();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!name.trim() || !phone.trim() || !email.trim()) {
-      showError('Preencha todos os campos obrigatórios');
-      return;
-    }
-
-    const formattedPhone = formatPhone(phone);
-    const digitsOnly = formattedPhone.replace(/\D/g, '');
-    if (digitsOnly.length < 10 || digitsOnly.length > 11) {
-      showError('Informe um telefone válido no formato (11) 99999-9999');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await createClient({
-        name: name.trim(),
-        phone: formattedPhone,
-        email: email.trim(),
-        notes: ''
-      });
-      success('Cliente cadastrado com sucesso!');
-      setName('');
-      setPhone('');
-      setEmail('');
-      closeModal('newClient');
-      onClose();
-    } catch (err) {
-      showError('Erro ao cadastrar cliente');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-slate-400">Nome *</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nome completo"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Telefone *</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="(11) 99999-9999"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Email *</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="cliente@email.com"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div className="flex space-x-3 pt-4">
-        <button
-          onClick={onClose}
-          disabled={loading}
-          className="flex-1 bg-slate-700 text-slate-200 font-bold py-2 rounded-lg hover:bg-slate-600 disabled:bg-slate-800"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="flex-1 bg-violet-600 text-white font-bold py-2 rounded-lg hover:bg-violet-700 disabled:bg-slate-500"
-        >
-          {loading ? 'Salvando...' : 'Cadastrar'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-/**
- * NewPaymentForm - Formulário inline para registrar transação
- */
-interface NewPaymentFormProps {
-  onClose: () => void;
-}
-
-const NewPaymentForm: React.FC<NewPaymentFormProps> = ({ onClose }) => {
-  const { createTransaction } = useFinancial();
-  const { success, error: showError } = useUI();
-  const [type, setType] = useState<TransactionType>(TransactionType.Income);
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Serviços');
-  const [paymentMethod, setPaymentMethod] = useState('Dinheiro');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!description.trim() || !amount || parseFloat(amount) <= 0) {
-      showError('Preencha todos os campos corretamente');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const now = new Date();
-      const date = now.toISOString().split('T')[0];
-      const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-      await createTransaction({
-        type,
-        description: description.trim(),
-        category,
-        amount: parseFloat(amount),
-        date,
-        time,
-        paymentMethod
-      });
-
-      success('Transação registrada com sucesso!');
-      onClose();
-    } catch (err) {
-      showError('Erro ao registrar transação');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-slate-400">Tipo *</label>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as TransactionType)}
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        >
-          <option value={TransactionType.Income}>Receita</option>
-          <option value={TransactionType.Expense}>Despesa</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-slate-400">Descrição *</label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Ex: Corte de cabelo - João Silva"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-slate-400">Valor (R$) *</label>
-        <input
-          type="number"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-slate-400">Categoria *</label>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Ex: Serviços, Produtos"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-slate-400">Método de Pagamento *</label>
-        <select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        >
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão de Crédito">Cartão de Crédito</option>
-          <option value="Cartão de Débito">Cartão de Débito</option>
-          <option value="Pix">Pix</option>
-        </select>
-      </div>
-
-      <div className="flex space-x-3 pt-4">
-        <button
-          onClick={onClose}
-          disabled={loading}
-          className="flex-1 bg-slate-700 text-slate-200 font-bold py-2 rounded-lg hover:bg-slate-600 disabled:bg-slate-800"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="flex-1 bg-violet-600 text-white font-bold py-2 rounded-lg hover:bg-violet-700 disabled:bg-slate-500"
-        >
-          {loading ? 'Salvando...' : 'Registrar'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
 // ===== Main Component =====
 
 export const DashboardPage: React.FC = () => {
@@ -479,7 +251,16 @@ export const DashboardPage: React.FC = () => {
   }).format(today);
 
   // Estatísticas - Otimizado com useMemo
-  const { todayAppointments, futureAppointments, appointmentStats, nextAppointment, todayRevenue, todayTransactionsCount } = useMemo(() => {
+  const {
+    todayAppointments,
+    futureAppointments,
+    appointmentStats,
+    nextAppointment,
+    todayRevenue,
+    todayTransactionsCount,
+    todayConfirmed,
+    todayCompleted
+  } = useMemo(() => {
     const now = Date.now();
     const todayIso = new Date().toISOString().split('T')[0];
 
@@ -552,7 +333,9 @@ export const DashboardPage: React.FC = () => {
       appointmentStats,
       nextAppointment: next,
       todayRevenue,
-      todayTransactionsCount: todayIncomeTransactions.length
+      todayTransactionsCount: todayIncomeTransactions.length,
+      todayConfirmed: appointments.filter(app => app.date === todayIso && app.status === AppointmentStatus.Confirmed).length,
+      todayCompleted: appointments.filter(app => app.date === todayIso && app.status === AppointmentStatus.Completed).length
     };
   }, [appointments, transactions]);
 
@@ -663,8 +446,8 @@ export const DashboardPage: React.FC = () => {
           <StatsCard
             icon="calendar"
             title="Agendamentos Hoje"
-            value={todayAppointments.length.toString()}
-            trend={`${appointmentStats.confirmed} confirmados`}
+            value={todayConfirmed.toString()}
+            trend={`${todayCompleted} realizados`}
             trendDirection="neutral"
           />
           <StatsCard
@@ -767,10 +550,10 @@ export const DashboardPage: React.FC = () => {
             </div>
           )}
         </Card>
-      </div>
+      </div >
 
       {/* Modals */}
-      <Modal
+      < Modal
         isOpen={isModalOpen('confirmRemove')}
         onClose={() => closeModal('confirmRemove')}
         title="Confirmar Cancelamento"
@@ -781,7 +564,7 @@ export const DashboardPage: React.FC = () => {
           onConfirm={handleConfirmRemove}
           onCancel={() => closeModal('confirmRemove')}
         />
-      </Modal>
+      </Modal >
 
       <Modal
         isOpen={isModalOpen('confirmComplete')}
@@ -847,7 +630,7 @@ export const DashboardPage: React.FC = () => {
         onClose={() => closeModal('newClient')}
         title="Cadastrar Novo Cliente"
       >
-        <NewClientForm onClose={() => closeModal('newClient')} />
+        <ClientForm onClose={() => closeModal('newClient')} />
       </Modal>
 
       <Modal
@@ -855,7 +638,7 @@ export const DashboardPage: React.FC = () => {
         onClose={() => closeModal('newPayment')}
         title="Registrar Transação"
       >
-        <NewPaymentForm onClose={() => closeModal('newPayment')} />
+        <TransactionForm onClose={() => closeModal('newPayment')} />
       </Modal>
 
       {/* Modal de Detalhes */}

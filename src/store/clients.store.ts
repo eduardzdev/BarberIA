@@ -123,10 +123,6 @@ export const useClientsStore = create<ClientsState>()(
             throw new Error('Telefone é obrigatório');
           }
 
-          if (!data.email) {
-            throw new Error('Email é obrigatório');
-          }
-
           // Gera iniciais do avatar
           const avatarInitials = data.name
             .split(' ')

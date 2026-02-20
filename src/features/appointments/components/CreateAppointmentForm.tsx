@@ -7,6 +7,7 @@ import { useUI } from '@/hooks/useUI';
 import { AppointmentStatus } from '@/types';
 import { formatPhone } from '@/lib/validations';
 import { getAvailableHalfHourSlots, isHalfHourSlot } from '@/constants';
+import { Icon } from '@/components/Icon';
 
 interface CreateAppointmentFormProps {
   onClose: () => void;
@@ -53,7 +54,7 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
     defaultValues?.date || new Date().toISOString().split('T')[0]
   );
   const [startTime, setStartTime] = useState(defaultValues?.startTime || '');
-  const [duration, setDuration] = useState(defaultValues?.duration || 60);
+  const [duration, setDuration] = useState(defaultValues?.duration || 30);
   const [notes, setNotes] = useState(defaultValues?.notes || '');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<AppointmentStatus>(
@@ -161,8 +162,8 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!clientName.trim() || !clientPhone.trim() || !date || !startTime || selectedServices.length === 0) {
-      showError('Preencha todos os campos obrigatórios');
+    if (!clientName.trim() || !date || !startTime || selectedServices.length === 0) {
+      showError('Preencha os campos obrigatórios (Cliente, Data, Horário e Serviços)');
       return;
     }
 
@@ -182,13 +183,16 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
       return;
     }
 
-    const formattedPhone = formatPhone(clientPhone);
-    const digitsOnly = formattedPhone.replace(/\D/g, '');
-    if (digitsOnly.length < 10 || digitsOnly.length > 11) {
-      showError('Informe um telefone válido no formato (11) 99999-9999');
-      return;
+    let formattedPhone = '';
+    if (clientPhone.trim()) {
+      formattedPhone = formatPhone(clientPhone);
+      const digitsOnly = formattedPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 10 || digitsOnly.length > 11) {
+        showError('Informe um telefone válido no formato (11) 99999-9999 ou deixe em branco');
+        return;
+      }
+      setClientPhone(formattedPhone);
     }
-    setClientPhone(formattedPhone);
 
     setLoading(true);
     try {
@@ -228,7 +232,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       <div>
-        <label className="text-sm font-medium text-slate-400">Cliente *</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="user" className="w-4 h-4 mr-2 text-violet-400" />
+          Cliente *
+        </label>
         <input
           type="text"
           value={clientName}
@@ -242,7 +249,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-400">Telefone *</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="phone" className="w-4 h-4 mr-2 text-violet-400" />
+          Telefone
+        </label>
         <input
           type="tel"
           value={clientPhone}
@@ -252,25 +262,42 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-400 mb-2 block">
-          Serviços * (R$ {totalPrice.toFixed(2)})
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-2">
+          <Icon name="scissors" className="w-4 h-4 mr-2 text-violet-400" />
+          Serviços * <span className="text-green-400 font-bold ml-1">(R$ {totalPrice.toFixed(2)})</span>
         </label>
-        <div className="space-y-2 max-h-32 overflow-y-auto border border-slate-600 rounded-lg p-3 bg-slate-700/30">
+        <div className="max-h-48 overflow-y-auto border border-slate-600 rounded-lg p-3 bg-slate-700/30">
           {services.length === 0 ? (
             <p className="text-slate-400 text-sm">Nenhum serviço disponível</p>
           ) : (
-            services.map((service) => (
-              <label key={service.id} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedServices.includes(service.name)}
-                  onChange={() => toggleService(service.name)}
-                  className="w-4 h-4 text-violet-600 bg-slate-700 border-slate-600 rounded focus:ring-2 focus:ring-violet-500"
-                />
-                <span className="text-slate-200 text-sm">
-                  {service.name} - R$ {service.price.toFixed(2)}
-                </span>
-              </label>
+            Object.entries(
+              services.reduce((acc, service) => {
+                const cat = service.category || 'Outros';
+                if (!acc[cat]) acc[cat] = [];
+                acc[cat].push(service);
+                return acc;
+              }, {} as Record<string, typeof services>)
+            ).map(([category, items]) => (
+              <div key={category} className="mb-4 last:mb-0">
+                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-wider">
+                  {category === 'combos' ? 'Combos Promocionais' : category}
+                </p>
+                <div className="space-y-2">
+                  {items.map((service) => (
+                    <label key={service.id} className="flex items-center space-x-2 cursor-pointer transition-colors hover:bg-slate-700/20 p-1 -mx-1 rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedServices.includes(service.name)}
+                        onChange={() => toggleService(service.name)}
+                        className="w-4 h-4 text-violet-600 bg-slate-700 border-slate-600 rounded focus:ring-2 focus:ring-violet-500"
+                      />
+                      <span className="text-slate-200 text-sm">
+                        {service.name} - R$ {service.price.toFixed(2)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             ))
           )}
         </div>
@@ -279,7 +306,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
       {/* Seleção de Profissional */}
       {barbers.length > 0 && (
         <div>
-          <label className="text-sm font-medium text-slate-400">Profissional *</label>
+          <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+            <Icon name="star" className="w-4 h-4 mr-2 text-violet-400" />
+            Profissional *
+          </label>
           <select
             value={selectedBarber}
             onChange={(event) => setSelectedBarber(event.target.value)}
@@ -296,7 +326,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
       )}
 
       <div>
-        <label className="text-sm font-medium text-slate-400">Data *</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="calendar" className="w-4 h-4 mr-2 text-violet-400" />
+          Data *
+        </label>
         <input
           type="date"
           value={date}
@@ -305,7 +338,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-400">Horário *</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="clock" className="w-4 h-4 mr-2 text-violet-400" />
+          Horário *
+        </label>
         <input
           type="time"
           min="08:00"
@@ -326,7 +362,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         )}
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-400">Duração (minutos)</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="history" className="w-4 h-4 mr-2 text-violet-400" />
+          Duração (minutos)
+        </label>
         <input
           type="number"
           value={duration}
@@ -337,7 +376,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-slate-400">Notas</label>
+        <label className="flex items-center text-sm font-medium text-slate-400 mb-1">
+          <Icon name="pencil" className="w-4 h-4 mr-2 text-violet-400" />
+          Notas
+        </label>
         <textarea
           value={notes}
           onChange={(event) => setNotes(event.target.value)}

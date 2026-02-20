@@ -27,7 +27,7 @@
  * - Modal inline para nova transação
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import CardSkeleton from '@/components/common/CardSkeleton';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
@@ -35,8 +35,10 @@ import { Modal } from '@/components/Modal';
 import { useFinancial } from '@/hooks/useFinancial';
 import { useUI } from '@/hooks/useUI';
 import { StatsCard } from '@/components/StatsCard';
-import { Transaction, TransactionType } from '@/types';
-import { CreateTransactionData } from '@/store/financial.store';
+import { Transaction, TransactionType, Appointment } from '@/types';
+import { CreateTransactionData, UpdateTransactionData } from '@/store/financial.store';
+import { appointmentService } from '@/services/appointment.service';
+import { TransactionForm } from '@/features/financial/components/TransactionForm';
 
 // ===== Sub-Components =====
 
@@ -122,165 +124,185 @@ const PaymentMethodDistribution: React.FC<PaymentMethodDistributionProps> = ({
 /**
  * TransactionItem - Item de transação na lista
  */
-interface TransactionItemProps {
+const TransactionItem: React.FC<{
   transaction: Transaction;
-}
-
-const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
+  onEdit: (t: Transaction) => void;
+  onDelete: (t: Transaction) => void;
+}> = ({ transaction, onEdit, onDelete }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  const [loadingAppt, setLoadingAppt] = useState(false);
   const isIncome = transaction.type === TransactionType.Income;
 
-  return (
-    <div className="flex items-center justify-between py-3">
-      <div className="flex items-center space-x-4">
-        <div className={`p-2 rounded-lg ${isIncome ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
-          <Icon
-            name={isIncome ? 'arrowUp' : 'arrowDown'}
-            className={`w-5 h-5 ${isIncome ? 'text-green-400' : 'text-red-400'}`}
-          />
-        </div>
-        <div>
-          <p className="font-bold text-slate-100">{transaction.description}</p>
-          <p className="text-xs text-slate-400">
-            {transaction.date} - {transaction.time}
-          </p>
-        </div>
-      </div>
-      <div className="text-right">
-        <p className={`font-bold text-lg ${isIncome ? 'text-green-400' : 'text-red-400'}`}>
-          {isIncome ? '+' : '-'}R$ {transaction.amount.toFixed(2)}
-        </p>
-        <p className="text-xs text-slate-400">{transaction.category}</p>
-      </div>
-    </div>
-  );
-};
-
-/**
- * NewTransactionForm - Formulário inline para criar transação
- */
-interface NewTransactionFormProps {
-  onClose: () => void;
-}
-
-const NewTransactionForm: React.FC<NewTransactionFormProps> = ({ onClose }) => {
-  const { createTransaction } = useFinancial();
-  const { success, error: showError } = useUI();
-
-  const [type, setType] = useState<TransactionType>(TransactionType.Income);
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Serviços');
-  const [paymentMethod, setPaymentMethod] = useState('Dinheiro');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!description.trim() || !amount || parseFloat(amount) <= 0) {
-      showError('Preencha todos os campos corretamente');
-      return;
+  useEffect(() => {
+    if (expanded && transaction.referenceType === 'appointment' && transaction.referenceId && !appointment) {
+      setLoadingAppt(true);
+      appointmentService.getById(transaction.referenceId)
+        .then(data => {
+          if (data) setAppointment(data);
+        })
+        .catch(console.error)
+        .finally(() => setLoadingAppt(false));
     }
+  }, [expanded, transaction, appointment]);
 
-    setLoading(true);
-    try {
-      const now = new Date();
-      const date = now.toISOString().split('T')[0];
-      const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-      const createData: CreateTransactionData = {
-        type,
-        description: description.trim(),
-        category: category.trim(),
-        amount: parseFloat(amount),
-        date,
-        time,
-        paymentMethod: paymentMethod.trim()
-      };
-
-      await createTransaction(createData);
-      success('Transação registrada com sucesso!');
-      onClose();
-    } catch (err) {
-      showError('Erro ao registrar transação');
-    } finally {
-      setLoading(false);
-    }
+  const formatDateBR = (dateStr: string) => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year.slice(2)}`;
   };
 
+  const getDisplayInfo = () => {
+    let title = transaction.description;
+    let tagText = isIncome ? 'ENTRADA' : 'SAÍDA';
+    let tagColor = isIncome
+      ? 'bg-green-500/10 text-green-400 border-green-500/20'
+      : 'bg-red-500/10 text-red-500 border-red-500/20'; // Adjusted to match the print closer
+
+    if (transaction.referenceType === 'appointment') {
+      const parts = transaction.description.split(' - ');
+      if (parts.length > 1) {
+        const fullName = parts[0].trim();
+        const names = fullName.split(' ');
+        if (names.length > 1) {
+          title = `${names[0]} ${names[names.length - 1].charAt(0)}.`;
+        } else {
+          title = names[0];
+        }
+      }
+
+      tagText = 'CLIENTE';
+      tagColor = 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40';
+    }
+
+    return { title, tagText, tagColor };
+  };
+
+  const { title, tagText, tagColor } = getDisplayInfo();
+
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-slate-400">Tipo *</label>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as TransactionType)}
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        >
-          <option value={TransactionType.Income}>Receita</option>
-          <option value={TransactionType.Expense}>Despesa</option>
-        </select>
+    <div className="flex flex-col border-b border-slate-700/50 last:border-0 hover:bg-slate-800/20 transition-colors">
+      <div
+        className="flex items-center justify-between py-4 px-2 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center space-x-3 min-w-0 flex-1 pr-4">
+          <div className={`p-2.5 rounded-xl flex-shrink-0 ${isIncome ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+            <Icon
+              name={isIncome ? 'arrowUp' : 'arrowDown'}
+              className={`w-5 h-5 ${isIncome ? 'text-green-400' : 'text-red-400'}`}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-slate-100 truncate text-sm sm:text-base">{title}</p>
+              <span className={`flex-shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-bold tracking-wider ${tagColor}`}>
+                {tagText}
+              </span>
+            </div>
+            <div className="flex items-center text-xs text-slate-400 mt-1">
+              <Icon name="calendar" className="w-3.5 h-3.5 mr-1" />
+              <span>{formatDateBR(transaction.date)} às {transaction.time}</span>
+            </div>
+          </div>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className={`font-bold text-base sm:text-lg ${isIncome ? 'text-green-400' : 'text-red-400'}`}>
+            {isIncome ? '+' : '-'}R$ {transaction.amount.toFixed(2)}
+          </p>
+          <div className="flex items-center justify-end text-[10px] font-bold tracking-wider text-slate-500 mt-1">
+            <span>VER DETALHES</span>
+            <Icon
+              name="chevronDown"
+              className={`w-3.5 h-3.5 ml-1 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+            />
+          </div>
+        </div>
       </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Descrição *</label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Ex: Corte de cabelo - João Silva"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Valor (R$) *</label>
-        <input
-          type="number"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Categoria *</label>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Ex: Serviços, Produtos"
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-slate-400">Método de Pagamento *</label>
-        <select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-          className="mt-1 w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-        >
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão de Crédito">Cartão de Crédito</option>
-          <option value="Cartão de Débito">Cartão de Débito</option>
-          <option value="Pix">Pix</option>
-        </select>
-      </div>
-      <div className="flex space-x-3 pt-4">
-        <button
-          onClick={onClose}
-          disabled={loading}
-          className="flex-1 bg-slate-700 text-slate-200 font-bold py-2 rounded-lg hover:bg-slate-600 disabled:bg-slate-800"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="flex-1 bg-violet-600 text-white font-bold py-2 rounded-lg hover:bg-violet-700 disabled:bg-slate-500"
-        >
-          {loading ? 'Salvando...' : 'Registrar'}
-        </button>
-      </div>
+
+      {expanded && (
+        <div className="px-4 pb-4 pt-2 bg-slate-800/30 rounded-lg mx-2 mb-3">
+          <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm mb-4">
+            <div>
+              <p className="text-slate-500 text-xs mb-0.5">Tipo</p>
+              <p className="text-slate-200 font-medium">{isIncome ? 'Receita' : 'Despesa'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs mb-0.5">Método de Pagamento</p>
+              <p className="text-slate-200 font-medium">{transaction.paymentMethod}</p>
+            </div>
+            {transaction.referenceType !== 'appointment' && (
+              <div className="col-span-2">
+                <p className="text-slate-500 text-xs mb-0.5">Descrição Completa</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-slate-200 font-medium text-sm">{transaction.description}</p>
+                  {transaction.category && (
+                    <span className="flex-shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-bold tracking-wider bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
+                      {transaction.category.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {transaction.referenceType === 'appointment' && (
+              <div className="col-span-2 bg-violet-500/10 p-3 rounded-lg border border-violet-500/20">
+                <p className="text-violet-400 text-xs mb-2 font-semibold flex items-center">
+                  <Icon name="calendar" className="w-3.5 h-3.5 mr-1" />
+                  Detalhes do Agendamento
+                </p>
+                {loadingAppt ? (
+                  <p className="text-slate-400 text-xs animate-pulse">Carregando detalhes do cliente...</p>
+                ) : appointment ? (
+                  <div className="space-y-1.5 mt-2">
+                    <p className="text-slate-200 text-sm flex items-center">
+                      <Icon name="user" className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                      <span className="font-medium mr-1">Cliente:</span> {appointment.clientName}
+                    </p>
+                    <p className="text-slate-200 text-sm flex items-center">
+                      <Icon name="phone" className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                      <span className="font-medium mr-1">Telefone:</span> {appointment.clientPhone}
+                    </p>
+                    <p className="text-slate-200 text-sm flex items-start">
+                      <Icon name="scissors" className="w-3.5 h-3.5 mr-2 text-slate-500 mt-0.5" />
+                      <span className="font-medium mr-1">Serviços:</span>
+                      <span className="flex-1">{appointment.services.join(', ')}</span>
+                    </p>
+                    {appointment.barberName && (
+                      <p className="text-slate-200 text-sm flex items-center">
+                        <Icon name="star" className="w-3.5 h-3.5 mr-2 text-slate-500" />
+                        <span className="font-medium mr-1">Profissional:</span> {appointment.barberName}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-slate-300 text-sm">{transaction.description}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex space-x-3 pt-3 border-t border-slate-700/50">
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(transaction); }}
+              className="flex-1 flex items-center justify-center space-x-2 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-200 rounded-lg text-sm transition-colors"
+            >
+              <Icon name="edit" className="w-4 h-4" />
+              <span>Editar</span>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(transaction); }}
+              className="flex-1 flex items-center justify-center space-x-2 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm transition-colors"
+            >
+              <Icon name="trash" className="w-4 h-4" />
+              <span>Excluir</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 // ===== Main Component =====
 
@@ -291,10 +313,33 @@ export const FinancialPage: React.FC = () => {
     loading,
     getTodayTransactions,
     getMonthlyStats,
-    getStatsByPaymentMethod
+    getStatsByPaymentMethod,
+    deleteTransaction
   } = useFinancial({ autoFetch: 'current-month' });
 
-  const { openModal, closeModal, isModalOpen } = useUI();
+  const { openModal, closeModal, isModalOpen, showConfirm, success, error: showError } = useUI();
+
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    openModal('editTransaction');
+  };
+
+  const handleDelete = (transaction: Transaction) => {
+    showConfirm(
+      'Confirmar Exclusão',
+      `Tem certeza que deseja remover a transação\n"${transaction.description}"?\n\nEsta ação não pode ser desfeita.`,
+      async () => {
+        try {
+          await deleteTransaction(transaction.id);
+          success('Transação excluída com sucesso');
+        } catch (err) {
+          showError('Erro ao excluir transação');
+        }
+      }
+    );
+  };
 
   // Estatísticas
   const todayTransactions = getTodayTransactions();
@@ -464,7 +509,12 @@ export const FinancialPage: React.FC = () => {
             <>
               <div className="divide-y divide-slate-700">
                 {recentTransactions.map((tx) => (
-                  <TransactionItem key={tx.id} transaction={tx} />
+                  <TransactionItem
+                    key={tx.id}
+                    transaction={tx}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
                 ))}
               </div>
               {transactions.length > 10 && (
@@ -488,7 +538,24 @@ export const FinancialPage: React.FC = () => {
         onClose={() => closeModal('newTransaction')}
         title="Nova Transação"
       >
-        <NewTransactionForm onClose={() => closeModal('newTransaction')} />
+        <TransactionForm onClose={() => closeModal('newTransaction')} />
+      </Modal>
+
+      <Modal
+        isOpen={isModalOpen('editTransaction')}
+        onClose={() => {
+          closeModal('editTransaction');
+          setTimeout(() => setEditingTransaction(null), 200);
+        }}
+        title="Editar Transação"
+      >
+        <TransactionForm
+          onClose={() => {
+            closeModal('editTransaction');
+            setTimeout(() => setEditingTransaction(null), 200);
+          }}
+          transaction={editingTransaction}
+        />
       </Modal>
     </>
   );

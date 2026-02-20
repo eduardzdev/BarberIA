@@ -143,8 +143,8 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={() => setActiveTab('login')}
               className={`flex-1 py-2 text-center font-semibold transition-colors duration-300 ${activeTab === 'login'
-                  ? 'text-violet-400 border-b-2 border-violet-400'
-                  : 'text-slate-400 hover:text-slate-300'
+                ? 'text-violet-400 border-b-2 border-violet-400'
+                : 'text-slate-400 hover:text-slate-300'
                 }`}
               type="button"
             >
@@ -153,8 +153,8 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={() => setActiveTab('register')}
               className={`flex-1 py-2 text-center font-semibold transition-colors duration-300 ${activeTab === 'register'
-                  ? 'text-violet-400 border-b-2 border-violet-400'
-                  : 'text-slate-400 hover:text-slate-300'
+                ? 'text-violet-400 border-b-2 border-violet-400'
+                : 'text-slate-400 hover:text-slate-300'
                 }`}
               type="button"
             >
@@ -233,15 +233,6 @@ export const LoginPage: React.FC = () => {
             >
               <Icon name="google" className="w-5 h-5" />
               <span>Continuar com Google</span>
-            </button>
-
-            {/* Continue Without Login */}
-            <button
-              type="button"
-              onClick={() => navigate('/booking')}
-              className="w-full bg-transparent border-2 border-slate-600 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-800 hover:border-slate-500 transition-colors duration-300"
-            >
-              Continuar sem login
             </button>
           </div>
         )}

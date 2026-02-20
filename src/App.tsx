@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 // ... (omitting lines between imports and usage for brevity in thought, but tool needs exact match or separate edits. I will do separate edits to be safe or target carefully)
 import { LoginPage } from './features/auth';
-import { BookingPage } from './features/booking';
+
 import { TermsPage, PrivacyPage } from './features/legal';
 import { Layout } from './components/Layout';
 import { Header } from './components/Header';
@@ -42,6 +42,7 @@ import { SubscriptionGuard } from './guards/SubscriptionGuard';
 import './lib/firebase-app-check';
 
 import { ToastContainer } from './components/ToastContainer';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { useFCM } from '@/hooks/useFCM';
 
 
@@ -178,8 +179,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Global Toasts */}
+      {/* Global Toasts & Modals */}
       <ToastContainer />
+      <ConfirmDialog />
 
       {/* Setup Modal for New Users */}
       <BarbershopSetupModal
@@ -191,7 +193,7 @@ const App: React.FC = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-            <Route path="/booking" element={<BookingPage />} />
+
             <Route path="/termos" element={<TermsPage />} />
             <Route path="/privacidade" element={<PrivacyPage />} />
             <Route path="/precos" element={<React.Suspense fallback={<PageSkeleton />}><LandingPage /></React.Suspense>} />

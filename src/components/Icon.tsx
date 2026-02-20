@@ -10,7 +10,7 @@ import {
   BiLogoTiktok, BiMap, BiGlobe, BiPhone, BiPalette, BiKey, BiShieldQuarter,
   BiHelpCircle, BiSolidStar, BiGift, BiCog, BiLogoGoogle, BiArchive, BiDoorOpen, BiWallet,
   BiCamera, BiImage, BiUpload, BiBuildings, BiMapPin, BiCurrentLocation, BiParty,
-  BiRocket, BiInfoCircle, BiStore, BiErrorCircle, BiCopy, BiShareAlt, BiHide
+  BiRocket, BiInfoCircle, BiStore, BiErrorCircle, BiCopy, BiShareAlt, BiHide, BiEnvelope
 } from 'react-icons/bi';
 
 interface IconProps {
@@ -93,6 +93,7 @@ const iconMap: { [key: string]: React.ElementType } = {
   copy: BiCopy,
   share: BiShareAlt,
   eyeOff: BiHide,
+  envelope: BiEnvelope,
 };
 
 export const Icon: React.FC<IconProps> = ({ name, className, style }) => {
