@@ -84,10 +84,10 @@ export const EmbeddedBookingFlow: React.FC = () => {
     };
 
     const categoryLabels: Record<string, string> = {
-        combos: 'Combos Especiais',
+        combos: 'Combos',
         cabelo: 'Cabelo',
         barba: 'Barba',
-        especiais: 'Serviços Especiais',
+        especiais: 'Especiais',
         sobrancelhas: 'Sobrancelhas'
     };
 
@@ -133,7 +133,7 @@ export const EmbeddedBookingFlow: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-bold px-3 py-1.5 bg-shop-primary text-white rounded-full uppercase tracking-tighter shadow-sm shadow-shop-primary/20">
+                                                <span className="text-[9px] font-bold px-2 py-1 bg-shop-primary text-white rounded-full uppercase tracking-tighter shadow-sm shadow-shop-primary/20">
                                                     {items.length} {items.length === 1 ? 'opção' : 'opções'}
                                                 </span>
                                                 <div className={`p-1 rounded-full bg-white/50 transition-transform duration-300 ${isExpanded ? 'rotate-0' : 'rotate-180'}`}>
@@ -319,19 +319,19 @@ export const EmbeddedBookingFlow: React.FC = () => {
             </section>
 
             {/* Sticky Footer */}
-            <div className="fixed bottom-6 left-0 right-0 px-4 z-50">
+            <div className="fixed bottom-6 left-0 right-0 px-3 md:px-4 z-50">
                 <div className="max-w-4xl mx-auto">
-                    <div className="bg-white/95 rounded-2xl md:rounded-full p-2 pl-6 md:pl-10 border-2 border-shop-primary shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex items-center justify-between gap-4 backdrop-blur-xl">
+                    <div className="bg-white/95 rounded-2xl md:rounded-full p-1.5 pl-4 md:p-2 md:pl-10 border-2 border-shop-primary shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex items-center justify-between gap-2 md:gap-4 backdrop-blur-xl">
                         <div className="flex flex-col">
-                            <span className="text-slate-900 text-[10px] font-bold uppercase tracking-[0.2em]">Total Estimado</span>
-                            <span className="text-2xl md:text-3xl font-black text-emerald-600 tracking-tighter">R$ {total.toFixed(2)}</span>
+                            <span className="text-slate-900 text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap">Total Estimado</span>
+                            <span className="text-xl md:text-3xl font-black text-emerald-600 tracking-tighter whitespace-nowrap">R$ {total.toFixed(2)}</span>
                         </div>
 
                         <button
                             onClick={handleConfirm}
                             disabled={!isValid || loading}
                             className={`
-                                h-14 md:h-16 px-8 md:px-12 rounded-xl md:rounded-full font-bold text-white flex items-center justify-center gap-3 transition-all duration-300
+                                h-12 md:h-16 px-4 md:px-12 rounded-xl md:rounded-full font-bold text-white flex items-center justify-center gap-2 md:gap-3 transition-all duration-300 flex-shrink-0
                                 ${isValid && !loading
                                     ? 'bg-green-500 hover:bg-green-600 active:bg-green-700 hover:scale-[1.02] shadow-lg shadow-green-500/40 active:scale-95'
                                     : 'bg-slate-100 text-slate-300 cursor-not-allowed'
@@ -342,8 +342,8 @@ export const EmbeddedBookingFlow: React.FC = () => {
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                             ) : (
                                 <>
-                                    <Icon name="whatsapp" className={`w-5 h-5 ${isValid ? 'text-white' : 'text-slate-300'}`} />
-                                    <span className="text-sm md:text-base whitespace-nowrap">Confirmar no WhatsApp</span>
+                                    <Icon name="whatsapp" className={`w-4 h-4 md:w-5 md:h-5 ${isValid ? 'text-white' : 'text-slate-300'}`} />
+                                    <span className="text-xs md:text-base whitespace-nowrap">Confirmar no WhatsApp</span>
                                 </>
                             )}
                         </button>
