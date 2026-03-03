@@ -20,8 +20,8 @@ export const useFCM = () => {
       if (permissionResult === 'granted') {
         const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
         if (!vapidKey) {
-            console.error('VITE_FIREBASE_VAPID_KEY não está definida no .env');
-            return;
+          console.error('VITE_FIREBASE_VAPID_KEY não está definida no .env');
+          return;
         }
 
         const currentToken = await getToken(messaging, {
@@ -30,25 +30,23 @@ export const useFCM = () => {
 
         if (currentToken) {
           setFcmToken(currentToken);
-          
+
           // Salvar token no Firestore se o usuário estiver logado
           if (user?.uid) {
-             const userRef = doc(db, 'users', user.uid);
-             // Usamos arrayUnion para adicionar o token sem duplicar,
-             // permitindo múltiplos dispositivos (celular, note, tablet)
-             await updateDoc(userRef, {
-                fcmTokens: arrayUnion(currentToken)
-             });
-             console.log('FCM Token salvo/atualizado para o usuário:', user.uid);
+            const userRef = doc(db, 'users', user.uid);
+            // Usamos arrayUnion para adicionar o token sem duplicar,
+            // permitindo múltiplos dispositivos (celular, note, tablet)
+            await updateDoc(userRef, {
+              fcmTokens: arrayUnion(currentToken)
+            });
           }
         } else {
-          console.log('Nenhum token de registro disponível. Solicite permissão para gerar um.');
+          // Log removed
         }
       } else {
-        console.log('Permissão de notificação negada.');
+        // Log removed
       }
     } catch (error) {
-      console.error('Erro ao recuperar token FCM:', error);
     }
   };
 
@@ -56,14 +54,13 @@ export const useFCM = () => {
   useEffect(() => {
     // Escuta mensagens quando o app está aberto e em foco
     const unsubscribe = onMessage(messaging, (payload: MessagePayload) => {
-      console.log('Mensagem recebida em foreground:', payload);
-      
+
       // Exibir Toast ou atualizar store de notificações
       if (payload.notification) {
-          info(
-              `${payload.notification.title}: ${payload.notification.body}`
-          );
-          // TODO: Adicionar à store de notificações persistente se necessário
+        info(
+          `${payload.notification.title}: ${payload.notification.body}`
+        );
+        // TODO: Adicionar à store de notificações persistente se necessário
       }
     });
 

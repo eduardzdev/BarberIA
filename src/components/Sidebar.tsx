@@ -61,6 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <NavLink
             to={path}
             onClick={onClose}
+            data-testid={`sidebar-link-${label.toLowerCase()}`}
             className={({ isActive }) =>
                 `flex items-center space-x-4 px-4 py-3 rounded-lg transition-colors duration-200 ${isActive ? 'bg-violet-500/20 text-violet-300' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
                 }`
@@ -88,8 +89,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-slate-700">
                         <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-violet-500 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30">
-                                <Icon name="scissors" className="w-5 h-5 text-slate-950" />
+                            <div className="w-8 h-8 flex items-center justify-center">
+                                <img src="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" alt="BarberIA" className="w-full h-full object-contain" />
                             </div>
                             <span className="text-xl font-bold text-slate-100">BarberIA</span>
                         </div>

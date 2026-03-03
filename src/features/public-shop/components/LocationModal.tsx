@@ -12,20 +12,20 @@ interface LocationModalProps {
     shopName: string;
     theme: {
         primaryColor: string;
-        secondaryColor: string;
+        secondaryColor?: string;
         font: string;
         mode?: 'light' | 'dark';
     };
 }
 
-export const LocationModal: React.FC<LocationModalProps> = ({ 
-    isOpen, 
-    onClose, 
-    address, 
+export const LocationModal: React.FC<LocationModalProps> = ({
+    isOpen,
+    onClose,
+    address,
     city,
     state,
-    shopName, 
-    theme 
+    shopName,
+    theme
 }) => {
     const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
     const [loading, setLoading] = useState(false);
@@ -35,25 +35,25 @@ export const LocationModal: React.FC<LocationModalProps> = ({
         if (isOpen && !coordinates && address) {
             setLoading(true);
             setError(false);
-            
+
             // Construir query de busca mais precisa
             let searchQuery = address;
             if (city) searchQuery += `, ${city}`;
             if (state) searchQuery += ` - ${state}`;
-            
-            console.log('🗺️ Iniciando busca de coordenadas para:', searchQuery);
+
+            // Log removed
 
             // Usando Nominatim OpenStreetMap API para geocoding
             // Importante: Adicionar User-Agent para respeitar política de uso
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`, {
                 headers: {
                     'User-Agent': 'BarberIA-App',
-                    'Accept-Language': 'pt-BR' 
+                    'Accept-Language': 'pt-BR'
                 }
             })
                 .then(res => res.json())
                 .then(data => {
-                    console.log('📍 Resultado Nominatim:', data);
+                    // Log removed
                     if (data && data.length > 0) {
                         setCoordinates({
                             lat: parseFloat(data[0].lat),
@@ -78,14 +78,14 @@ export const LocationModal: React.FC<LocationModalProps> = ({
     const textColor = theme.mode === 'light' ? '#0f172a' : '#f8fafc';
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
             onClick={onClose}
         >
-            <div 
+            <div
                 className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-                style={{ 
-                    border: `2px solid ${theme.primaryColor}`, 
+                style={{
+                    border: `2px solid ${theme.primaryColor}`,
                     backgroundColor: bgColor,
                     color: textColor
                 }}
@@ -97,7 +97,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                         <Icon name="map" className="w-5 h-5" style={{ color: theme.primaryColor }} />
                         Localização
                     </h3>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="p-1 rounded-full hover:bg-slate-500/10 transition-colors"
                     >
@@ -123,10 +123,10 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: theme.primaryColor }}></div>
                             </div>
                         }>
-                            <ShopMap 
-                                lat={coordinates.lat} 
-                                lng={coordinates.lng} 
-                                shopName={shopName} 
+                            <ShopMap
+                                lat={coordinates.lat}
+                                lng={coordinates.lng}
+                                shopName={shopName}
                             />
                         </Suspense>
                     ) : null}
@@ -135,7 +135,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 {/* Footer with Address */}
                 <div className="p-4 text-sm opacity-90 shrink-0 flex items-start gap-3 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="p-2 rounded-full bg-slate-200/20 shrink-0">
-                         <Icon name="mapPin" className="w-4 h-4" style={{ color: theme.primaryColor }} />
+                        <Icon name="mapPin" className="w-4 h-4" style={{ color: theme.primaryColor }} />
                     </div>
                     <div>
                         <p className="font-medium" style={{ color: theme.primaryColor }}>Endereço Completo</p>

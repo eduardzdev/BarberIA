@@ -420,6 +420,7 @@ export const FinancialPage: React.FC = () => {
         {/* Nova Transação Button */}
         <button
           onClick={() => openModal('newTransaction')}
+          data-testid="new-transaction-btn"
           className="w-full bg-violet-600 text-white font-bold py-3 rounded-lg flex items-center justify-center space-x-2 shadow-lg shadow-violet-600/20 hover:bg-violet-700 transition-colors"
         >
           <Icon name="plus" className="w-5 h-5" />

@@ -87,7 +87,7 @@ export const useClientsStore = create<ClientsState>()(
 
         try {
           const clients = await clientsService.getAll([
-            orderBy('name', 'asc')
+            orderBy('createdAt', 'desc')
           ]);
 
           set({
@@ -140,6 +140,7 @@ export const useClientsStore = create<ClientsState>()(
             lastVisit: data.lastVisit || '',
             status: data.status || ClientStatus.Active,
             isVip: data.isVip || false,
+            createdAt: Date.now(),
           });
 
           // Atualiza estado local
@@ -152,12 +153,11 @@ export const useClientsStore = create<ClientsState>()(
             lastVisit: data.lastVisit || '',
             status: data.status || ClientStatus.Active,
             isVip: data.isVip || false,
+            createdAt: Date.now(),
           };
 
           set((state) => ({
-            clients: [...state.clients, newClient].sort((a, b) =>
-              a.name.localeCompare(b.name)
-            ),
+            clients: [newClient, ...state.clients],
             loading: false,
             error: null,
             lastFetchedAt: Date.now(),

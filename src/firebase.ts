@@ -84,7 +84,7 @@ if (import.meta.env.PROD) {
   try {
     analytics = getAnalytics(app);
     performance = getPerformance(app);
-    console.log('✅ Firebase Analytics e Performance inicializados');
+    // Log removed
   } catch (error) {
     console.warn('⚠️ Erro ao inicializar Analytics/Performance:', error);
   }
@@ -103,12 +103,12 @@ export const functions = getFunctions(app, 'southamerica-east1');
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
   try {
     connectFunctionsEmulator(functions, 'localhost', 5001);
-    console.log('🔧 Functions Emulator conectado (localhost:5001)');
+    // Log removed
   } catch {
     // Emulador pode não estar rodando
   }
 } else if (import.meta.env.DEV) {
-  console.log('☁️ Functions conectado à produção (southamerica-east1)');
+  // Log removed
 }
 
 // ============================================
@@ -116,10 +116,10 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === 'true') {
 // ============================================
 
 if (import.meta.env.DEV) {
-  console.log('🔥 Firebase inicializado com sucesso!');
-  console.log('📦 Projeto:', firebaseConfig.projectId);
-  console.log('🌐 Auth Domain:', firebaseConfig.authDomain);
-  console.log('🔐 Modo:', import.meta.env.MODE);
+  // Log removed
+  // Log removed
+  // Log removed
+  // Log removed
 }
 
 // ============================================

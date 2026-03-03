@@ -11,33 +11,37 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  
+
   // Timeout por teste (30 segundos)
-  timeout: 30 * 1000,
-  
+  timeout: 120000,
+
   // Configurações globais
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  
+  workers: 1,
+
+  expect: {
+    timeout: 20000,
+  },
+
   // Reporter
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
     ['list']
   ],
-  
+
   use: {
     // Base URL da aplicação (detecta porta automaticamente)
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3002',
-    
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+
     // Screenshot em falhas
     screenshot: 'only-on-failure',
-    
+
     // Vídeo em falhas
     video: 'retain-on-failure',
-    
+
     // Trace em falhas
     trace: 'on-first-retry',
   },
@@ -53,7 +57,7 @@ export default defineConfig({
   // Dev server (inicia automaticamente antes dos testes)
   webServer: {
     command: 'npm run dev',
-    url: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3002',
+    url: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

@@ -415,7 +415,7 @@ export const ClientsPage: React.FC = () => {
       if (aInactive && !bInactive) return 1;
       if (!aInactive && bInactive) return -1;
 
-      return a.name.localeCompare(b.name);
+      return (b.createdAt || 0) - (a.createdAt || 0);
     });
 
     return sorted;
@@ -597,7 +597,7 @@ export const ClientsPage: React.FC = () => {
               <p className="text-slate-500 text-sm mt-2">
                 {searchQuery || filterStatus !== 'all'
                   ? 'Nenhum cliente encontrado com os filtros aplicados.'
-                  : 'Nenhum cliente cadastrado ainda.'}
+                  : 'Você ainda não tem clientes cadastrados. Adicione seu primeiro cliente para começar!'}
               </p>
             </div>
           )}

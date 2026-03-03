@@ -622,9 +622,9 @@ export const HistoryPage: React.FC = () => {
           ) : (
             <div className="text-center py-12">
               <Icon name="history" className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400 mb-2">Nenhum atendimento no histórico</p>
+              <p className="text-slate-400 mb-2">Seu histórico está vazio</p>
               <p className="text-sm text-slate-500">
-                Os atendimentos concluídos aparecerão aqui
+                Os agendamentos concluídos com sucesso aparecerão aqui.
               </p>
             </div>
           )}

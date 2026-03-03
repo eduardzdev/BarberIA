@@ -49,7 +49,7 @@ export const LoginPage: React.FC = () => {
       try {
         const result = await getRedirectResult(auth);
         if (result) {
-          console.log('Login successful via Google redirect');
+          // Log removed
         }
       } catch (err) {
         console.error('Error checking redirect result:', err);
@@ -124,12 +124,12 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 p-4">
       <Card className={`w-full transition-all duration-300 ${activeTab === 'register' ? 'max-w-md' : 'max-w-sm'}`}>
         {/* Logo and Title */}
-        <div className="flex flex-col items-center text-center p-4">
-          <div className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
-            <Icon name="scissors" className="w-8 h-8 text-slate-950" />
+        <div className="flex flex-col items-center text-center p-3 md:p-4">
+          <div className="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center mb-2 md:mb-4">
+            <img src="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" alt="BarberIA Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-100">BarberIA</h1>
-          <p className="text-slate-400 mt-1 text-sm">
+          <h1 className="text-xl md:text-2xl font-bold text-slate-100">BarberIA</h1>
+          <p className="text-slate-400 mt-1 text-xs md:text-sm">
             {activeTab === 'login'
               ? 'Acesse seu painel profissional'
               : 'Gerencie sua barbearia com inteligência'
@@ -139,7 +139,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Tabs: Login / Cadastro */}
         <div className="px-4">
-          <div className="flex border-b border-slate-700 mb-6">
+          <div className="flex border-b border-slate-700 mb-4 md:mb-6">
             <button
               onClick={() => setActiveTab('login')}
               className={`flex-1 py-2 text-center font-semibold transition-colors duration-300 ${activeTab === 'login'

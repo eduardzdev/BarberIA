@@ -107,7 +107,7 @@ export function useAuth() {
       if (userCredential.user) {
         try {
           await seedInitialData(userCredential.user.uid);
-          console.log('[Auth] Onboarding seed executado com sucesso');
+          // Log removed
         } catch (seedError) {
           // Log do erro mas não bloqueia o registro
           console.warn('[Auth] Erro no seed (não crítico):', seedError);

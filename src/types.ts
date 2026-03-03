@@ -37,6 +37,7 @@ export interface Client {
     spent: number;
     notes: string;
     isVip: boolean;
+    createdAt?: number;
 }
 
 export enum TransactionType {

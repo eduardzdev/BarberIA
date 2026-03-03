@@ -281,7 +281,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
       ) : (
         <div className="text-center py-4">
           <Icon name="inbox" className="w-6 h-6 mx-auto text-slate-600" />
-          <p className="text-slate-500 text-xs mt-1">Nenhum agendamento</p>
+          <p className="text-slate-500 text-xs mt-1">Sua agenda está livre por enquanto.</p>
         </div>
       )}
     </div>
@@ -868,16 +868,17 @@ export const AgendaPage: React.FC = () => {
         {/* Date Navigation */}
         <div className="flex space-x-2">
           <div className="flex-grow flex items-center bg-slate-800/50 border border-slate-700 rounded-lg">
-            <button onClick={handlePreviousDay} className="p-2.5 text-slate-400 hover:text-white">
+            <button onClick={handlePreviousDay} data-testid="prev-day" className="p-2.5 text-slate-400 hover:text-white">
               <Icon name="left" className="w-5 h-5" />
             </button>
             <button
               onClick={handleToday}
+              data-testid="today-btn"
               className="flex-grow text-center font-semibold text-slate-200 hover:text-white"
             >
               {isToday ? 'Hoje' : 'Ir para Hoje'}
             </button>
-            <button onClick={handleNextDay} className="p-2.5 text-slate-400 hover:text-white">
+            <button onClick={handleNextDay} data-testid="next-day" className="p-2.5 text-slate-400 hover:text-white">
               <Icon name="right" className="w-5 h-5" />
             </button>
           </div>
@@ -918,6 +919,7 @@ export const AgendaPage: React.FC = () => {
             <div className="flex-grow flex space-x-1 p-1 bg-slate-800/50 rounded-lg">
               <button
                 onClick={() => setViewMode('calendar')}
+                data-testid="view-calendar"
                 className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'calendar'
                   ? 'bg-slate-700 font-semibold text-slate-100'
                   : 'text-slate-400'
@@ -927,6 +929,7 @@ export const AgendaPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('kanban')}
+                data-testid="view-kanban"
                 className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'kanban'
                   ? 'bg-slate-700 font-semibold text-slate-100'
                   : 'text-slate-400'
@@ -936,6 +939,7 @@ export const AgendaPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('timeline')}
+                data-testid="view-timeline"
                 className={`flex-1 text-center text-sm py-1.5 rounded-md ${viewMode === 'timeline'
                   ? 'bg-slate-700 font-semibold text-slate-100'
                   : 'text-slate-400'

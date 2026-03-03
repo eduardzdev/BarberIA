@@ -23,20 +23,20 @@
  * await markAsRead(notification.id);
  * 
  * // Contagem não lidas
- * console.log(`Você tem ${unreadCount} notificações não lidas`);
+ * \`Você tem ${unreadCount} notificações não lidas\`);
  * ```
  */
 
 import { create } from 'zustand';
 import { Notification, NotificationType } from '@/types';
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   doc,
   Unsubscribe,
   serverTimestamp
@@ -94,10 +94,10 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
     }
 
     set({ loading: true, error: null });
-    
+
     try {
       const colRef = getNotificationsCollectionRef();
-      const q = query(colRef, orderBy('time', 'desc'));
+      const q = query(colRef, orderBy('createdAt', 'desc'));
 
       unsubscribe = onSnapshot(
         q,
@@ -112,25 +112,25 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
           const unreadCount = notifications.filter(n => !n.read).length;
 
-          set({ 
-            notifications, 
+          set({
+            notifications,
             unreadCount,
-            loading: false 
+            loading: false
           });
         },
         (error) => {
           console.error('Erro no listener de notificações:', error);
-          set({ 
-            error: 'Erro ao ouvir notificações', 
-            loading: false 
+          set({
+            error: 'Erro ao ouvir notificações',
+            loading: false
           });
         }
       );
     } catch (err) {
       console.error('Erro ao iniciar listener:', err);
-      set({ 
-        error: 'Erro ao iniciar listener', 
-        loading: false 
+      set({
+        error: 'Erro ao iniciar listener',
+        loading: false
       });
     }
   },
@@ -214,8 +214,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   markAllAsRead: async () => {
     try {
       const unreadNotifications = get().notifications.filter(n => !n.read);
-      
-      const promises = unreadNotifications.map(n => 
+
+      const promises = unreadNotifications.map(n =>
         get().markAsRead(n.id)
       );
 
@@ -250,8 +250,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   clearAll: async () => {
     try {
       const notifications = get().notifications;
-      
-      const promises = notifications.map(n => 
+
+      const promises = notifications.map(n =>
         get().deleteNotification(n.id)
       );
 

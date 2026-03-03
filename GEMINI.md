@@ -11,7 +11,7 @@ Este arquivo contém informações essenciais sobre o projeto **BarberIA** para 
 *   **Estilização:** Tailwind CSS (Mobile-first, Dark Mode exclusivo)
 *   **State Management:** Zustand (8 stores especializados)
 *   **Backend (BaaS):** Firebase (Auth, Firestore, Hosting, App Check)
-*   **Roteamento:** React Router (HashRouter)
+*   **Roteamento:** React Router (BrowserRouter)
 *   **Testes E2E:** Playwright
 *   **Validação:** Zod
 *   **Ícones:** React Icons

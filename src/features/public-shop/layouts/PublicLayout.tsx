@@ -4,7 +4,7 @@ interface PublicLayoutProps {
   children: React.ReactNode;
   theme: {
     primaryColor: string;
-    secondaryColor: string;
+    secondaryColor?: string;
     font?: string;
     mode?: 'light' | 'dark';
   };
@@ -15,7 +15,7 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, theme }) =
     // Injeta variáveis CSS no root
     const root = document.documentElement;
     root.style.setProperty('--shop-primary', theme.primaryColor);
-    root.style.setProperty('--shop-secondary', theme.secondaryColor);
+    root.style.setProperty('--shop-secondary', theme.secondaryColor || theme.primaryColor);
 
     return () => {
       root.style.removeProperty('--shop-primary');

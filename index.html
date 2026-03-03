@@ -9,29 +9,72 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <meta name="theme-color" content="#020617" />
-  <meta name="description" content="BarberIA - Plataforma SaaS para gestão inteligente de barbearias. Agenda, financeiro e clientes em um só lugar." />
+  <meta name="description"
+    content="BarberIA - Plataforma SaaS para gestão inteligente de barbearias. Agenda, financeiro e clientes em um só lugar." />
   <link rel="canonical" href="https://obarberia.online/" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://obarberia.online/" />
   <meta property="og:title" content="BarberIA - Gestão Inteligente para Barbearias" />
-  <meta property="og:description" content="Sistema completo para barbearias: Agenda online, gestão financeira, cadastro de clientes e muito mais. Teste grátis!" />
-  <meta property="og:image" content="https://obarberia.online/icons/Logo%20BarberIA%20Quadrado.svg" />
+  <meta property="og:description"
+    content="Sistema completo para barbearias: Agenda online, gestão financeira, cadastro de clientes e muito mais. Teste grátis!" />
+  <meta property="og:image" content="https://obarberia.online/icons/Logo%20Final%20BarberIA%20100x100%20.svg" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://obarberia.online/" />
   <meta property="twitter:title" content="BarberIA - Gestão Inteligente para Barbearias" />
-  <meta property="twitter:description" content="Sistema completo para barbearias: Agenda online, gestão financeira, cadastro de clientes e muito mais." />
-  <meta property="twitter:image" content="https://obarberia.online/icons/Logo%20BarberIA%20Quadrado.svg" />
+  <meta property="twitter:description"
+    content="Sistema completo para barbearias: Agenda online, gestão financeira, cadastro de clientes e muito mais." />
+  <meta property="twitter:image" content="https://obarberia.online/icons/Logo%20Final%20BarberIA%20100x100%20.svg" />
 
-  <link rel="icon" href="/icons/Logo%20BarberIA.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/icons/Logo%20BarberIA%20Quadrado.svg" />
+  <link rel="icon" href="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" />
 </head>
 
 <body class="bg-slate-950">
-  <div id="root"></div>
+  <div id="root">
+    <style>
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #020617;
+        /* Tailwind slate-950 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      #initial-loader img {
+        width: 100px;
+        height: 100px;
+        animation: pulse 2s infinite ease-in-out;
+      }
+
+      @keyframes pulse {
+
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+
+        50% {
+          transform: scale(1.1);
+          opacity: 0.8;
+        }
+      }
+    </style>
+    <div id="initial-loader">
+      <img src="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" alt="BarberIA Loading" />
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

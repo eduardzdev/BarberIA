@@ -17,21 +17,21 @@ const firebaseConfig = {
 
 // Tenta inicializar apenas se tiver config válida
 try {
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
-    messaging.onBackgroundMessage(function(payload) {
-      console.log('[firebase-messaging-sw.js] Received background message ', payload);
-      
-      const notificationTitle = payload.notification.title;
-      const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/icon-192.png', 
-        data: payload.data
-      };
+  messaging.onBackgroundMessage(function (payload) {
+    // Log removed
 
-      self.registration.showNotification(notificationTitle, notificationOptions);
-    });
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+      body: payload.notification.body,
+      icon: '/icon-192.png',
+      data: payload.data
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
 } catch (e) {
-    console.error('Falha ao inicializar Firebase no SW. Verifique a configuração.', e);
+  console.error('Falha ao inicializar Firebase no SW. Verifique a configuração.', e);
 }

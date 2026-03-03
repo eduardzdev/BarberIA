@@ -10,11 +10,12 @@ interface NotificationsPanelProps {
 }
 
 export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose }) => {
-    const { 
-        notifications, 
-        markAsRead, 
+    const {
+        notifications,
+        markAsRead,
         markAllAsRead,
-        loading 
+        clearAll,
+        loading
     } = useNotifications({ autoStart: true });
 
     const getIconInfo = (type: Notification['type']) => {
@@ -27,18 +28,18 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
                 return { name: 'bell', color: 'text-slate-400', bg: 'bg-slate-500/10' };
         }
     };
-    
+
     return (
         <>
             {/* Mobile Backdrop */}
-            <div 
+            <div
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
                 onClick={onClose}
             ></div>
 
             {/* Panel */}
             <div className="fixed inset-x-0 top-0 z-50 md:absolute md:inset-auto md:top-full md:right-0 md:mt-2 md:w-80 animate-fade-in-down-fast">
-                 <style>{`
+                <style>{`
                     @keyframes fade-in-down-fast {
                         from { opacity: 0; transform: translateY(-10px); }
                         to { opacity: 1; transform: translateY(0); }
@@ -48,26 +49,41 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
                     }
                  `}</style>
                 <Card className="!p-0 overflow-hidden bg-slate-900 shadow-2xl shadow-violet-500/20 rounded-b-xl md:rounded-xl border-t-0 md:border-t border-slate-700">
-                    <div className="p-4 md:p-3 border-b border-slate-700 flex justify-between items-center">
-                        <h3 className="font-bold text-slate-100 text-lg md:text-base">Notificações</h3>
-                        <button 
-                            onClick={onClose}
-                            className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors md:hidden"
-                        >
-                            <Icon name="close" className="w-5 h-5" />
-                        </button>
+                    <div className="p-4 md:p-3 border-b border-slate-700 flex justify-between items-center text-slate-100">
+                        <h3 className="font-bold text-lg md:text-base">Notificações</h3>
+                        <div className="flex items-center space-x-1">
+                            {notifications.length > 0 && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('Deseja limpar todo o histórico de notificações?')) {
+                                            clearAll();
+                                        }
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    title="Limpar todas"
+                                >
+                                    <Icon name="trash" className="w-5 h-5" />
+                                </button>
+                            )}
+                            <button
+                                onClick={onClose}
+                                className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors md:hidden"
+                            >
+                                <Icon name="close" className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
                     <div className="max-h-[70vh] md:max-h-96 overflow-y-auto">
                         {loading && notifications.length === 0 ? (
-                             <div className="p-8 flex justify-center">
+                            <div className="p-8 flex justify-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
-                             </div>
+                            </div>
                         ) : notifications.length > 0 ? (
                             notifications.map(notif => {
                                 const iconInfo = getIconInfo(notif.type);
                                 return (
-                                    <div 
-                                        key={notif.id} 
+                                    <div
+                                        key={notif.id}
                                         onClick={() => markAsRead(notif.id)}
                                         className={`flex items-start space-x-3 p-4 md:p-3 border-b border-slate-700/50 hover:bg-slate-700/40 transition-colors duration-150 cursor-pointer ${!notif.read ? 'bg-violet-500/5' : ''}`}
                                     >
@@ -90,7 +106,7 @@ export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ onClose 
                         )}
                     </div>
                     <div className="p-3 bg-slate-800/50 text-center border-t border-slate-700/50">
-                        <button 
+                        <button
                             onClick={() => markAllAsRead()}
                             className="text-violet-400 font-semibold text-sm w-full py-2 hover:bg-slate-700/50 rounded-lg transition-colors"
                         >

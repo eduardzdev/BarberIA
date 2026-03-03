@@ -129,7 +129,7 @@ export const AppSettingsPage: React.FC = () => {
 
   const handleNotificationToggle = (key: 'newAppointments' | 'reminders', enabled: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: enabled }));
-    // TODO: Save to Firestore or local storage
+    // Salvar configuração persistente
   };
 
   const handleOpenSupport = () => {

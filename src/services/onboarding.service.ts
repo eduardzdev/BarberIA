@@ -21,6 +21,7 @@ import type { BarbershopSettings, DaySchedule } from '@/store/barbershop.store';
 // Serviço padrão criado automaticamente
 const DEFAULT_SERVICE: Omit<Service, 'id'> = {
     name: 'Corte Masculino',
+    category: 'cabelo',
     price: 35,
     duration: 30,
     active: true,
@@ -85,7 +86,7 @@ async function seedDefaultService(userId: string): Promise<string> {
         createdAt: new Date().toISOString(),
     });
 
-    console.log('[Onboarding] Serviço padrão criado:', serviceId);
+    // Log removed
     return serviceId;
 }
 
@@ -100,7 +101,7 @@ async function seedDefaultSettings(userId: string): Promise<void> {
         createdAt: new Date().toISOString(),
     });
 
-    console.log('[Onboarding] Settings padrão criados');
+    // Log removed
 }
 
 /**
@@ -115,7 +116,7 @@ async function markOnboardingCompleted(userId: string): Promise<void> {
         version: '1.0.0', // Para futuras migrações
     });
 
-    console.log('[Onboarding] Marcado como completo');
+    // Log removed
 }
 
 /**
@@ -132,11 +133,11 @@ export async function seedInitialData(userId: string): Promise<boolean> {
         // Verificar se já foi feito
         const alreadyCompleted = await checkOnboardingCompleted(userId);
         if (alreadyCompleted) {
-            console.log('[Onboarding] Já completado, ignorando seed');
+            // Log removed
             return false;
         }
 
-        console.log('[Onboarding] Iniciando seed de dados para:', userId);
+        // Log removed
 
         // Executar seeds em paralelo para performance
         await Promise.all([
@@ -147,7 +148,7 @@ export async function seedInitialData(userId: string): Promise<boolean> {
         // Marcar como completo
         await markOnboardingCompleted(userId);
 
-        console.log('[Onboarding] Seed completo com sucesso!');
+        // Log removed
         return true;
     } catch (error) {
         // Log do erro mas não bloqueia o registro
@@ -174,5 +175,5 @@ export async function resetOnboarding(userId: string): Promise<void> {
         resetAt: new Date().toISOString(),
     });
 
-    console.log('[Onboarding] Reset completo - próximo login fará seed novamente');
+    // Log removed
 }

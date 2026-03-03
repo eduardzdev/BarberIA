@@ -22,6 +22,7 @@ const HistoryPage = React.lazy(() => import('./features/history').then(m => ({ d
 const PublicShopPage = React.lazy(() => import('@/features/public-shop').then(m => ({ default: m.PublicShopPage })));
 const BillingPage = React.lazy(() => import('./features/billing').then(m => ({ default: m.BillingPage })));
 const LandingPage = React.lazy(() => import('./features/landing').then(m => ({ default: m.LandingPage })));
+const NotFoundPage = React.lazy(() => import('./components/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 // Settings
 const ShopSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ShopSettingsPage })));
 const ServicesSettingsPage = React.lazy(() => import('./features/settings').then(m => ({ default: m.ServicesSettingsPage })));
@@ -225,6 +226,9 @@ const App: React.FC = () => {
                 </React.Suspense>
               }
             />
+
+            {/* Rota 404 - Not Found */}
+            <Route path="*" element={<React.Suspense fallback={<PageSkeleton />}><NotFoundPage /></React.Suspense>} />
           </Routes>
         </BrowserRouter>
       </ErrorBoundary>

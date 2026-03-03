@@ -83,7 +83,7 @@ export interface BarbershopSettings {
     slug?: string;
     theme?: {
       primaryColor: string;
-      secondaryColor: string;
+      secondaryColor?: string;
       font: string;
       mode?: 'light' | 'dark';
     };

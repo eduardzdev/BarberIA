@@ -30,14 +30,14 @@ if (import.meta.env.DEV) {
   if (import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN) {
     // @ts-ignore - Debug token é definido globalmente
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN;
-    console.log('🔧 Firebase App Check em modo DEBUG');
-    console.log('📝 Debug token configurado para testes locais');
+    // Log removed
+    // Log removed
   } else {
     // Habilita modo debug automático (gera token no console)
     // @ts-ignore
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-    console.log('🔧 Firebase App Check em modo DEBUG AUTO');
-    console.log('📝 Copie o debug token do console e adicione ao Firebase Console');
+    // Log removed
+    // Log removed
   }
 }
 
@@ -47,7 +47,7 @@ if (import.meta.env.DEV) {
 
 if (import.meta.env.PROD) {
   const siteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_KEY;
-  
+
   if (!siteKey) {
     console.warn(
       '⚠️ Firebase App Check: SITE KEY não configurada!\n' +
@@ -59,13 +59,13 @@ if (import.meta.env.PROD) {
       // Inicializa App Check com reCAPTCHA v3
       const appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider(siteKey),
-        
+
         // Auto-refresh: o SDK automaticamente renova tokens antes de expirar
         isTokenAutoRefreshEnabled: true,
       });
 
-      console.log('✅ Firebase App Check inicializado com reCAPTCHA v3');
-      console.log('🛡️ Proteção contra abuso ativada');
+      // Log removed
+      // Log removed
     } catch (error) {
       console.error('❌ Erro ao inicializar Firebase App Check:', error);
       console.error('Verifique se a SITE KEY está correta e registrada no Firebase Console');
@@ -102,4 +102,4 @@ if (import.meta.env.PROD) {
  */
 
 // Exporta o módulo para ser importado no App.tsx
-export {};
+export { };

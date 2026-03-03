@@ -18,6 +18,7 @@ export const BottomNav: React.FC = () => {
                     <NavLink
                         key={item.path}
                         to={item.path}
+                        data-testid={`bottom-link-${item.label.toLowerCase()}`}
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center space-y-1 w-full text-slate-400 ${isActive ? 'text-violet-400' : ''}`
                         }

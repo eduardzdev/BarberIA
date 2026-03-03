@@ -58,7 +58,9 @@ export const PublicShopPage: React.FC = () => {
     if (error || !shopData) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 text-center">
-                <Icon name="scissors" className="w-16 h-16 text-slate-400 mb-4" />
+                <div className="w-20 h-20 mb-4 grayscale opacity-60">
+                    <img src="/icons/Logo%20Final%20BarberIA%20100x100%20.svg" alt="BarberIA" className="w-full h-full object-contain" />
+                </div>
                 <h1 className="text-2xl font-bold text-slate-900 mb-2">Barbearia não encontrada</h1>
                 <p className="text-slate-600">Verifique o endereço e tente novamente.</p>
             </div>

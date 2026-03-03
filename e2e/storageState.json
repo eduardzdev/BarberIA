@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "barberia-barbershop",
+          "value": "{\"state\":{\"barbers\":[],\"businessHours\":{\"schedule\":[{\"dayOfWeek\":0,\"isOpen\":false,\"startTime\":\"09:00\",\"endTime\":\"13:00\",\"hasLunchBreak\":false,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":1,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"19:00\",\"hasLunchBreak\":true,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":2,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"19:00\",\"hasLunchBreak\":true,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":3,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"19:00\",\"hasLunchBreak\":true,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":4,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"19:00\",\"hasLunchBreak\":true,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":5,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"19:00\",\"hasLunchBreak\":true,\"lunchStart\":\"12:00\",\"lunchDuration\":60},{\"dayOfWeek\":6,\"isOpen\":true,\"startTime\":\"09:00\",\"endTime\":\"18:00\",\"hasLunchBreak\":false,\"lunchStart\":\"12:00\",\"lunchDuration\":60}]},\"paymentMethods\":[\"Dinheiro\",\"Cartão\",\"Pix\"],\"shopInfo\":{\"name\":\"Minha Barbearia\",\"phone\":\"\",\"address\":\"\",\"description\":\"\",\"defaultPaymentMethod\":\"Dinheiro\"},\"settingsLoaded\":false,\"lastFetchedAt\":null},\"version\":1}"
+        }
+      ]
+    }
+  ]
+}

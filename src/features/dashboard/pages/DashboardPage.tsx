@@ -100,10 +100,8 @@ const UpcomingAppointmentItem: React.FC<UpcomingAppointmentItemProps> = ({
     ? `R$ ${appointment.price.toFixed(2)}`
     : '--';
 
-  const dateFormatted = new Date(appointment.date + 'T00:00:00').toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short'
-  });
+  const dateObj = new Date(appointment.date + 'T00:00:00');
+  const dateFormatted = `(${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')})`;
 
   return (
     <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
@@ -175,7 +173,7 @@ const UpcomingAppointmentItem: React.FC<UpcomingAppointmentItemProps> = ({
             <Icon name="calendar" className="w-4 h-4 mr-1" />
             {dateFormatted} • {appointment.startTime}
           </span>
-          <span className="font-bold text-slate-100">{priceLabel}</span>
+          <span className="font-bold text-emerald-500">{priceLabel}</span>
         </div>
       </button>
     </div>
@@ -546,7 +544,7 @@ export const DashboardPage: React.FC = () => {
           ) : (
             <div className="text-center py-8">
               <Icon name="calendar" className="w-8 h-8 mx-auto text-slate-600" />
-              <p className="text-slate-500 text-sm mt-2">Nenhum agendamento futuro.</p>
+              <p className="text-slate-500 text-sm mt-2">Agenda livre por enquanto! Aproveite para divulgar seu link.</p>
             </div>
           )}
         </Card>

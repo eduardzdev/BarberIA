@@ -22,10 +22,12 @@ export const WebsiteSettingsPage: React.FC = () => {
 
     const [theme, setTheme] = useState<{
         primaryColor: string;
+        secondaryColor?: string;
         font: string;
         mode: 'light' | 'dark';
     }>({
         primaryColor: '#7c3aed', // violet-600
+        secondaryColor: '',
         font: 'inter',
         mode: 'light'
     });
@@ -116,7 +118,10 @@ export const WebsiteSettingsPage: React.FC = () => {
             // 1. Salvar configurações na collection barbershops (privada)
             const updateData = {
                 slug,
-                theme,
+                theme: {
+                    ...theme,
+                    secondaryColor: theme.secondaryColor || theme.primaryColor
+                },
                 layout
             };
             await updateShopInfo(updateData);
@@ -160,7 +165,7 @@ export const WebsiteSettingsPage: React.FC = () => {
             };
 
             // Se o slug mudou, precisaríamos deletar o antigo, mas por segurança vamos apenas criar/sobrescrever o novo
-            // TODO: Lidar com exclusão de slug antigo se necessário para liberar nome
+            // Lidar com exclusão de slug antigo se necessário para liberar nome
 
             await setDoc(doc(db, 'public_shops', slug), publicData);
 

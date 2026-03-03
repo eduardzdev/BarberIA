@@ -35,23 +35,23 @@ export default defineConfig(({ mode }) => {
           icons: [
             // Primary icon with rounded corners (SVG) - most platforms
             {
-              src: '/icons/Logo%20BarberIA.svg',
+              src: '/icons/Logo%20Final%20BarberIA%20100x100%20.svg',
               sizes: 'any',
               type: 'image/svg+xml',
               purpose: 'any'
             },
             // Square icon for OS that require it (iOS, some Android launchers)
             {
-              src: '/icons/Logo%20BarberIA%20Quadrado.svg',
-              sizes: 'any',
-              type: 'image/svg+xml',
+              src: '/icons/logo-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
               purpose: 'any'
             },
             // Maskable icon for adaptive icons (Android)
             {
-              src: '/icons/Logo%20BarberIA%20Quadrado.svg',
+              src: '/icons/logo-512x512.png',
               sizes: '512x512',
-              type: 'image/svg+xml',
+              type: 'image/png',
               purpose: 'maskable'
             },
           ],

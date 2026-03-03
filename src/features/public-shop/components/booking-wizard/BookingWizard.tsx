@@ -6,20 +6,19 @@ import { StepDateTime } from './StepDateTime';
 // Sub-componentes para cada passo (simplificados aqui, idealmente em arquivos separados)
 const StepServices = () => {
     const { shopData, selectedServices, toggleService } = useBookingStore();
-    
+
     return (
         <div className="space-y-3 max-h-[60vh] overflow-y-auto">
             {shopData?.catalog.map(service => {
                 const isSelected = selectedServices.some(s => s.id === service.id);
                 return (
-                    <div 
+                    <div
                         key={service.id}
                         onClick={() => toggleService(service)}
-                        className={`p-4 rounded-xl border flex justify-between items-center cursor-pointer transition-all ${
-                            isSelected 
-                                ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary' 
-                                : 'border-slate-200 hover:border-shop-primary/50'
-                        }`}
+                        className={`p-4 rounded-xl border flex justify-between items-center cursor-pointer transition-all ${isSelected
+                            ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary'
+                            : 'border-slate-200 hover:border-shop-primary/50'
+                            }`}
                     >
                         <div className="flex items-center gap-3">
                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'bg-shop-primary border-shop-primary' : 'border-slate-300'}`}>
@@ -39,16 +38,15 @@ const StepServices = () => {
 
 const StepBarber = () => {
     const { shopData, selectedBarber, selectBarber } = useBookingStore();
-    
+
     return (
         <div className="grid grid-cols-2 gap-3">
-            <div 
+            <div
                 onClick={() => selectBarber(null)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${
-                    selectedBarber === null
-                        ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary' 
-                        : 'border-slate-200 hover:border-shop-primary/50'
-                }`}
+                className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${selectedBarber === null
+                    ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary'
+                    : 'border-slate-200 hover:border-shop-primary/50'
+                    }`}
             >
                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
                     <Icon name="users" className="w-6 h-6" />
@@ -57,14 +55,13 @@ const StepBarber = () => {
             </div>
 
             {shopData?.team.map(barber => (
-                <div 
+                <div
                     key={barber.id}
                     onClick={() => selectBarber(barber)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${
-                        selectedBarber?.id === barber.id
-                            ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary' 
-                            : 'border-slate-200 hover:border-shop-primary/50'
-                    }`}
+                    className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center gap-2 ${selectedBarber?.id === barber.id
+                        ? 'border-shop-primary bg-shop-primary/5 ring-1 ring-shop-primary'
+                        : 'border-slate-200 hover:border-shop-primary/50'
+                        }`}
                 >
                     {barber.avatarUrl ? (
                         <img src={barber.avatarUrl} alt={barber.name} className="w-12 h-12 rounded-full object-cover" />
@@ -82,23 +79,23 @@ const StepBarber = () => {
 
 const StepClientInfo = () => {
     const { clientInfo, setClientInfo } = useBookingStore();
-    
+
     return (
         <div className="space-y-4">
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Seu Nome</label>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     value={clientInfo.name}
                     onChange={(e) => setClientInfo(e.target.value, clientInfo.phone)}
                     className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-shop-primary"
-                    placeholder="Como você se chama?"
+                    placeholder="Nos diga seu primeiro e sobrenome"
                 />
             </div>
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Seu WhatsApp</label>
-                <input 
-                    type="tel" 
+                <input
+                    type="tel"
                     value={clientInfo.phone}
                     onChange={(e) => {
                         // Mascara simples
@@ -156,22 +153,22 @@ const StepSummary = () => {
             </div>
 
             <div className="border border-slate-200 p-3 rounded-lg">
-                 <p className="text-xs text-slate-500 uppercase font-bold">Cliente</p>
-                 <p className="text-slate-800 font-medium">{clientInfo.name}</p>
-                 <p className="text-sm text-slate-600">{clientInfo.phone}</p>
+                <p className="text-xs text-slate-500 uppercase font-bold">Cliente</p>
+                <p className="text-slate-800 font-medium">{clientInfo.name}</p>
+                <p className="text-sm text-slate-600">{clientInfo.phone}</p>
             </div>
         </div>
     );
 };
 
 export const BookingWizard: React.FC = () => {
-    const { 
-        isOpen, 
-        closeBooking, 
-        step, 
-        nextStep, 
-        prevStep, 
-        loading, 
+    const {
+        isOpen,
+        closeBooking,
+        step,
+        nextStep,
+        prevStep,
+        loading,
         confirmBooking,
         selectedServices,
         selectedDate,
@@ -206,8 +203,8 @@ export const BookingWizard: React.FC = () => {
     const handleConfirm = async () => {
         try {
             await confirmBooking();
-            // TODO: Redirecionar para página de sucesso ou mostrar mensagem de sucesso
-            // Por enquanto o store fecha o modal
+            // Redirecionamento futuro ou mensagem de sucesso na tela
+            // Por enquanto o store fecha o modal após o alert
             alert('Agendamento realizado com sucesso! Enviamos os detalhes para seu WhatsApp.');
         } catch (error) {
             alert('Erro ao agendar. Tente novamente.');
@@ -222,7 +219,7 @@ export const BookingWizard: React.FC = () => {
             {/* Modal */}
             <div className="relative bg-white w-full md:w-[500px] md:rounded-2xl rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col animate-slide-in-up md:animate-scale-in">
                 {/* Header */}
-                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div className="p-3 md:p-4 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         {step > 1 && (
                             <button onClick={prevStep} className="text-slate-400 hover:text-slate-600">
@@ -240,7 +237,7 @@ export const BookingWizard: React.FC = () => {
                 </div>
 
                 {/* Content */}
-                <div className="p-4 overflow-y-auto flex-1">
+                <div className="p-3 md:p-4 overflow-y-auto flex-1">
                     {step === 1 && <StepServices />}
                     {step === 2 && <StepBarber />}
                     {step === 3 && <StepDateTime />}
@@ -249,14 +246,14 @@ export const BookingWizard: React.FC = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
-                    <button 
+                <div className="p-3 md:p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl">
+                    <button
                         onClick={step === 5 ? handleConfirm : handleNext}
                         disabled={!canProceed() || loading}
                         className={`
                             w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2
-                            ${!canProceed() || loading 
-                                ? 'bg-slate-300 cursor-not-allowed shadow-none' 
+                            ${!canProceed() || loading
+                                ? 'bg-slate-300 cursor-not-allowed shadow-none'
                                 : 'bg-shop-primary hover:opacity-90 active:scale-95'
                             }
                         `}

@@ -1,89 +1,85 @@
 import { test, expect } from '@playwright/test';
+import { loginForTests, navigateTo } from './utils';
 
 test.describe('Agenda', () => {
   test.beforeEach(async ({ page }) => {
-    // Login
-    await page.goto('/');
-    await page.fill('input[type="email"]', 'teste@exemplo.com');
-    await page.fill('input[type="password"]', 'senha123');
-    await page.click('button[type="submit"]');
-    await page.waitForURL(/dashboard/, { timeout: 10000 });
-    
-    // Navegar para agenda
-    await page.click('text=/agenda/i');
-    await page.waitForURL(/agenda/);
+    test.setTimeout(60000); // 60s
+    await loginForTests(page);
+    await navigateTo(page, 'agenda');
   });
 
   test('deve exibir visualização da agenda', async ({ page }) => {
-    // Verificar título
+    // Verificar título exato
     await expect(page.locator('text=/agenda/i').first()).toBeVisible();
   });
 
   test('deve alternar entre visualizações (dia/semana/mês)', async ({ page }) => {
-    // Procurar botões de visualização
-    const viewButtons = page.locator('button:has-text("Dia"), button:has-text("Semana"), button:has-text("Mês")');
-    const count = await viewButtons.count();
-    
-    if (count > 0) {
-      // Clicar em diferentes visualizações
-      const dayBtn = page.locator('button:has-text("Dia")');
-      if (await dayBtn.isVisible()) {
-        await dayBtn.click();
-        await page.waitForTimeout(300);
-      }
-      
-      const weekBtn = page.locator('button:has-text("Semana")');
-      if (await weekBtn.isVisible()) {
-        await weekBtn.click();
-        await page.waitForTimeout(300);
-      }
-      
-      expect(true).toBeTruthy();
-    }
+    // Assegurar que os botões estão visíveis e declarados
+    const calendarBtn = page.getByTestId('view-calendar');
+    const kanbanBtn = page.getByTestId('view-kanban');
+    const timelineBtn = page.getByTestId('view-timeline');
+
+    await expect(calendarBtn).toBeVisible({ timeout: 10000 });
+    await expect(kanbanBtn).toBeVisible();
+    await expect(timelineBtn).toBeVisible();
+
+    // Alternar para Kanban
+    await kanbanBtn.click();
+    // A visualização Kanban tem colunas com data-status
+    await page.locator('[data-status]').first().waitFor({ state: 'visible', timeout: 15000 });
+    await expect(page.locator('[data-status]').first()).toBeVisible();
+
+    // Alternar para Timeline
+    await timelineBtn.click();
+    // A timeline por padrão mostra horários disponíveis (pode demorar a carregar store)
+    const timelineIndicator = page.locator('text=/Linha do Tempo/i');
+    await timelineIndicator.waitFor({ state: 'visible', timeout: 15000 });
+    await expect(timelineIndicator).toBeVisible();
+
+    // Alternar para Calendário
+    await calendarBtn.click();
+    const calendarIndicator = page.locator('text=/Próximos 7 Dias/i');
+    await calendarIndicator.waitFor({ state: 'visible', timeout: 15000 });
+    await expect(calendarIndicator).toBeVisible();
   });
 
   test('deve navegar entre datas', async ({ page }) => {
-    // Procurar botões de navegação de data
-    const prevBtn = page.locator('button[aria-label*="anterior"], button:has-text("‹"), button:has-text("◀")');
-    const nextBtn = page.locator('button[aria-label*="próximo"], button:has-text("›"), button:has-text("▶")');
-    
-    if (await prevBtn.first().isVisible()) {
-      await prevBtn.first().click();
-      await page.waitForTimeout(300);
-    }
-    
-    if (await nextBtn.first().isVisible()) {
-      await nextBtn.first().click();
-      await page.waitForTimeout(300);
-    }
-    
-    expect(true).toBeTruthy();
+    const prevBtn = page.getByTestId('prev-day');
+    const todayBtn = page.getByTestId('today-btn');
+    const nextBtn = page.getByTestId('next-day');
+
+    await expect(prevBtn).toBeVisible();
+    await expect(nextBtn).toBeVisible();
+
+    await prevBtn.click();
+    await page.waitForTimeout(500);
+
+    await nextBtn.click();
+    await page.waitForTimeout(500);
+
+    await todayBtn.click();
+    await page.waitForTimeout(500);
+
+    // O texto deve ser "Hoje" se for a data atual
+    await expect(todayBtn).toHaveText(/Hoje/i);
   });
 
-  test('deve exibir agendamentos no calendário', async ({ page }) => {
-    // Verificar se há agendamentos visíveis
-    const appointments = page.locator('[data-testid*="appointment"], [data-testid*="event"]');
-    const count = await appointments.count();
-    
-    // Apenas verificar que a página carregou
-    expect(count).toBeGreaterThanOrEqual(0);
-  });
+  test('deve abrir modal de novo agendamento ao clicar em horário do calendário', async ({ page }) => {
+    // Assegurar visão de Timeline (onde tem horários disponíveis)
+    const dayBtn = page.locator('button:has-text("Timeline")').first();
+    await dayBtn.click();
 
-  test('deve abrir modal de novo agendamento ao clicar em horário', async ({ page }) => {
-    // Procurar slots de horário clicáveis
-    const timeSlots = page.locator('[data-time], [data-hour]');
-    const count = await timeSlots.count();
-    
-    if (count > 0) {
-      await timeSlots.first().click();
-      
-      // Verificar se modal abriu
-      const modal = page.locator('[role="dialog"]');
-      if (await modal.isVisible({ timeout: 2000 })) {
-        expect(await modal.isVisible()).toBeTruthy();
-      }
-    }
-    
-    expect(true).toBeTruthy();
+    // Localiza uma célula clicável de horário no calendário
+    const timeSlots = page.locator('button:has-text("Horário disponível")');
+
+    // Garante que o calendário renderizou as células
+    await expect(timeSlots.first()).toBeVisible({ timeout: 10000 });
+
+    // Clica no primeiro horário disponível
+    await timeSlots.first().click();
+
+    // Modal de agendamento DEVE abrir
+    const modal = page.locator('[role="dialog"]').first();
+    await expect(modal).toBeVisible({ timeout: 4000 });
   });
 });

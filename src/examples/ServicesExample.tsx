@@ -36,9 +36,9 @@ export function ServicesExample() {
     isNameDuplicate,
   } = useServices({ autoFetch: true });
 
-  // Estado local para formulário
   const [formData, setFormData] = useState({
     name: '',
+    category: 'cabelo' as any,
     price: 0,
     duration: 30,
     icon: 'scissors',
@@ -59,16 +59,16 @@ export function ServicesExample() {
 
     try {
       await createService(formData);
-      
-      // Limpa formulário
+
       setFormData({
         name: '',
+        category: 'cabelo' as any,
         price: 0,
         duration: 30,
         icon: 'scissors',
         color: '#8B5CF6',
       });
-      
+
       alert('Serviço criado com sucesso!');
     } catch (err) {
       alert('Erro ao criar serviço');
@@ -98,8 +98,8 @@ export function ServicesExample() {
   };
 
   // Serviços filtrados por busca
-  const filteredServices = searchQuery 
-    ? searchByName(searchQuery) 
+  const filteredServices = searchQuery
+    ? searchByName(searchQuery)
     : services;
 
   // Estatísticas
@@ -119,7 +119,7 @@ export function ServicesExample() {
               <Icon name="help-circle" className="text-xl" />
               <span>{error}</span>
             </div>
-            <button 
+            <button
               onClick={clearError}
               className="text-red-400 hover:text-red-300"
             >
@@ -221,8 +221,8 @@ export function ServicesExample() {
         ) : filteredServices.length === 0 ? (
           <Card>
             <div className="text-center text-slate-400">
-              {searchQuery 
-                ? 'Nenhum serviço encontrado' 
+              {searchQuery
+                ? 'Nenhum serviço encontrado'
                 : 'Nenhum serviço cadastrado'}
             </div>
           </Card>

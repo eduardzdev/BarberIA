@@ -112,7 +112,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleOpenLocation = () => {
     if (shopInfo?.address) {
-      console.log('Open maps:', shopInfo.address);
+      // Log removed
     }
   };
 
