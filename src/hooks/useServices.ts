@@ -72,12 +72,14 @@ export function useServices(options: UseServicesOptions = {}) {
 
   // Estado do store
   const services = useServicesStore((state) => state.services);
+  const combos = useServicesStore((state) => state.combos);
   const loading = useServicesStore((state) => state.loading);
   const error = useServicesStore((state) => state.error);
   const dataLoaded = useServicesStore((state) => state.dataLoaded);
 
   // Ações
   const fetchServices = useServicesStore((state) => state.fetchServices);
+  const fetchCombos = useServicesStore((state) => state.fetchCombos);
   const createService = useServicesStore((state) => state.createService);
   const updateService = useServicesStore((state) => state.updateService);
   const deleteService = useServicesStore((state) => state.deleteService);
@@ -88,8 +90,9 @@ export function useServices(options: UseServicesOptions = {}) {
   useEffect(() => {
     if (autoFetch) {
       fetchServices(forceRefresh);
+      fetchCombos(forceRefresh);
     }
-  }, [autoFetch, forceRefresh, fetchServices]);
+  }, [autoFetch, forceRefresh, fetchServices, fetchCombos]);
 
   // Helpers memoizados para evitar re-renders desnecessários
   const helpers = useMemo(() => ({
@@ -97,7 +100,7 @@ export function useServices(options: UseServicesOptions = {}) {
      * Busca um serviço por ID
      */
     getServiceById: (id: string) => {
-      return services.find(s => s.id === id) || null;
+      return [...services, ...combos].find(s => s.id === id) || null;
     },
 
     /**
@@ -105,7 +108,7 @@ export function useServices(options: UseServicesOptions = {}) {
      */
     searchByName: (query: string) => {
       const lowerQuery = query.toLowerCase();
-      return services.filter(s =>
+      return [...services, ...combos].filter(s =>
         s.name.toLowerCase().includes(lowerQuery)
       );
     },
@@ -114,7 +117,7 @@ export function useServices(options: UseServicesOptions = {}) {
      * Filtra serviços por faixa de preço
      */
     filterByPriceRange: (minPrice: number, maxPrice: number) => {
-      return services.filter(s =>
+      return [...services, ...combos].filter(s =>
         s.price >= minPrice && s.price <= maxPrice
       );
     },
@@ -123,7 +126,7 @@ export function useServices(options: UseServicesOptions = {}) {
      * Filtra serviços por faixa de duração (minutos)
      */
     filterByDuration: (minDuration: number, maxDuration: number) => {
-      return services.filter(s =>
+      return [...services, ...combos].filter(s =>
         s.duration >= minDuration && s.duration <= maxDuration
       );
     },
@@ -132,7 +135,8 @@ export function useServices(options: UseServicesOptions = {}) {
      * Retorna estatísticas dos serviços
      */
     getStats: () => {
-      if (services.length === 0) {
+      const allItems = [...services, ...combos];
+      if (allItems.length === 0) {
         return {
           total: 0,
           averagePrice: 0,
@@ -142,11 +146,11 @@ export function useServices(options: UseServicesOptions = {}) {
         };
       }
 
-      const prices = services.map(s => s.price);
-      const durations = services.map(s => s.duration);
+      const prices = allItems.map(s => s.price);
+      const durations = allItems.map(s => s.duration);
 
       return {
-        total: services.length,
+        total: allItems.length,
         averagePrice: prices.reduce((a, b) => a + b, 0) / prices.length,
         averageDuration: durations.reduce((a, b) => a + b, 0) / durations.length,
         minPrice: Math.min(...prices),
@@ -158,22 +162,24 @@ export function useServices(options: UseServicesOptions = {}) {
      * Valida se o nome do serviço já existe
      */
     isNameDuplicate: (name: string, excludeId?: string) => {
-      return services.some(s =>
+      return [...services, ...combos].some(s =>
         s.name.toLowerCase() === name.toLowerCase() &&
         s.id !== excludeId
       );
     },
-  }), [services]);
+  }), [services, combos]);
 
   return {
     // Estado
     services,
+    combos,
     loading,
     error,
     dataLoaded,
 
     // Ações
     fetchServices,
+    fetchCombos,
     createService,
     updateService,
     deleteService,

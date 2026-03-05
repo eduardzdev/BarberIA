@@ -202,7 +202,7 @@ const TransactionItem: React.FC<{
             </div>
             <div className="flex items-center text-xs text-slate-400 mt-1">
               <Icon name="calendar" className="w-3.5 h-3.5 mr-1" />
-              <span>{formatDateBR(transaction.date)} às {transaction.time}</span>
+              <span>{formatDateBR(transaction.date)} • {transaction.time}</span>
             </div>
           </div>
         </div>
@@ -222,20 +222,30 @@ const TransactionItem: React.FC<{
 
       {expanded && (
         <div className="px-4 pb-4 pt-2 bg-slate-800/30 rounded-lg mx-2 mb-3">
-          <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm mb-4">
+          <div className="grid grid-cols-2 gap-y-4 gap-x-4 text-sm mb-4">
             <div>
-              <p className="text-slate-500 text-xs mb-0.5">Tipo</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="layer" className="w-3 h-3 mr-1.5 text-violet-400" />
+                TIPO
+              </p>
               <p className="text-slate-200 font-medium">{isIncome ? 'Receita' : 'Despesa'}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-xs mb-0.5">Método de Pagamento</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="payment" className="w-3 h-3 mr-1.5 text-violet-400" />
+                MÉTODO DE PAG.
+              </p>
               <p className="text-slate-200 font-medium">{transaction.paymentMethod}</p>
             </div>
-            {transaction.referenceType !== 'appointment' && (
-              <div className="col-span-2">
-                <p className="text-slate-500 text-xs mb-0.5">Descrição Completa</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <p className="text-slate-200 font-medium text-sm">{transaction.description}</p>
+
+            {transaction.referenceType !== 'appointment' ? (
+              <div className="col-span-2 border border-slate-800 rounded-lg bg-slate-900/60 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-2 flex items-center font-bold">
+                  <Icon name="pencil" className="w-3 h-3 mr-1.5 text-violet-400" />
+                  DESCRIÇÃO COMPLETA
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-slate-300 italic leading-relaxed">"{transaction.description}"</p>
                   {transaction.category && (
                     <span className="flex-shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-bold tracking-wider bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
                       {transaction.category.toUpperCase()}
@@ -243,39 +253,41 @@ const TransactionItem: React.FC<{
                   )}
                 </div>
               </div>
-            )}
-            {transaction.referenceType === 'appointment' && (
+            ) : (
               <div className="col-span-2 bg-violet-500/10 p-3 rounded-lg border border-violet-500/20">
-                <p className="text-violet-400 text-xs mb-2 font-semibold flex items-center">
-                  <Icon name="calendar" className="w-3.5 h-3.5 mr-1" />
-                  Detalhes do Agendamento
+                <p className="text-[10px] uppercase tracking-wide text-violet-400 mb-3 flex items-center font-bold">
+                  <Icon name="calendar" className="w-3.5 h-3.5 mr-1.5" />
+                  DETALHES DO AGENDAMENTO
                 </p>
                 {loadingAppt ? (
                   <p className="text-slate-400 text-xs animate-pulse">Carregando detalhes do cliente...</p>
                 ) : appointment ? (
-                  <div className="space-y-1.5 mt-2">
+                  <div className="space-y-2">
                     <p className="text-slate-200 text-sm flex items-center">
-                      <Icon name="user" className="w-3.5 h-3.5 mr-2 text-slate-500" />
-                      <span className="font-medium mr-1">Cliente:</span> {appointment.clientName}
+                      <Icon name="user" className="w-3.5 h-3.5 mr-2 text-violet-400/70" />
+                      <span className="text-slate-500 text-xs uppercase font-bold mr-2">Cliente:</span>
+                      <span className="font-medium">{appointment.clientName}</span>
                     </p>
                     <p className="text-slate-200 text-sm flex items-center">
-                      <Icon name="phone" className="w-3.5 h-3.5 mr-2 text-slate-500" />
-                      <span className="font-medium mr-1">Telefone:</span> {appointment.clientPhone}
+                      <Icon name="phone" className="w-3.5 h-3.5 mr-2 text-violet-400/70" />
+                      <span className="text-slate-500 text-xs uppercase font-bold mr-2">Telefone:</span>
+                      <span className="font-medium">{appointment.clientPhone}</span>
                     </p>
                     <p className="text-slate-200 text-sm flex items-start">
-                      <Icon name="scissors" className="w-3.5 h-3.5 mr-2 text-slate-500 mt-0.5" />
-                      <span className="font-medium mr-1">Serviços:</span>
-                      <span className="flex-1">{appointment.services.join(', ')}</span>
+                      <Icon name="scissors" className="w-3.5 h-3.5 mr-2 text-violet-400/70 mt-0.5" />
+                      <span className="text-slate-500 text-xs uppercase font-bold mr-2">Serviços:</span>
+                      <span className="flex-1 font-medium">{appointment.services.join(', ')}</span>
                     </p>
                     {appointment.barberName && (
                       <p className="text-slate-200 text-sm flex items-center">
-                        <Icon name="star" className="w-3.5 h-3.5 mr-2 text-slate-500" />
-                        <span className="font-medium mr-1">Profissional:</span> {appointment.barberName}
+                        <Icon name="star" className="w-3.5 h-3.5 mr-2 text-violet-400/70" />
+                        <span className="text-slate-500 text-xs uppercase font-bold mr-2">Profissional:</span>
+                        <span className="font-medium">{appointment.barberName}</span>
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-slate-300 text-sm">{transaction.description}</p>
+                  <p className="text-slate-300 text-sm italic">"{transaction.description}"</p>
                 )}
               </div>
             )}

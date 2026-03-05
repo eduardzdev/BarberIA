@@ -38,6 +38,16 @@ import { Appointment, AppointmentStatus } from '@/types';
 import { CreateAppointmentForm } from '@/features/appointments/components/CreateAppointmentForm';
 import { StatsCard } from '@/components/StatsCard';
 
+// ===== Helpers =====
+const formatName = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return '';
+  let first = parts[0];
+  if (first.length > 10) first = first.substring(0, 10) + '...';
+  if (parts.length > 1) return `${first} ${parts[parts.length - 1][0]}.`;
+  return first;
+};
+
 // ===== Sub-Components =====
 
 /**
@@ -51,6 +61,7 @@ interface TimelineSlotProps {
   onEditAppointment?: (appointment: Appointment) => void;
   onCompleteAppointment?: (appointment: Appointment) => void;
   onCancelAppointment?: (appointment: Appointment) => void;
+  onDeleteAppointment?: (appointment: Appointment) => void;
   onStatusChange?: (appointment: Appointment, newStatus: AppointmentStatus) => void;
   statusActionLoading?: boolean;
 }
@@ -60,6 +71,7 @@ interface AppointmentActionMenuProps {
   onEdit?: (appointment: Appointment) => void;
   onComplete?: (appointment: Appointment) => void;
   onCancel?: (appointment: Appointment) => void;
+  onDelete?: (appointment: Appointment) => void;
   disabledActions?: boolean;
 }
 
@@ -68,6 +80,7 @@ const AppointmentActionMenu: React.FC<AppointmentActionMenuProps> = ({
   onEdit,
   onComplete,
   onCancel,
+  onDelete,
   disabledActions = false
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -129,11 +142,20 @@ const AppointmentActionMenu: React.FC<AppointmentActionMenuProps> = ({
           <button
             disabled={disableCancel}
             onClick={(event) => handleAction(event, onCancel)}
-            className={`w-full flex items-center px-4 py-2 text-sm rounded-b-lg hover:bg-slate-600 ${disableCancel ? 'text-slate-500 cursor-not-allowed' : 'text-red-400'
+            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-slate-600 ${disableCancel ? 'text-slate-500 cursor-not-allowed' : 'text-red-400'
               }`}
           >
             <Icon name="x" className="w-4 h-4 mr-2" />
             Cancelar
+          </button>
+          <button
+            disabled={disabledActions}
+            onClick={(event) => handleAction(event, onDelete)}
+            className={`w-full flex items-center px-4 py-2 text-sm rounded-b-lg hover:bg-slate-600 ${disabledActions ? 'text-slate-500 cursor-not-allowed' : 'text-red-500 font-bold'
+              }`}
+          >
+            <Icon name="trash" className="w-4 h-4 mr-2" />
+            Excluir
           </button>
         </div>
       )}
@@ -149,6 +171,7 @@ const TimelineSlot: React.FC<TimelineSlotProps> = ({
   onEditAppointment,
   onCompleteAppointment,
   onCancelAppointment,
+  onDeleteAppointment,
   onStatusChange,
   statusActionLoading
 }) => {
@@ -160,28 +183,66 @@ const TimelineSlot: React.FC<TimelineSlotProps> = ({
           <div className="w-2 h-2 rounded-full bg-violet-500 absolute top-1 -left-1 ring-4 ring-slate-900"></div>
         </div>
         <div className="flex-1 -mt-1">
-          <Card className="bg-slate-800 hover:bg-slate-750 transition-colors">
-            <div className="flex justify-between items-start">
-              <button
-                onClick={() => onAppointmentClick?.(appointment)}
-                className="flex-1 pr-2 text-left"
-              >
-                <p className="font-bold text-slate-100">{appointment.clientName}</p>
-                <p className="text-sm text-slate-300">{appointment.services.join(' + ')}</p>
-                <p className="text-xs text-slate-400 mt-1">{appointment.duration}min</p>
-              </button>
-              <div className="flex items-start space-x-2" onClick={(e) => e.stopPropagation()}>
-                <StatusSelector
-                  currentStatus={appointment.status}
-                  onStatusChange={(newStatus) => onStatusChange?.(appointment, newStatus)}
-                />
-                <AppointmentActionMenu
-                  appointment={appointment}
-                  onEdit={onEditAppointment}
-                  onComplete={onCompleteAppointment}
-                  onCancel={onCancelAppointment}
-                  disabledActions={statusActionLoading}
-                />
+          <Card className="!p-4 bg-slate-800/50 hover:bg-slate-700/60 border border-slate-700/50 transition-all group">
+            <div className="flex flex-col space-y-4">
+              {/* Top Section: Name and Actions */}
+              <div className="flex justify-between items-start gap-4">
+                <button
+                  onClick={() => onAppointmentClick?.(appointment)}
+                  className="flex items-center gap-2 text-left group-hover:translate-x-1 transition-transform"
+                >
+                  <Icon name="user" className="w-4 h-4 text-violet-400" />
+                  <p className="font-bold text-slate-100 text-base leading-none">
+                    {formatName(appointment.clientName)}
+                  </p>
+                </button>
+
+                <div className="flex items-center space-x-2 h-6" onClick={(e) => e.stopPropagation()}>
+                  <StatusSelector
+                    currentStatus={appointment.status}
+                    onStatusChange={(newStatus) => onStatusChange?.(appointment, newStatus)}
+                  />
+                  <AppointmentActionMenu
+                    appointment={appointment}
+                    onEdit={onEditAppointment}
+                    onComplete={onCompleteAppointment}
+                    onCancel={onCancelAppointment}
+                    onDelete={onDeleteAppointment}
+                    disabledActions={statusActionLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Section: Info and Price */}
+              <div className="flex flex-col space-y-3 pt-1">
+                {/* Full-width Services */}
+                <button
+                  onClick={() => onAppointmentClick?.(appointment)}
+                  className="flex items-center gap-2 text-left group-hover:translate-x-1 transition-transform w-full"
+                >
+                  <Icon name="scissors" className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+                  <p className="text-sm text-slate-300 font-medium line-clamp-1">
+                    {appointment.services.join(' + ')}
+                  </p>
+                </button>
+
+                {/* Duration and Price in one line */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Icon name="clock" className="w-3.5 h-3.5 text-violet-400" />
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                      {appointment.duration} min
+                    </p>
+                  </div>
+
+                  {appointment.price && (
+                    <div className="flex-shrink-0">
+                      <span className="text-sm font-extrabold text-green-400 bg-green-400/10 px-3 py-1 rounded-lg border border-green-500/20 block leading-none">
+                        R$ {appointment.price.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
@@ -223,6 +284,7 @@ interface KanbanColumnProps {
   onEditAppointment?: (appointment: Appointment) => void;
   onCompleteAppointment?: (appointment: Appointment) => void;
   onCancelAppointment?: (appointment: Appointment) => void;
+  onDeleteAppointment?: (appointment: Appointment) => void;
   onStatusChange?: (appointment: Appointment, newStatus: AppointmentStatus) => void;
   statusActionLoading?: boolean;
 }
@@ -236,57 +298,87 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   onEditAppointment,
   onCompleteAppointment,
   onCancelAppointment,
+  onDeleteAppointment,
   onStatusChange,
   statusActionLoading
-}) => (
-  <div className="flex-1 min-w-0" data-status={status}>
-    <div className={`px-3 py-2 rounded-lg ${color} mb-3`}>
-      <p className="font-bold text-slate-100 text-sm">{title}</p>
-      <p className="text-xs text-slate-300">{appointments.length} agendamentos</p>
-    </div>
-    <div className="space-y-2">
-      {appointments.length > 0 ? (
-        appointments.map(app => (
-          <Card key={app.id} className="!p-3 hover:bg-slate-750 transition-colors space-y-2">
-            <div className="flex justify-between items-start">
-              <button
-                onClick={() => onAppointmentClick(app)}
-                className="flex-1 text-left"
-              >
-                <p className="font-bold text-slate-100 text-sm">{app.startTime}</p>
-                <p className="text-xs text-slate-300 mt-1">{app.clientName}</p>
-                <p className="text-xs text-slate-400 mt-1">{app.services.join(', ')}</p>
-              </button>
-              <div onClick={(e) => e.stopPropagation()}>
-                <AppointmentActionMenu
-                  appointment={app}
-                  onEdit={onEditAppointment}
-                  onComplete={onCompleteAppointment}
-                  onCancel={onCancelAppointment}
-                  disabledActions={statusActionLoading}
-                />
+}) => {
+  return (
+    <div className="w-64 flex-shrink-0" data-status={status}>
+      <div className={`px-3 py-2 rounded-lg ${color} mb-3`}>
+        <p className="font-bold text-slate-100 text-sm">{title}</p>
+        <p className="text-xs text-slate-300">{appointments.length} agendamentos</p>
+      </div>
+      <div className="space-y-2">
+        {appointments.length > 0 ? (
+          appointments.map(app => (
+            <Card key={app.id} className="!p-4 hover:bg-slate-700/40 border border-slate-700/50 transition-all space-y-3 group">
+              <div className="flex justify-between items-start">
+                <button
+                  onClick={() => onAppointmentClick(app)}
+                  className="flex-1 text-left"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-violet-500/10 p-1.5 rounded-lg">
+                        <Icon name="clock" className="w-4 h-4 text-violet-400" />
+                      </div>
+                      <p className="font-bold text-slate-100 text-base">{app.startTime}</p>
+                    </div>
+                    {app.price && (
+                      <span className="text-sm font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-md">
+                        R$ {app.price.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Icon name="user" className="w-3.5 h-3.5 text-violet-400" />
+                      <p className="font-semibold text-slate-200 text-sm truncate">
+                        {formatName(app.clientName)}
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Icon name="scissors" className="w-3.5 h-3.5 text-violet-400 mt-0.5" />
+                      <p className="text-xs text-slate-400 line-clamp-1">{app.services.join(', ')}</p>
+                    </div>
+                  </div>
+                </button>
+                <div onClick={(e) => e.stopPropagation()} className="ml-2">
+                  <AppointmentActionMenu
+                    appointment={app}
+                    onEdit={onEditAppointment}
+                    onComplete={onCompleteAppointment}
+                    onCancel={onCancelAppointment}
+                    onDelete={onDeleteAppointment}
+                    disabledActions={statusActionLoading}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>{app.duration} min</span>
-              <div onClick={(e) => e.stopPropagation()}>
-                <StatusSelector
-                  currentStatus={app.status}
-                  onStatusChange={(newStatus) => onStatusChange?.(app, newStatus)}
-                />
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <Icon name="clock" className="w-3.5 h-3.5 text-violet-400" />
+                  <span className="text-xs font-medium">{app.duration} min</span>
+                </div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <StatusSelector
+                    currentStatus={app.status}
+                    onStatusChange={(newStatus) => onStatusChange?.(app, newStatus)}
+                  />
+                </div>
               </div>
-            </div>
-          </Card>
-        ))
-      ) : (
-        <div className="text-center py-4">
-          <Icon name="inbox" className="w-6 h-6 mx-auto text-slate-600" />
-          <p className="text-slate-500 text-xs mt-1">Sua agenda está livre por enquanto.</p>
-        </div>
-      )}
+            </Card>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <Icon name="inbox" className="w-8 h-8 mx-auto text-slate-700/50" />
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * DailyScheduleView - Grade de horários do dia
@@ -298,6 +390,7 @@ interface DailyScheduleViewProps {
   onEditAppointment?: (appointment: Appointment) => void;
   onCompleteAppointment?: (appointment: Appointment) => void;
   onCancelAppointment?: (appointment: Appointment) => void;
+  onDeleteAppointment?: (appointment: Appointment) => void;
   onStatusChange?: (appointment: Appointment, newStatus: AppointmentStatus) => void;
   statusActionLoading?: boolean;
 }
@@ -309,6 +402,7 @@ const DailyScheduleView: React.FC<DailyScheduleViewProps> = ({
   onEditAppointment,
   onCompleteAppointment,
   onCancelAppointment,
+  onDeleteAppointment,
   onStatusChange,
   statusActionLoading
 }) => {
@@ -338,6 +432,7 @@ const DailyScheduleView: React.FC<DailyScheduleViewProps> = ({
             onEditAppointment={onEditAppointment}
             onCompleteAppointment={onCompleteAppointment}
             onCancelAppointment={onCancelAppointment}
+            onDeleteAppointment={onDeleteAppointment}
             onStatusChange={onStatusChange}
             statusActionLoading={statusActionLoading}
           />
@@ -427,81 +522,82 @@ const AgendaMacroOverview: React.FC<AgendaMacroOverviewProps> = ({
   };
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="space-y-4">
+      <div className="space-y-3">
+        {/* Card de Agendamentos (Principal) */}
         <Card className="!p-4 bg-slate-900/70 border border-slate-800">
-          <p className="text-xs text-slate-400 uppercase tracking-wide">Agendamentos (7 dias)</p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
-              <p className="text-[11px] text-slate-500 uppercase">Confirmados</p>
-              <p className="mt-2 text-2xl font-bold text-emerald-400">{totals.totalConfirmed}</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-3">Agendamentos (7 dias)</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-slate-800/50 bg-slate-950/40 p-3">
+              <p className="text-[10px] text-slate-500 uppercase font-bold">Confirm.</p>
+              <p className="mt-1 text-2xl font-bold text-emerald-400">{totals.totalConfirmed}</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
-              <p className="text-[11px] text-slate-500 uppercase">Total</p>
-              <p className="mt-2 text-2xl font-bold text-slate-100">{totals.totalAppointments}</p>
+            <div className="rounded-lg border border-slate-800/50 bg-slate-950/40 p-3">
+              <p className="text-[10px] text-slate-500 uppercase font-bold">Total</p>
+              <p className="mt-1 text-2xl font-bold text-slate-100">{totals.totalAppointments}</p>
             </div>
-          </div>
-        </Card>
-        <Card className="!p-4 bg-slate-900/70 border border-slate-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-400 uppercase tracking-wide">Receita Prevista</p>
-              <p className="text-xl font-bold text-emerald-400">{currencyFormatter.format(totals.totalRevenue)}</p>
-              <p className="text-[11px] text-slate-500 mt-1">Considera agendamentos confirmados</p>
-            </div>
-            <Icon name="trendUp" className="w-8 h-8 text-emerald-400" />
           </div>
         </Card>
 
-        <p className="col-span-full text-sm text-slate-400 mt-4 mb-1">
-          Dê dois cliques no dia para visualizar mais detalhes dos agendamentos na visualização de
-          {' '}<button
-            onClick={onTimelineLinkClick}
-            className="text-violet-300 font-semibold hover:text-violet-200 transition-colors"
-            type="button"
-          >
-            Timeline
-          </button>
-          .
-        </p>
+        {/* Card de Receita (Minimalista) */}
+        <div className="px-4 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon name="trendUp" className="w-4 h-4 text-emerald-400" />
+            <p className="text-[10px] text-emerald-400/70 uppercase tracking-wider font-bold">Receita Prevista:</p>
+            <p className="text-sm font-bold text-emerald-400">{currencyFormatter.format(totals.totalRevenue)}</p>
+          </div>
+          <span className="text-[9px] text-slate-600 uppercase font-medium">Líquido</span>
+        </div>
       </div>
+
+      <p className="text-[11px] text-slate-400 px-1">
+        Dê dois cliques no dia para ver detalhes na
+        {' '}<button
+          onClick={onTimelineLinkClick}
+          className="text-violet-400 font-bold hover:underline"
+          type="button"
+        >
+          Timeline
+        </button>.
+      </p>
 
       <div className="space-y-3">
         {daySummaries.map(day => {
           const weekday = formatWeekday(day.date, day.isBaseDay);
           const formattedDate = formatDate(day.date);
           const highlightClass = day.isBaseDay
-            ? 'border-violet-500/40 shadow-[0_0_14px_rgba(139,92,246,0.4)]'
-            : 'border-slate-800';
+            ? 'border-violet-500/40 shadow-[0_0_14px_rgba(139,92,246,0.3)]'
+            : 'border-slate-800/60';
           return (
             <Card
               onDoubleClick={() => onDayDoubleClick?.(day.isoDate)}
               key={day.isoDate}
-              className={`!p-4 bg-slate-900/80 border ${highlightClass} ${onDayDoubleClick ? 'cursor-zoom-in' : ''}`}
+              className={`!p-4 bg-slate-900/80 border ${highlightClass} ${onDayDoubleClick ? 'cursor-zoom-in' : ''
+                }`}
             >
               <div className="flex items-center justify-between">
                 <p className="text-xs text-slate-500 uppercase tracking-wide">{weekday}</p>
                 <p className="text-sm font-semibold text-slate-200">{formattedDate}</p>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+              <div className="mt-4 grid grid-cols-3 gap-2 text-sm border-t border-slate-800/50 pt-4">
                 <div>
-                  <p className="text-[11px] uppercase text-slate-500 tracking-wide">Total</p>
-                  <p className="mt-1 text-base font-semibold text-slate-200">{day.total}</p>
+                  <p className="text-[9px] uppercase text-slate-500 font-bold tracking-tight mb-1">Total</p>
+                  <p className="text-base font-bold text-slate-200">{day.total}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase text-slate-500 tracking-wide">Confirmados</p>
-                  <p className="mt-1 text-base font-semibold text-emerald-400">{day.confirmed}</p>
+                  <p className="text-[9px] uppercase text-slate-500 font-bold tracking-tight mb-1">Confirm.</p>
+                  <p className="text-base font-bold text-emerald-400">{day.confirmed}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] uppercase text-slate-500 tracking-wide">Pendentes</p>
-                  <p className="mt-1 text-base font-semibold text-yellow-400">{day.pending}</p>
+                  <p className="text-[9px] uppercase text-slate-500 font-bold tracking-tight mb-1">Pendente</p>
+                  <p className="text-base font-bold text-yellow-400">{day.pending}</p>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-[11px] uppercase text-slate-500 tracking-wide">Receita Prevista</p>
-                <p className="text-base font-semibold text-emerald-400">
+              <div className="mt-4 flex items-center justify-between bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
+                <p className="text-[9px] uppercase text-emerald-400/70 font-bold tracking-wider">Receita Prevista</p>
+                <p className="text-sm font-bold text-emerald-400">
                   {currencyFormatter.format(day.revenue)}
                 </p>
               </div>
@@ -528,7 +624,10 @@ const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     <div className="flex justify-between items-start">
       <div>
         <p className="text-2xl font-bold text-slate-100">{appointment.clientName}</p>
-        <p className="text-slate-400">{appointment.clientPhone}</p>
+        <p className="text-slate-400 flex items-center">
+          <Icon name="phone" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          {appointment.clientPhone}
+        </p>
       </div>
       <StatusSelector
         currentStatus={appointment.status}
@@ -537,26 +636,46 @@ const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     </div>
     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700">
       <div>
-        <p className="text-xs text-slate-400">Data</p>
-        <p className="font-semibold text-slate-200">{appointment.date}</p>
+        <p className="text-xs text-slate-400 flex items-center mb-1">
+          <Icon name="calendar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          Data
+        </p>
+        <p className="font-semibold text-slate-200">
+          {(() => {
+            const [year, month, day] = appointment.date.split('-');
+            return `${day}/${month}/${year.slice(-2)}`;
+          })()}
+        </p>
       </div>
       <div>
-        <p className="text-xs text-slate-400">Horário</p>
+        <p className="text-xs text-slate-400 flex items-center mb-1">
+          <Icon name="clock" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          Horário
+        </p>
         <p className="font-semibold text-slate-200">{appointment.startTime}</p>
       </div>
       <div>
-        <p className="text-xs text-slate-400">Duração</p>
+        <p className="text-xs text-slate-400 flex items-center mb-1">
+          <Icon name="history" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          Duração
+        </p>
         <p className="font-semibold text-slate-200">{appointment.duration} min</p>
       </div>
       <div>
-        <p className="text-xs text-slate-400">Preço</p>
+        <p className="text-xs text-slate-400 flex items-center mb-1">
+          <Icon name="dollar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          Preço
+        </p>
         <p className="font-semibold text-slate-200">
           {appointment.price ? `R$ ${appointment.price.toFixed(2)}` : '-'}
         </p>
       </div>
     </div>
     <div className="pt-4 border-t border-slate-700">
-      <p className="text-xs text-slate-400 mb-2">Serviços</p>
+      <p className="text-xs text-slate-400 mb-2 flex items-center">
+        <Icon name="scissors" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+        Serviços
+      </p>
       <div className="flex flex-wrap gap-2">
         {appointment.services.map((service, idx) => (
           <span
@@ -570,7 +689,10 @@ const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
     </div>
     {appointment.notes && (
       <div className="pt-4 border-t border-slate-700">
-        <p className="text-xs text-slate-400 mb-2">Observações</p>
+        <p className="text-xs text-slate-400 mb-2 flex items-center">
+          <Icon name="pencil" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+          Observações
+        </p>
         <p className="text-sm text-slate-300 italic">"{appointment.notes}"</p>
       </div>
     )}
@@ -589,7 +711,7 @@ type ViewMode = 'timeline' | 'kanban' | 'calendar';
 
 export const AgendaPage: React.FC = () => {
   // Hooks
-  const { appointments, filterByDate, updateStatus, fetchUpcoming } = useAppointments({ autoFetch: 'upcoming' });
+  const { appointments, filterByDate, updateStatus, deleteAppointment, fetchUpcoming } = useAppointments({ autoFetch: 'upcoming' });
   const { openModal, closeModal, isModalOpen, success, error: showError } = useUI();
 
   // State
@@ -727,6 +849,24 @@ export const AgendaPage: React.FC = () => {
       'Agendamento cancelado.',
       'Não foi possível cancelar o agendamento.'
     );
+  };
+
+  const handleDeleteAppointment = async (appointment: Appointment) => {
+    if (!window.confirm(`Tem certeza que deseja excluir permanentemente o agendamento de ${appointment.clientName}?`)) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      await deleteAppointment(appointment.id);
+      success('Agendamento excluído com sucesso!');
+      await fetchUpcoming();
+    } catch (err) {
+      console.error('Erro ao excluir agendamento:', err);
+      showError(err instanceof Error ? err.message : 'Erro ao excluir agendamento');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleOpenCompleteModal = (appointment: Appointment) => {
@@ -963,6 +1103,7 @@ export const AgendaPage: React.FC = () => {
               onEditAppointment={handleEditAppointment}
               onCompleteAppointment={handleCompleteAppointment}
               onCancelAppointment={handleCancelAppointment}
+              onDeleteAppointment={handleDeleteAppointment}
               onStatusChange={handleQuickStatusChange}
               statusActionLoading={actionLoading}
             />
@@ -983,6 +1124,7 @@ export const AgendaPage: React.FC = () => {
                   onEditAppointment={handleEditAppointment}
                   onCompleteAppointment={handleCompleteAppointment}
                   onCancelAppointment={handleCancelAppointment}
+                  onDeleteAppointment={handleDeleteAppointment}
                   onStatusChange={handleQuickStatusChange}
                   statusActionLoading={actionLoading}
                 />

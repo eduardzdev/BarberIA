@@ -50,6 +50,16 @@ import { ClientForm } from '@/features/clients/components/ClientForm';
 import { TransactionForm } from '@/features/financial/components/TransactionForm';
 import { formatPhone } from '@/lib/validations';
 
+// ===== Helpers =====
+const formatName = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return '';
+  let first = parts[0];
+  if (first.length > 10) first = first.substring(0, 10) + '...';
+  if (parts.length > 1) return `${first} ${parts[parts.length - 1][0]}.`;
+  return first;
+};
+
 // ===== Sub-Components =====
 
 
@@ -96,86 +106,106 @@ const UpcomingAppointmentItem: React.FC<UpcomingAppointmentItemProps> = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const priceLabel = appointment.price
-    ? `R$ ${appointment.price.toFixed(2)}`
-    : '--';
-
   const dateObj = new Date(appointment.date + 'T00:00:00');
-  const dateFormatted = `(${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')})`;
+  const dateFormatted = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getFullYear()).slice(-2)}`;
 
   return (
-    <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
-      <div className="flex justify-between items-start mb-2">
-        <button
-          onClick={() => onViewDetails(appointment)}
-          className="flex-1 text-left"
-        >
-          <div className="flex items-center space-x-2 mb-1">
-            <p className="font-bold text-slate-100">{appointment.clientName}</p>
-            <div onClick={(e) => e.stopPropagation()}>
-              <StatusSelector
-                currentStatus={appointment.status}
-                onStatusChange={(newStatus) => onStatusChange(appointment, newStatus)}
-              />
+    <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors group">
+      <div className="flex flex-col space-y-4">
+        {/* Top Section: Name and Status/Actions */}
+        <div className="flex justify-between items-center gap-4">
+          <button
+            onClick={() => onViewDetails(appointment)}
+            className="flex items-center gap-2 text-left group-hover:translate-x-1 transition-transform"
+          >
+            <Icon name="user" className="w-4 h-4 text-violet-400" />
+            <p className="font-bold text-slate-100 text-base leading-none">
+              {formatName(appointment.clientName)}
+            </p>
+          </button>
+
+          <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+            <StatusSelector
+              currentStatus={appointment.status}
+              onStatusChange={(newStatus) => onStatusChange(appointment, newStatus)}
+            />
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-1 text-slate-400 hover:text-white"
+              >
+                <Icon name="dots" className="w-5 h-5" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-20">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEdit(appointment);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-t-lg"
+                  >
+                    <Icon name="pencil" className="w-4 h-4 mr-2" />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onComplete(appointment);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-green-400 hover:bg-slate-600"
+                  >
+                    <Icon name="check" className="w-4 h-4 mr-2" />
+                    Concluir
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onRemove(appointment);
+                    }}
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-slate-600 rounded-b-lg"
+                  >
+                    <Icon name="x" className="w-4 h-4 mr-2" />
+                    Cancelar
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-          <p className="text-sm text-slate-300">{appointment.services.join(' + ')}</p>
+        </div>
+
+        {/* Middle Section: Services (Full Width) */}
+        <button
+          onClick={() => onViewDetails(appointment)}
+          className="flex items-center gap-2 text-left group-hover:translate-x-1 transition-transform w-full"
+        >
+          <Icon name="scissors" className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+          <p className="text-sm text-slate-300 font-medium line-clamp-1">
+            {appointment.services.join(' + ')}
+          </p>
         </button>
-        <div className="relative" onClick={(e) => e.stopPropagation()}>
+
+        {/* Bottom Section: Date/Time and Price */}
+        <div className="flex justify-between items-center pt-1">
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1 text-slate-400 hover:text-white"
+            onClick={() => onViewDetails(appointment)}
+            className="flex items-center gap-2 text-left"
           >
-            <Icon name="dots" className="w-5 h-5" />
+            <Icon name="calendar" className="w-3.5 h-3.5 text-violet-400" />
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+              {dateFormatted} • {appointment.startTime}
+            </span>
           </button>
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-10">
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  onEdit(appointment);
-                }}
-                className="w-full flex items-center px-4 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-t-lg"
-              >
-                <Icon name="pencil" className="w-4 h-4 mr-2" />
-                Editar
-              </button>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  onComplete(appointment);
-                }}
-                className="w-full flex items-center px-4 py-2 text-sm text-green-400 hover:bg-slate-600"
-              >
-                <Icon name="check" className="w-4 h-4 mr-2" />
-                Concluir
-              </button>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  onRemove(appointment);
-                }}
-                className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-slate-600 rounded-b-lg"
-              >
-                <Icon name="x" className="w-4 h-4 mr-2" />
-                Cancelar
-              </button>
+
+          {appointment.price && (
+            <div className="flex-shrink-0">
+              <span className="text-sm font-extrabold text-green-400 bg-green-400/10 px-3 py-1 rounded-lg border border-green-500/20 block leading-none">
+                R$ {appointment.price.toFixed(2)}
+              </span>
             </div>
           )}
         </div>
       </div>
-      <button
-        onClick={() => onViewDetails(appointment)}
-        className="w-full text-left"
-      >
-        <div className="flex items-center justify-between text-sm text-slate-400">
-          <span className="flex items-center">
-            <Icon name="calendar" className="w-4 h-4 mr-1" />
-            {dateFormatted} • {appointment.startTime}
-          </span>
-          <span className="font-bold text-emerald-500">{priceLabel}</span>
-        </div>
-      </button>
     </div>
   );
 };
@@ -654,7 +684,10 @@ export const DashboardPage: React.FC = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-2xl font-bold text-slate-100">{viewDetailsAppointment.clientName}</p>
-                <p className="text-slate-400">{viewDetailsAppointment.clientPhone}</p>
+                <p className="text-slate-400 flex items-center">
+                  <Icon name="phone" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  {viewDetailsAppointment.clientPhone}
+                </p>
               </div>
               <StatusSelector
                 currentStatus={viewDetailsAppointment.status}
@@ -663,26 +696,46 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700">
               <div>
-                <p className="text-xs text-slate-400">Data</p>
-                <p className="font-semibold text-slate-200">{viewDetailsAppointment.date}</p>
+                <p className="text-xs text-slate-400 flex items-center mb-1">
+                  <Icon name="calendar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Data
+                </p>
+                <p className="font-semibold text-slate-200">
+                  {(() => {
+                    const [year, month, day] = viewDetailsAppointment.date.split('-');
+                    return `${day}/${month}/${year.slice(-2)}`;
+                  })()}
+                </p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Horário</p>
+                <p className="text-xs text-slate-400 flex items-center mb-1">
+                  <Icon name="clock" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Horário
+                </p>
                 <p className="font-semibold text-slate-200">{viewDetailsAppointment.startTime}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Duração</p>
+                <p className="text-xs text-slate-400 flex items-center mb-1">
+                  <Icon name="history" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Duração
+                </p>
                 <p className="font-semibold text-slate-200">{viewDetailsAppointment.duration} min</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">Preço</p>
+                <p className="text-xs text-slate-400 flex items-center mb-1">
+                  <Icon name="dollar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Preço
+                </p>
                 <p className="font-semibold text-slate-200">
                   {viewDetailsAppointment.price ? `R$ ${viewDetailsAppointment.price.toFixed(2)}` : '-'}
                 </p>
               </div>
             </div>
             <div className="pt-4 border-t border-slate-700">
-              <p className="text-xs text-slate-400 mb-2">Serviços</p>
+              <p className="text-xs text-slate-400 mb-2 flex items-center">
+                <Icon name="scissors" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                Serviços
+              </p>
               <div className="flex flex-wrap gap-2">
                 {viewDetailsAppointment.services.map((service, idx) => (
                   <span
@@ -696,7 +749,10 @@ export const DashboardPage: React.FC = () => {
             </div>
             {viewDetailsAppointment.notes && (
               <div className="pt-4 border-t border-slate-700">
-                <p className="text-xs text-slate-400 mb-2">Observações</p>
+                <p className="text-xs text-slate-400 mb-2 flex items-center">
+                  <Icon name="pencil" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Observações
+                </p>
                 <p className="text-sm text-slate-300 italic">"{viewDetailsAppointment.notes}"</p>
               </div>
             )}

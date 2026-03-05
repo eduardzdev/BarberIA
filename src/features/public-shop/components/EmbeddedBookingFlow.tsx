@@ -36,7 +36,10 @@ export const EmbeddedBookingFlow: React.FC = () => {
 
     // Agrupamento de itens
     const categoriesOrder: string[] = ['combos', 'cabelo', 'barba', 'especiais', 'sobrancelhas'];
-    const allItems = [...(shopData.catalog || []), ...(shopData.combos || [])];
+    const allItems = [
+        ...(shopData.catalog || []),
+        ...(shopData.combos || [])
+    ].filter(item => item.active !== false);
 
     // Total e validação
     const total = selectedServices.reduce((acc, s) => acc + (s.promotionalPrice || s.price), 0);

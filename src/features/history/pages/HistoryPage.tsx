@@ -34,6 +34,16 @@ import {
 } from 'date-fns';
 import { exportFilteredHistory } from '@/services/export.service';
 
+// ===== Helpers =====
+const formatName = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return '';
+  let first = parts[0];
+  if (first.length > 10) first = first.substring(0, 10) + '...';
+  if (parts.length > 1) return `${first} ${parts[parts.length - 1][0]}.`;
+  return first;
+};
+
 
 /**
  * HistoryDetailCard - Card detalhado de atendimento no histórico
@@ -44,8 +54,10 @@ interface HistoryDetailCardProps {
   date: string;
   time: string;
   duration: number;
+  barberName?: string;
   price?: number;
   notes?: string;
+  onClick?: () => void;
 }
 
 const HistoryDetailCard: React.FC<HistoryDetailCardProps> = ({
@@ -54,52 +66,73 @@ const HistoryDetailCard: React.FC<HistoryDetailCardProps> = ({
   date,
   time,
   duration,
+  barberName,
   price,
-  notes
+  notes,
+  onClick
 }) => {
+  const barberFirstName = barberName ? barberName.trim().split(/\s+/)[0] : '---';
+
   return (
-    <div className="flex space-x-4">
-      {/* Data e Hora */}
-      <div className="text-center">
-        <p className="font-bold text-slate-100">{date}</p>
-        <p className="text-sm text-slate-400">{time}</p>
+    <div className="relative flex gap-4 group min-h-[100px]">
+      {/* Esquerda: Data e Hora */}
+      <div className="w-14 flex-shrink-0 pt-1.5 text-right">
+        <p className="font-bold text-slate-100 text-sm leading-none mb-1">{date}</p>
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{time}</p>
       </div>
 
-      {/* Separador vertical */}
-      <div className="w-px bg-slate-700 h-auto"></div>
+      {/* Meio: Linha e Ponto da Timeline */}
+      <div className="relative flex flex-col items-center">
+        <div className="absolute top-0 bottom-0 w-px bg-slate-700/50 group-last:bottom-auto group-last:h-4"></div>
+        <div className="relative w-3 h-3 rounded-full bg-violet-500 ring-4 ring-slate-950 z-10 mt-2.5"></div>
+      </div>
 
-      {/* Detalhes do atendimento */}
-      <Card className="flex-grow">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="font-semibold text-slate-300 flex items-center">
-              <Icon name="user" className="w-4 h-4 mr-2" />
-              {clientName}
-            </p>
-            <p className="font-bold text-slate-100 text-lg">{services}</p>
-          </div>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
-            Concluído
-          </span>
-        </div>
+      {/* Direita: O Card de Conteúdo */}
+      <div className="flex-1 pb-8 group-last:pb-0">
+        <button
+          onClick={onClick}
+          className="w-full text-left focus:outline-none"
+        >
+          <Card className="!p-4 bg-slate-800/40 hover:bg-slate-700/50 border-slate-700/50 transition-all flex flex-col space-y-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <Icon name="user" className="w-4 h-4 text-violet-400" />
+                <p className="font-bold text-slate-100 text-base leading-none">
+                  {formatName(clientName)}
+                </p>
+              </div>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                Concluído
+              </span>
+            </div>
 
-        {/* Duração e Preço */}
-        <div className="flex items-center justify-between text-sm text-slate-400 mt-3">
-          <span>{duration}min</span>
-          {price && (
-            <span className="font-bold text-slate-100 text-base">
-              R$ {price.toFixed(2)}
-            </span>
-          )}
-        </div>
+            <div className="flex items-center gap-2">
+              <Icon name="scissors" className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+              <p className="text-sm text-slate-300 font-medium line-clamp-2">
+                {services}
+              </p>
+            </div>
 
-        {/* Observações (se houver) */}
-        {notes && (
-          <p className="text-xs text-slate-500 italic mt-3 pt-3 border-t border-slate-700">
-            "{notes}"
-          </p>
-        )}
-      </Card>
+            <div className="flex justify-between items-center pt-1">
+              <div className="flex items-center gap-2">
+                <Icon name="star" className="w-3.5 h-3.5 text-violet-400" />
+                <span className="text-xs text-slate-400 capitalize">
+                  {barberFirstName.toLowerCase()}
+                </span>
+              </div>
+
+              {price && (
+                <div className="flex-shrink-0">
+                  <span className="text-sm font-extrabold text-green-400 bg-green-400/10 px-3 py-1 rounded-lg border border-green-500/20 block leading-none">
+                    R$ {price.toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+          </Card>
+        </button>
+      </div>
     </div>
   );
 };
@@ -125,6 +158,7 @@ export const HistoryPage: React.FC = () => {
   const [customDateRange, setCustomDateRange] = useState<{ start?: string; end?: string }>({});
   type PriceOperator = 'any' | 'gt' | 'lt' | 'eq';
   const [priceFilter, setPriceFilter] = useState<{ operator: PriceOperator; value?: number }>({ operator: 'any' });
+  const [viewDetailsAppointment, setViewDetailsAppointment] = useState<any>(null);
 
   // Carrega dados iniciais
   useEffect(() => {
@@ -605,7 +639,7 @@ export const HistoryPage: React.FC = () => {
         <p className="text-sm text-slate-400 mb-6">
           Registro completo de todos os atendimentos realizados
         </p>
-        <div className="space-y-5">
+        <div className="space-y-0">
           {filteredAppointments.length > 0 ? (
             filteredAppointments.map((appointment) => (
               <HistoryDetailCard
@@ -615,8 +649,10 @@ export const HistoryPage: React.FC = () => {
                 date={formatDate(appointment.date)}
                 time={appointment.startTime}
                 duration={appointment.duration}
+                barberName={appointment.barberName}
                 price={appointment.price}
                 notes={appointment.notes}
+                onClick={() => setViewDetailsAppointment(appointment)}
               />
             ))
           ) : (
@@ -817,6 +853,116 @@ export const HistoryPage: React.FC = () => {
             {exportProgress === 100 && 'Concluído! 🎉'}
           </div>
         </div>
+      </Modal>
+
+      {/* Modal de Detalhes do Histórico */}
+      <Modal
+        isOpen={!!viewDetailsAppointment}
+        onClose={() => setViewDetailsAppointment(null)}
+        title="Detalhes do Agendamento"
+      >
+        {viewDetailsAppointment && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-2xl font-bold text-slate-100">{viewDetailsAppointment.clientName}</p>
+                <p className="text-slate-400 flex items-center">
+                  <Icon name="phone" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  {viewDetailsAppointment.clientPhone}
+                </p>
+              </div>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                Concluído
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700">
+              <div>
+                <p className="text-xs text-slate-400 flex items-center mb-1 font-bold uppercase tracking-wider">
+                  <Icon name="calendar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Data
+                </p>
+                <p className="text-lg font-bold text-slate-200">
+                  {(() => {
+                    const [year, month, day] = viewDetailsAppointment.date.split('-');
+                    return `${day}/${month}/${year.slice(-2)}`;
+                  })()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 flex items-center mb-1 font-bold uppercase tracking-wider">
+                  <Icon name="clock" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Horário
+                </p>
+                <p className="text-lg font-bold text-slate-200">{viewDetailsAppointment.startTime}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 flex items-center mb-1 font-bold uppercase tracking-wider">
+                  <Icon name="history" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Duração
+                </p>
+                <p className="text-lg font-bold text-slate-200">{viewDetailsAppointment.duration} min</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 flex items-center mb-1 font-bold uppercase tracking-wider">
+                  <Icon name="dollar" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Preço
+                </p>
+                <p className="text-lg font-bold text-slate-200">
+                  {viewDetailsAppointment.price ? `R$ ${viewDetailsAppointment.price.toFixed(2)}` : '-'}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-700">
+              <p className="text-xs text-slate-400 mb-2 flex items-center font-bold uppercase tracking-wider">
+                <Icon name="user" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                Profissional
+              </p>
+              <p className="text-lg font-bold text-slate-100">
+                {viewDetailsAppointment.barberName || 'Não informado'}
+              </p>
+            </div>
+
+            <div className="pt-4 border-t border-slate-700">
+              <p className="text-xs text-slate-400 mb-2 flex items-center font-bold uppercase tracking-wider">
+                <Icon name="scissors" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                Serviços
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {viewDetailsAppointment.services.map((service: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 bg-violet-500/20 text-violet-400 text-xs font-bold rounded-full border border-violet-500/20"
+                  >
+                    {service}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {viewDetailsAppointment.notes && (
+              <div className="pt-4 border-t border-slate-700">
+                <p className="text-xs text-slate-400 mb-2 flex items-center font-bold uppercase tracking-wider">
+                  <Icon name="pencil" className="w-3.5 h-3.5 mr-1 text-violet-400" />
+                  Observações
+                </p>
+                <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
+                  <p className="text-sm text-slate-300 italic leading-relaxed">
+                    "{viewDetailsAppointment.notes}"
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => setViewDetailsAppointment(null)}
+              className="w-full bg-violet-600 text-white font-extrabold py-3 rounded-xl hover:bg-violet-700 transition-all shadow-lg shadow-violet-600/20 mt-4 active:scale-[0.98]"
+            >
+              Fechar
+            </button>
+          </div>
+        )}
       </Modal>
     </div>
   );

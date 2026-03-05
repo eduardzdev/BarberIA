@@ -158,51 +158,49 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onDelete, onSta
           onClick={handleCardToggle}
           onKeyDown={handleKeyToggle}
           aria-expanded={expanded}
-          className="flex-1 cursor-pointer select-none"
+          className="flex-1 cursor-pointer select-none min-w-0"
         >
-          <div className="flex items-start space-x-3">
-            <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center font-semibold text-violet-300 text-lg">
+          <div className="flex items-start space-x-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center font-semibold text-violet-300 text-lg flex-shrink-0">
               {client.avatarInitials}
             </div>
-            <div className="flex-1 space-y-2">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <p className="text-base font-semibold text-slate-100">{displayName}</p>
-                  {client.isVip && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400">
-                      <Icon name="star-fill" className="w-3 h-3 mr-1" />
-                      VIP
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2 text-sm text-slate-400">
-                  <span>{client.phone}</span>
-                  {whatsappLink && (
-                    <button
-                      type="button"
-                      onClick={handleWhatsAppClick}
-                      className="p-1 rounded-full bg-green-500/10 text-green-400 hover:bg-green-500/20 transition"
-                      aria-label="Abrir WhatsApp"
-                    >
-                      <Icon name="whatsapp" className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-2">
+                <p className="text-base font-semibold text-slate-100 truncate">{displayName}</p>
+                {client.isVip && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/20">
+                    <Icon name="star-fill" className="w-2.5 h-2.5 mr-1" />
+                    VIP
+                  </span>
+                )}
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
-                <div className="flex items-center space-x-1">
-                  <Icon name="calendar" className="w-4 h-4 text-slate-500" />
-                  <span>{lastVisit}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Icon name="door" className="w-4 h-4 text-slate-500" />
-                  <span>{client.visits} visita{client.visits === 1 ? '' : 's'}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Icon name="wallet" className="w-4 h-4 text-slate-500" />
-                  <span>{totalSpent}</span>
-                </div>
+              <div className="flex items-center space-x-2 text-sm text-slate-400">
+                <span>{client.phone}</span>
+                {whatsappLink && (
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppClick}
+                    className="p-1 rounded-full bg-green-500/10 text-green-400 hover:bg-green-500/20 transition"
+                    aria-label="Abrir WhatsApp"
+                  >
+                    <Icon name="whatsapp" className="w-4 h-4" />
+                  </button>
+                )}
               </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+            <div className="flex items-center space-x-1">
+              <Icon name="calendar" className="w-3.5 h-3.5 text-violet-400" />
+              <span>{lastVisit}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Icon name="door" className="w-3.5 h-3.5 text-violet-400" />
+              <span>{client.visits} visita{client.visits === 1 ? '' : 's'}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Icon name="wallet" className="w-3.5 h-3.5 text-violet-400" />
+              <span>{totalSpent}</span>
             </div>
           </div>
         </div>
@@ -258,30 +256,49 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onEdit, onDelete, onSta
 
       {expanded && (
         <div className="mt-4 border-t border-slate-800 pt-4 space-y-4">
-          <div className="grid grid-cols-1 gap-3 text-sm text-slate-300">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Email</p>
-              <p className="font-medium text-slate-100">{client.email}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-300">
+            <div className="sm:col-span-2">
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="envelope" className="w-3 h-3 mr-1.5 text-violet-400" />
+                Email
+              </p>
+              <p className="font-medium text-slate-100 truncate">
+                {client.email || <span className="text-slate-500 italic">Não cadastrado</span>}
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="calendar" className="w-3 h-3 mr-1.5 text-violet-400" />
+                Última visita
+              </p>
+              <p className="font-medium text-slate-200">
+                {client.lastVisit ? (
+                  new Date(client.lastVisit).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+                ) : 'Nunca'}
+              </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Última visita</p>
-              <p className="font-medium text-slate-200">{client.lastVisit || 'Nunca'}</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="door" className="w-3 h-3 mr-1.5 text-violet-400" />
+                Visitas
+              </p>
+              <p className="font-semibold text-slate-100">{client.visits}</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Visitas</p>
-                <p className="font-semibold text-slate-100">{client.visits}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">Gasto total</p>
-                <p className="font-semibold text-slate-100">{totalSpent}</p>
-              </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 flex items-center mb-1 font-bold">
+                <Icon name="wallet" className="w-3 h-3 mr-1.5 text-violet-400" />
+                Gasto total
+              </p>
+              <p className="font-semibold text-slate-100">{totalSpent}</p>
             </div>
           </div>
           {client.notes && (
-            <div className="border border-slate-800 rounded-lg bg-slate-900/60 px-3 py-3 text-sm text-slate-300">
-              <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Notas</p>
-              <p className="italic">"{client.notes}"</p>
+            <div className="border border-slate-800 rounded-lg bg-slate-900/60 p-3 text-sm text-slate-300">
+              <p className="text-[10px] uppercase tracking-wide text-slate-500 mb-2 flex items-center font-bold">
+                <Icon name="pencil" className="w-3 h-3 mr-1.5 text-violet-400" />
+                Notas
+              </p>
+              <p className="italic text-slate-300 leading-relaxed">"{client.notes}"</p>
             </div>
           )}
         </div>

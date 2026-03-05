@@ -23,7 +23,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Appointment, AppointmentStatus, TransactionType } from '@/types';
-import { BaseService } from '@/services/base.service';
+import { appointmentService as appointmentsService } from '@/services/appointment.service';
 import {
   where,
   orderBy,
@@ -45,9 +45,6 @@ import {
   PERSIST_VERSION,
   CacheableStateWithMode
 } from '@/lib/store-helpers';
-
-// Instância do serviço de Firestore
-const appointmentsService = new BaseService<Appointment>('appointments');
 
 // Tipos para criação/atualização (sem ID)
 export type CreateAppointmentData = Omit<Appointment, 'id'>;

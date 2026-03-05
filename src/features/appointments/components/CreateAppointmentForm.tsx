@@ -41,7 +41,7 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
 }) => {
   const { createAppointment, updateAppointment, appointments } = useAppointments();
   const { clients } = useClients({ autoFetch: true });
-  const { services } = useServices({ autoFetch: true });
+  const { services, combos } = useServices({ autoFetch: true });
   const { barbers } = useBarbershop({ autoFetch: true });
   const { success, error: showError } = useUI();
 
@@ -117,10 +117,10 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
   const computedTotalPrice = useMemo(
     () =>
       selectedServices.reduce((sum, serviceName) => {
-        const service = services.find((s) => s.name === serviceName);
-        return sum + (service?.price || 0);
+        const item = [...services, ...combos].find((s) => s.name === serviceName);
+        return sum + (item?.promotionalPrice || item?.price || 0);
       }, 0),
-    [selectedServices, services]
+    [selectedServices, services, combos]
   );
 
   const totalPrice = computedTotalPrice > 0
@@ -271,28 +271,39 @@ export const CreateAppointmentForm: React.FC<CreateAppointmentFormProps> = ({
             <p className="text-slate-400 text-sm">Nenhum serviço disponível</p>
           ) : (
             Object.entries(
-              services.reduce((acc, service) => {
-                const cat = service.category || 'Outros';
-                if (!acc[cat]) acc[cat] = [];
-                acc[cat].push(service);
-                return acc;
-              }, {} as Record<string, typeof services>)
-            ).map(([category, items]) => (
+              [...services, ...combos]
+                .filter(s => s.active !== false)
+                .reduce((acc, item) => {
+                  const cat = item.category || 'Outros';
+                  if (!acc[cat]) acc[cat] = [];
+                  acc[cat].push(item);
+                  return acc;
+                }, {} as Record<string, (typeof services[0] | typeof combos[0])[]>)
+            ).sort(([a], [b]) => {
+              // Garantir que combos fiquem em cima se a categoria for 'combos'
+              if (a === 'combos') return -1;
+              if (b === 'combos') return 1;
+              return a.localeCompare(b);
+            }).map(([category, items]) => (
               <div key={category} className="mb-4 last:mb-0">
-                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-wider">
+                <p className="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-wider flex items-center">
+                  <Icon
+                    name={category === 'combos' ? 'star' : 'scissors'}
+                    className="w-3 h-3 mr-1 text-violet-400"
+                  />
                   {category === 'combos' ? 'Combos Promocionais' : category}
                 </p>
                 <div className="space-y-2">
-                  {items.map((service) => (
-                    <label key={service.id} className="flex items-center space-x-2 cursor-pointer transition-colors hover:bg-slate-700/20 p-1 -mx-1 rounded">
+                  {items.map((item) => (
+                    <label key={item.id} className="flex items-center space-x-2 cursor-pointer transition-colors hover:bg-slate-700/20 p-1 -mx-1 rounded">
                       <input
                         type="checkbox"
-                        checked={selectedServices.includes(service.name)}
-                        onChange={() => toggleService(service.name)}
+                        checked={selectedServices.includes(item.name)}
+                        onChange={() => toggleService(item.name)}
                         className="w-4 h-4 text-violet-600 bg-slate-700 border-slate-600 rounded focus:ring-2 focus:ring-violet-500"
                       />
                       <span className="text-slate-200 text-sm">
-                        {service.name} - R$ {service.price.toFixed(2)}
+                        {item.name} - R$ {(item.promotionalPrice || item.price).toFixed(2)}
                       </span>
                     </label>
                   ))}

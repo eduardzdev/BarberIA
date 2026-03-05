@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBarbershop } from '@/hooks/useBarbershop';
 import { useAuthStore } from '@/store/auth.store';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
     title: string;
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
     const { logout } = useAuth();
+    const navigate = useNavigate();
 
     // Data hooks
     const { shopInfo } = useBarbershop({ autoFetch: true });
@@ -131,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                                 {/* Perfil da Empresa */}
                                 <button
                                     onClick={() => {
-                                        window.location.hash = '#/profile';
+                                        navigate('/profile');
                                         setIsProfileOpen(false);
                                     }}
                                     className="w-full px-4 py-2 flex items-center gap-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"
@@ -146,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                                 {/* Configurações da Barbearia */}
                                 <button
                                     onClick={() => {
-                                        window.location.hash = '#/settings-shop';
+                                        navigate('/settings-shop');
                                         setIsProfileOpen(false);
                                     }}
                                     className="w-full px-4 py-2 flex items-center gap-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"
@@ -161,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuClick }) => {
                                 {/* Configurações */}
                                 <button
                                     onClick={() => {
-                                        window.location.hash = '#/settings-app';
+                                        navigate('/settings-app');
                                         setIsProfileOpen(false);
                                     }}
                                     className="w-full px-4 py-2 flex items-center gap-3 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors text-sm"

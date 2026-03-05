@@ -2,7 +2,7 @@
  * ProfilePage - Página de perfil da barbearia
  * 
  * Página pública do perfil da empresa:
- * - Imagem de capa e logo
+ * - Logo
  * - Informações da barbearia
  * - Descrição "Sobre Nós"
  * - Contato e localização
@@ -18,7 +18,7 @@
  * - DESCRICAO_FEATURES.md - Seção 9 (Perfil da Barbearia)
  * 
  * Features:
- * - Design de perfil social (capa + logo circular)
+ * - Design de perfil limpo e moderno
  * - Cards organizados com informações
  * - Links para redes sociais
  * - Localização e contato
@@ -89,21 +89,13 @@ export const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const { openModal } = useUI();
   const [showSetupModal, setShowSetupModal] = React.useState(false);
-  const [showCoverModal, setShowCoverModal] = React.useState(false);
   const [showLogoModal, setShowLogoModal] = React.useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = React.useState(false);
   const [showEditContactModal, setShowEditContactModal] = React.useState(false);
   const [showEditSocialModal, setShowEditSocialModal] = React.useState(false);
 
-  // Extrair nome do usuário
-  const userName = user?.displayName || user?.email?.split('@')[0] || 'Profissional';
-
   const handleEditProfile = () => {
     setShowEditProfileModal(true);
-  };
-
-  const handleCoverSave = async (imageUrl: string | null) => {
-    await updateShopInfo({ coverImageUrl: imageUrl || '' });
   };
 
   const handleLogoSave = async (imageUrl: string | null) => {
@@ -143,7 +135,7 @@ export const ProfilePage: React.FC = () => {
     return (
       <div className="space-y-6 pb-6">
         <div className="animate-pulse">
-          <div className="h-48 bg-slate-700 rounded-lg"></div>
+          <div className="h-32 bg-slate-700 rounded-lg"></div>
           <div className="h-24 w-24 bg-slate-700 rounded-full mt-[-3rem] ml-4"></div>
         </div>
       </div>
@@ -153,78 +145,54 @@ export const ProfilePage: React.FC = () => {
   return (
     <>
       <div className="-m-4">
-        {/* Cover Image */}
-        <div className="relative h-48 group cursor-pointer" onClick={() => setShowCoverModal(true)}>
-          {shopInfo?.coverImageUrl ? (
-            <img
-              src={shopInfo.coverImageUrl}
-              alt="Capa da Barbearia"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-              <Icon name="image" className="w-12 h-12 text-slate-700" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
-
-          {/* Edit Cover Button */}
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center gap-2">
-              <Icon name="camera" className="w-5 h-5 text-white" />
-              <span className="text-white font-medium">Alterar Capa</span>
-            </div>
-          </div>
-
-          {/* Logo with Edit Button */}
-          <div className="absolute -bottom-12 left-4">
-            <div className="relative group/logo cursor-pointer" onClick={(e) => {
-              e.stopPropagation();
-              setShowLogoModal(true);
-            }}>
+        {/* Simplified Header with Logo */}
+        <div className="bg-gradient-to-b from-slate-800 to-slate-900 pt-12 pb-8 px-4 relative border-b border-slate-800">
+          <div className="flex flex-col items-center">
+            {/* Logo with Edit Button */}
+            <div className="relative group/logo cursor-pointer mb-4" onClick={() => setShowLogoModal(true)}>
               {shopInfo?.logoUrl ? (
                 <img
                   src={shopInfo.logoUrl}
                   alt="Logo da Barbearia"
-                  className="w-24 h-24 rounded-full border-4 border-slate-900 object-cover"
+                  className="w-28 h-28 rounded-full border-4 border-slate-900 object-cover shadow-2xl"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full border-4 border-slate-900 bg-slate-800 flex items-center justify-center">
-                  <Icon name="image" className="w-8 h-8 text-slate-600" />
+                <div className="w-28 h-28 rounded-full border-4 border-slate-900 bg-slate-800 flex items-center justify-center shadow-2xl">
+                  <Icon name="image" className="w-10 h-10 text-slate-600" />
                 </div>
               )}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/logo:opacity-100 transition-opacity rounded-full flex items-center justify-center">
-                <Icon name="camera" className="w-6 h-6 text-white" />
+                <Icon name="camera" className="w-8 h-8 text-white" />
               </div>
             </div>
+
+            {/* Title and Username */}
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-slate-100 mb-1">
+                {shopInfo?.name || 'Minha Barbearia'}
+              </h1>
+              <p className="text-slate-400 text-sm">
+                @{shopInfo?.username || shopInfo?.name?.toLowerCase().replace(/\s+/g, '') || 'barbershop'}
+              </p>
+            </div>
+
+            {/* Edit Button */}
+            <button
+              onClick={handleEditProfile}
+              className="mt-6 px-6 py-2 text-sm font-semibold bg-violet-600/10 text-violet-400 border border-violet-500/20 rounded-full hover:bg-violet-600/20 transition-all active:scale-95"
+            >
+              Editar Perfil
+            </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="pt-16 px-4 pb-6 space-y-6">
-          {/* Header */}
-          <div>
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-slate-100">
-                {shopInfo?.name || 'Minha Barbearia'}
-              </h1>
-              <button
-                onClick={handleEditProfile}
-                className="px-4 py-2 text-sm font-semibold bg-slate-700/50 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
-              >
-                Editar Perfil
-              </button>
-            </div>
-            <p className="text-slate-400">
-              @{shopInfo?.username || shopInfo?.name?.toLowerCase().replace(/\s+/g, '') || 'barbershop'}
-            </p>
-          </div>
-
+        <div className="px-4 py-6 space-y-6">
           {/* About Section */}
           {shopInfo?.description && (
             <Card>
               <h2 className="font-bold text-slate-100 mb-2">Sobre Nós</h2>
-              <p className="text-slate-300 text-sm">{shopInfo.description}</p>
+              <p className="text-slate-300 text-sm leading-relaxed">{shopInfo.description}</p>
             </Card>
           )}
 
@@ -319,7 +287,7 @@ export const ProfilePage: React.FC = () => {
               </p>
               <button
                 onClick={() => setShowSetupModal(true)}
-                className="mt-4 px-6 py-2 bg-violet-600 text-white font-bold rounded-lg hover:bg-violet-700"
+                className="mt-4 px-6 py-2 bg-violet-600 text-white font-bold rounded-lg hover:bg-violet-700 transition-all active:scale-95"
               >
                 Completar Perfil
               </button>
@@ -332,16 +300,6 @@ export const ProfilePage: React.FC = () => {
       <BarbershopSetupModal
         isOpen={showSetupModal}
         onClose={() => setShowSetupModal(false)}
-      />
-
-      {/* Cover Image Modal */}
-      <ImageUploadModal
-        isOpen={showCoverModal}
-        onClose={() => setShowCoverModal(false)}
-        onSave={handleCoverSave}
-        title="Alterar Capa"
-        currentImage={shopInfo?.coverImageUrl}
-        aspectRatio="cover"
       />
 
       {/* Logo Image Modal */}
